@@ -74,7 +74,7 @@ class Loi(Base):
 
     id = Column(Integer, primary_key=True)
     numero = Column(String(20), unique=True, nullable=False)  # e.g., "2023-1322"
-    type = Column(String(10), nullable=False)  # LF, LFR, LFSS
+    type = Column(String(20), nullable=False)  # LF, LFR, LFSS, REGLEMENT_CE, REGLEMENT_CEE
     annee = Column(Integer, nullable=False)
     date_promulgation = Column(DateTime, nullable=False)
     titre = Column(String(500), nullable=False)
@@ -203,6 +203,7 @@ class Amendement(Base):
         Index("ix_amendements_article", "article_id"),
         Index("ix_amendements_sort", "sort"),
         Index("ix_amendements_reference_externe", "reference_externe", unique=True),
+        Index("idx_amendements_dossier_numero", "dossier_id", "numero"),
     )
 
 
@@ -243,6 +244,8 @@ class ChunkEmbedding(Base):
         Index("ix_chunk_embeddings_type", "chunk_type"),
         Index("ix_chunk_embeddings_source", "source_id"),
         Index("ix_chunk_embeddings_model", "embedding_model"),
+        Index("idx_chunk_embeddings_amendement_id", "amendement_id"),
+        Index("idx_chunk_embeddings_intervention_id", "intervention_id"),
     )
 
 

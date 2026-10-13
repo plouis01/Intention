@@ -319,7 +319,17 @@ def _parse_plain_text_debate(
     Uses regex to split by speaker patterns like "M. Dupont :" or "Mme Martin :"
     """
     # Pattern to match speaker introductions
-    speaker_pattern = r"(?:^|\n)(M(?:me|lle)?\.?\s+[A-ZÀ-Ý][a-zà-ÿ]+(?:\s+[A-ZÀ-Ý][a-zà-ÿ]+)*)\s*[:\.\-–]"
+    # Requires punctuation after name, hyphenated names need uppercase after hyphen
+    speaker_pattern = (
+        r"(?:^|\n)"
+        r"((?:M(?:me|lle)?\.?\s+)"
+        r"(?:l[ea]\s+(?:président(?:e)?|ministre|secrétaire|rapporteur)"
+        r"|(?:[A-ZÀ-Ý][a-zà-ÿ]+|d'[A-ZÀ-Ý][a-zà-ÿ]+|(?:de|du|le|la|des)\s+[A-ZÀ-Ý])[a-zà-ÿ]*"
+        r"(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*"
+        r"(?:\s+(?:[A-ZÀ-Ý][a-zà-ÿ]+(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*|d'[A-ZÀ-Ý][a-zà-ÿ]+|(?:de|du|le|la|des)))*"
+        r"))"
+        r"\s*[\.:,–—]"
+    )
 
     parts = re.split(speaker_pattern, text)
     interventions = []

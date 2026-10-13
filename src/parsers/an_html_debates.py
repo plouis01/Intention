@@ -287,10 +287,30 @@ def parse_leg13(soup: BeautifulSoup) -> ParsedDebat | None:
         if "somtitre" in (p_tag.get("class") or []):
             continue
 
-        # Must look like a speaker name: starts with M./Mme/Mlle or contains "président"
-        if not re.match(r"^(?:M(?:me|lle)?[\.\s]|Plusieurs|Un )", bold_text, re.IGNORECASE) and \
-           "président" not in bold_text.lower() and "présidente" not in bold_text.lower():
+        # Must look like a speaker name: starts with M./Mme/Mlle/Plusieurs/Un or président
+        if not re.match(
+            r"^(?:M(?:me|lle)?[\.\s]|Plusieurs|Un )",
+            bold_text, re.IGNORECASE
+        ) and "président" not in bold_text.lower() and "présidente" not in bold_text.lower():
             continue
+
+        # Reject false speakers (sentence fragments like "M. Macron a déclaré que...")
+        _reject_words = {
+            "Celles", "Ceux", "Celle", "Celui",
+            "Cette", "Ces", "Certains", "Certaines",
+        }
+        _false_speaker = re.match(
+            r"^(?:M\.|Mme|Mlle)\s+([A-ZÀ-Ý][a-zà-ÿ-]+)\s+[a-zà-ÿ]{3,}",
+            bold_text,
+        )
+        if _false_speaker:
+            _first = _false_speaker.group(1).split("-")[0]
+            if _first in _reject_words:
+                continue
+            # If followed by lowercase verb, skip unless known role
+            _roles = ("président", "ministre", "secrétaire", "rapporteur")
+            if not any(x in bold_text.lower() for x in _roles):
+                continue
 
         # Extract speaker name from the <b> tag
         # May contain an <a> link

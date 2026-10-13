@@ -59,10 +59,10 @@ def load_reference_laws() -> list[dict]:
 
     Merges lois_finances_2012_2025.json (curated, higher priority) with
     lois_cgi_1958_2026.json (auto-collected), keeping only finance law
-    types (LF, LFR, LFSS) from 2002 onward.
+    types (LF, LFR, LFSS) from 1959 onward.
     """
     FINANCE_TYPES = {"LF", "LFR", "LFSS"}
-    MIN_DATE = "2002-01-01"
+    MIN_DATE = "1958-01-01"
     laws_by_numero = {}
 
     # Load CGI laws first (lower priority), filtered to finance types + date
@@ -85,7 +85,7 @@ def load_reference_laws() -> list[dict]:
 
     laws = sorted(laws_by_numero.values(),
                   key=lambda x: x.get("date_promulgation", "0000"))
-    logger.info(f"Loaded {len(laws)} finance laws (LF/LFR/LFSS, 2002+) "
+    logger.info(f"Loaded {len(laws)} finance laws (LF/LFR/LFSS, 1958+) "
                 f"from CGI + curated finance files")
     return laws
 
@@ -740,6 +740,26 @@ def run_import(reset: bool = False, skip_existing: bool = False) -> bool:
     except Exception as e:
         logger.warning(f"AMELI amendments import failed: {e}")
 
+    # 13. Extract articles from DILA LEGI dump (pre-2002 laws missing articles)
+    try:
+        logger.info("--- Extract articles from DILA LEGI dump ---")
+        from scripts.extract_legi_articles import main as extract_legi_main
+
+        extract_legi_main()
+        logger.info("LEGI article extraction complete")
+    except Exception as e:
+        logger.warning(f"LEGI article extraction failed: {e}")
+
+    # 14. Import extracted LEGI articles
+    try:
+        logger.info("--- Import LEGI articles ---")
+        from scripts.import_legi_articles import main as import_legi_main
+
+        import_legi_main()
+        logger.info("LEGI article import complete")
+    except Exception as e:
+        logger.warning(f"LEGI article import failed: {e}")
+
     return True
 
 
@@ -808,6 +828,36 @@ def run_link() -> bool:
     except Exception as e:
         logger.warning(f"Advanced data linkage failed: {e}")
 
+    # 5. Create missing Sénat dossiers and link orphaned debates
+    try:
+        logger.info("--- Pre-2002 Sénat dossiers + orphan linking ---")
+        from scripts.fix_pre2002_senat_dossiers import main as fix_senat_dossiers_main
+
+        fix_senat_dossiers_main()
+        logger.info("Pre-2002 Sénat dossiers fix complete")
+    except Exception as e:
+        logger.warning(f"Pre-2002 Sénat dossiers fix failed: {e}")
+
+    # 6. Extract amendments from pre-2001 debate text
+    try:
+        logger.info("--- Extract amendments from pre-2001 debates ---")
+        from scripts.extract_amendments_from_debates import main as extract_amend_main
+
+        extract_amend_main()
+        logger.info("Pre-2001 amendment extraction complete")
+    except Exception as e:
+        logger.warning(f"Pre-2001 amendment extraction failed: {e}")
+
+    # 7. Deduplicate extracted amendments (same numero in same dossier)
+    try:
+        logger.info("--- Dedup extracted amendments ---")
+        from scripts.dedup_extracted_amendments import main as dedup_amend_main
+
+        dedup_amend_main()
+        logger.info("Amendment deduplication complete")
+    except Exception as e:
+        logger.warning(f"Amendment deduplication failed: {e}")
+
     return True
 
 
@@ -832,6 +882,46 @@ def run_fix() -> bool:
         logger.info("Encoding fixes complete")
     except Exception as e:
         logger.warning(f"Encoding fixes failed: {e}")
+
+    # 2. Fix misdated AN debates (OCR imports dated 1958-10-04)
+    try:
+        logger.info("--- Fix misdated AN debates ---")
+        from scripts.fix_misdated_an_debates import main as fix_misdated_main
+
+        fix_misdated_main()
+        logger.info("Misdated AN debates fix complete")
+    except Exception as e:
+        logger.warning(f"Misdated AN debates fix failed: {e}")
+
+    # 3. Fix empty debates (re-parse AN, delete empty SENAT)
+    try:
+        logger.info("--- Fix empty debates ---")
+        from scripts.fix_empty_debates import main as fix_empty_main
+
+        fix_empty_main()
+        logger.info("Empty debates fix complete")
+    except Exception as e:
+        logger.warning(f"Empty debates fix failed: {e}")
+
+    # 4. Remove consecutive duplicate interventions (parsing artifacts)
+    try:
+        logger.info("--- Fix consecutive duplicate interventions ---")
+        from scripts.fix_consecutive_duplicates import main as fix_consec_main
+
+        fix_consec_main()
+        logger.info("Consecutive duplicates fix complete")
+    except Exception as e:
+        logger.warning(f"Consecutive duplicates fix failed: {e}")
+
+    # 5. Enrich fonction field on Sénat interventions
+    try:
+        logger.info("--- Enrich Sénat intervention fonctions ---")
+        from scripts.enrich_fonctions import main as enrich_fonctions_main
+
+        enrich_fonctions_main()
+        logger.info("Fonction enrichment complete")
+    except Exception as e:
+        logger.warning(f"Fonction enrichment failed: {e}")
 
     return True
 
@@ -968,6 +1058,8 @@ def run_validate() -> bool:
     logger.info("=" * 60)
 
     try:
+        from sqlalchemy import text as sa_text
+
         from src.db.models import (
             Amendement,
             Article,
@@ -1007,6 +1099,53 @@ def run_validate() -> bool:
             logger.info("Validation Results:")
             for key, value in results.items():
                 logger.info(f"  {key}: {value}")
+
+            # --- Data quality checks ---
+            warnings = []
+
+            # Check: no misdated archive_an debates
+            misdated = session.execute(sa_text(
+                "SELECT COUNT(*) FROM debats "
+                "WHERE reference_externe LIKE 'archive_an:%' "
+                "AND date = '1958-10-04'"
+            )).scalar()
+            if misdated > 0:
+                warnings.append(f"{misdated} AN debates still dated 1958-10-04")
+
+            # Check: no empty debates (0 interventions and no contenu_integral)
+            empty_debates = session.execute(sa_text(
+                "SELECT COUNT(*) FROM debats d "
+                "LEFT JOIN interventions i ON d.id = i.debat_id "
+                "GROUP BY d.id HAVING COUNT(i.id) = 0"
+            )).fetchall()
+            if len(empty_debates) > 5:
+                warnings.append(f"{len(empty_debates)} debates with 0 interventions")
+
+            # Check: orphaned SENAT debates
+            orphaned_senat = session.execute(sa_text(
+                "SELECT COUNT(*) FROM debats "
+                "WHERE chambre = 'SENAT' AND dossier_id IS NULL"
+            )).scalar()
+            if orphaned_senat > 0:
+                logger.info(f"  orphaned_senat_debates: {orphaned_senat}")
+
+            # Check: amendments by era
+            pre2001_amend = session.execute(sa_text(
+                "SELECT COUNT(*) FROM amendements "
+                "WHERE reference_externe LIKE 'extracted_from_debate:%'"
+            )).scalar()
+            logger.info(f"  extracted_pre2001_amendments: {pre2001_amend}")
+
+            # Check: SENAT dossiers
+            senat_dossiers = session.execute(sa_text(
+                "SELECT COUNT(*) FROM dossiers_legislatifs WHERE chambre = 'SENAT'"
+            )).scalar()
+            logger.info(f"  senat_dossiers: {senat_dossiers}")
+
+            if warnings:
+                logger.warning("Data quality warnings:")
+                for w in warnings:
+                    logger.warning(f"  ! {w}")
 
         finally:
             session.close()

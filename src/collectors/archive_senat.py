@@ -15,7 +15,7 @@ ARCHIVE_SENAT_BASE = "https://www.senat.fr"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 }
-DEFAULT_DELAY = 2.0
+DEFAULT_DELAY = 0
 BACKOFF_WAIT = 60
 MAX_RETRIES = 3
 

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 import httpx
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +60,8 @@ class SenatDebatCollector:
                     # Find speaker name in orateur_nom span
                     orateur_spans = div.find_all("span", class_="orateur_nom")
                     if orateur_spans:
-                        # Combine all orateur_nom spans
-                        speaker = " ".join(s.get_text(strip=True) for s in orateur_spans)
+                        # Take first span only (duplicates are common)
+                        speaker = orateur_spans[0].get_text(strip=True)
                         # Clean up speaker name
                         speaker = re.sub(r"[.\s]+$", "", speaker)
                         speaker = re.sub(r"\s+", " ", speaker)
@@ -99,30 +99,85 @@ class SenatDebatCollector:
                         })
 
             # Method 2: Fallback for older page structure
+            # Pre-2002 pages have multiple speakers per <p>, separated by <strong> tags
             if not interventions:
-                for p in soup.find_all(["p", "div"]):
-                    text = p.get_text(strip=True)
+                speaker_pattern = re.compile(
+                    r"^\s*(M\.|Mme|Mlle)\s+"
+                    r"("
+                    r"l[ea]\s+(?:président(?:e)?|ministre|secrétaire|rapporteur)"
+                    r"|"
+                    r"(?:[A-ZÀ-Ý][a-zà-ÿ]+|d'[A-ZÀ-Ý][a-zà-ÿ]+|(?:de|du|le|la|des)\s+[A-ZÀ-Ý])[a-zà-ÿ]*"
+                    r"(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*"
+                    r"(?:\s+(?:[A-ZÀ-Ý][a-zà-ÿ]+(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*|d'[A-ZÀ-Ý][a-zà-ÿ]+|(?:de|du|le|la|des)))*"
+                    r")"
+                    r"(?:\s*\([^)]+\))?"
+                    r"(?:\s*,\s*([^\.]+))?\s*[\.:,–—]"
+                )
+                _reject_first_words = {
+                    "Celles", "Ceux", "Celle", "Celui",
+                    "Cette", "Ces", "Certains", "Certaines",
+                }
 
-                    # Look for speaker patterns
-                    speaker_match = re.match(
-                        r"^(M\.|Mme|Mlle)\s+([^,\.\(]+)(?:,\s*([^\.]+))?", text
-                    )
+                for strong in soup.find_all("strong"):
+                    strong_text = strong.get_text(strip=True)
+                    match = speaker_pattern.match(strong_text)
+                    if not match:
+                        continue
 
-                    if speaker_match:
-                        speaker = f"{speaker_match.group(1)} {speaker_match.group(2)}".strip()
-                        fonction = speaker_match.group(3) if speaker_match.group(3) else None
+                    # Reject pronoun-starting false speakers
+                    name = match.group(2)
+                    if not name.startswith("l"):
+                        first_word = name.split()[0].split("-")[0].replace("d'", "")
+                        if first_word in _reject_first_words:
+                            continue
 
-                        # Content is everything after the speaker identification
-                        content = text[speaker_match.end():].strip()
-                        if content.startswith("."):
-                            content = content[1:].strip()
+                    # Parse speaker name and optional function
+                    speaker = f"{match.group(1)} {match.group(2)}".strip()
+                    fonction = match.group(3).strip().rstrip(".") if match.group(3) else None
 
-                        if content and len(content) > 20:
-                            interventions.append({
-                                "orateur": speaker,
-                                "fonction": fonction,
-                                "contenu": content[:5000],
-                            })
+                    # Check for <em> immediately after <strong> (contains role)
+                    next_sib = strong.next_sibling
+                    while next_sib and isinstance(next_sib, NavigableString):
+                        if next_sib.strip():
+                            break
+                        next_sib = next_sib.next_sibling
+                    if next_sib and hasattr(next_sib, "name") and next_sib.name == "em":
+                        fonction = next_sib.get_text(strip=True).rstrip(".")
+
+                    # Collect text after this <strong> until next <strong>
+                    content_parts = []
+                    node = strong.next_sibling
+                    while node:
+                        if hasattr(node, "name") and node.name == "strong":
+                            break
+                        if hasattr(node, "name") and node.name == "em" and node == next_sib and fonction:
+                            node = node.next_sibling
+                            continue
+                        text = node.get_text(strip=True) if hasattr(node, "get_text") else str(node).strip()
+                        if text:
+                            content_parts.append(text)
+                        node = node.next_sibling
+
+                    content = " ".join(content_parts)
+                    content = re.sub(r"^[.\s]+", "", content)
+                    if content and len(content) > 20:
+                        interventions.append({
+                            "orateur": speaker,
+                            "fonction": fonction,
+                            "contenu": content[:5000],
+                        })
+
+                # Deduplicate (old pages can have TOC + body with same speakers)
+                seen = set()
+                unique = []
+                for interv in interventions:
+                    key = (interv["orateur"], interv["contenu"][:100])
+                    if key not in seen:
+                        seen.add(key)
+                        unique.append(interv)
+                interventions = unique
+
+            interventions = self._enrich_fonctions(interventions)
 
             return {
                 "url": url,
@@ -137,6 +192,59 @@ class SenatDebatCollector:
         except Exception as e:
             logger.error(f"Error fetching {url}: {e}")
             return None
+
+    def list_sessions_for_month(self, year: int, month: int) -> list[dict]:
+        """
+        Scrape the monthly index page to discover actual session dates.
+
+        Args:
+            year: Year (e.g. 1997)
+            month: Month (1-12)
+
+        Returns:
+            List of dicts with 'date' (datetime) and 'url' (str) for each session.
+        """
+        month_str = f"{year}{month:02d}"
+        index_url = f"{self.BASE_URL}/seances/s{month_str}/s{month_str}.html"
+
+        try:
+            response = self._client.get(index_url)
+            response.raise_for_status()
+        except httpx.HTTPStatusError:
+            return []
+        except Exception as e:
+            logger.debug(f"No index for {year}-{month:02d}: {e}")
+            return []
+
+        soup = BeautifulSoup(response.text, "html.parser")
+        sessions = []
+        seen_dates = set()
+
+        # Look for links matching the session date pattern
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            m = re.search(r"s(\d{8})", href)
+            if not m:
+                continue
+            date_str = m.group(1)
+            if date_str in seen_dates:
+                continue
+            seen_dates.add(date_str)
+
+            try:
+                date = datetime.strptime(date_str, "%Y%m%d")
+            except ValueError:
+                continue
+
+            # Build the mono URL
+            mono_url = (
+                f"{self.BASE_URL}/seances/s{month_str}/"
+                f"s{date_str}/s{date_str}_mono.html"
+            )
+            sessions.append({"date": date, "url": mono_url})
+
+        sessions.sort(key=lambda s: s["date"])
+        return sessions
 
     def fetch_amendement(self, url: str) -> dict:
         """
@@ -194,6 +302,75 @@ class SenatDebatCollector:
         except Exception as e:
             logger.error(f"Error fetching amendement {url}: {e}")
             return None
+
+    @staticmethod
+    def _enrich_fonctions(interventions: list[dict]) -> list[dict]:
+        """Enrich fonction field within a single debate's interventions.
+
+        Three passes:
+        1. Name-based: orateur name implies a function
+        2. President introductions: "La parole est à M. X, rapporteur..."
+        3. Propagation: spread known functions to other interventions of same speaker
+        """
+        if not interventions:
+            return interventions
+
+        intro_pattern = re.compile(
+            r"La parole est à (M\.|Mme|Mlle)\s+"
+            r"([A-Za-zÀ-ü][A-Za-zÀ-ü\s\-]+?)"
+            r",\s*([^\.]{5,80})\.",
+            re.UNICODE,
+        )
+        skip_phrases = (
+            "pour défendre", "pour présenter", "pour explication",
+            "contre l'", "pour l'", "sur l'", "sur l'",
+            "dont c'est", "avec l'autorisation",
+        )
+
+        speaker_functions: dict[str, str] = {}
+
+        for interv in interventions:
+            name = interv["orateur"]
+            name_lower = name.lower()
+
+            # Pass 1: name-based detection
+            if interv.get("fonction") is None:
+                if name in ("M. le président", "Mme la présidente"):
+                    interv["fonction"] = "président de séance"
+                elif "président" in name_lower or "présidente" in name_lower:
+                    interv["fonction"] = "président de séance"
+                elif "rapporteur" in name_lower:
+                    m = re.search(r"(rapporteur\w*(?:\s+.+)?)", name, re.IGNORECASE)
+                    interv["fonction"] = m.group(1).strip().rstrip(".") if m else "rapporteur"
+                elif any(k in name_lower for k in ("ministre", "secrétaire d", "garde des sceaux")):
+                    m = re.search(
+                        r"(?:le|la)\s+(ministre.+|secrétaire\s+d.+|garde\s+des\s+sceaux.+)",
+                        name, re.IGNORECASE,
+                    )
+                    interv["fonction"] = m.group(1).strip().rstrip(".") if m else "ministre"
+
+            # Collect known functions for propagation
+            if interv.get("fonction"):
+                speaker_functions.setdefault(name, interv["fonction"])
+
+            # Pass 2: parse president introductions
+            if name in ("M. le président", "Mme la présidente"):
+                normalized = re.sub(r"\s+", " ", interv.get("contenu", ""))
+                for match in intro_pattern.finditer(normalized):
+                    prefix = match.group(1)
+                    speaker_name = match.group(2).strip()
+                    role = match.group(3).strip().rstrip(",;")
+                    if any(s in role.lower() for s in skip_phrases):
+                        continue
+                    full_name = f"{prefix} {speaker_name}"
+                    speaker_functions.setdefault(full_name, role)
+
+        # Pass 3: propagation
+        for interv in interventions:
+            if interv.get("fonction") is None and interv["orateur"] in speaker_functions:
+                interv["fonction"] = speaker_functions[interv["orateur"]]
+
+        return interventions
 
     def close(self):
         """Close HTTP client."""

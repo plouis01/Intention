@@ -28,22 +28,23 @@ FRENCH_MONTHS = {
 
 # Journal Officiel header patterns to remove
 JO_HEADER_PATTERNS = [
-    # Full header lines
+    # Full header lines (with and without accents for OCR variants)
     r"^JOURNAL\s+OFFICIEL.*$",
-    r"^ASSEMBLÉE\s+NATIONALE.*$",
-    r"^SÉNAT.*$",
-    r"^COMPTE\s+RENDU\s+INTÉGRAL.*$",
+    r"^ASSEMBL[ÉEée]E\s+NATIONALE.*$",
+    r"^S[ÉEée]NAT.*$",
+    r"^COMPTE\s+RENDU\s+INT[ÉEée]GRAL.*$",
     r"^COMPTE\s+RENDU\s+ANALYTIQUE.*$",
-    r"^DÉBATS\s+PARLEMENTAIRES.*$",
-    r"^QUESTIONS\s+ÉCRITES.*$",
+    r"^D[ÉEée]BATS\s+PARLEMENTAIRES.*$",
+    r"^QUESTIONS\s+[ÉEée]CRITES.*$",
     # Page numbers (standalone number lines)
     r"^\s*\d{1,5}\s*$",
-    # Session headers
+    # Session headers (with and without number prefix, with and without accents)
     r"^[-–—]\s*\d+\s*[-–—]\s*$",
-    r"^\d+e\s+SÉANCE\s+DU.*$",
-    r"^\d+re\s+SÉANCE\s+DU.*$",
-    r"^SÉANCE\s+DU\s+.*$",
-    r"^PRÉSIDENCE\s+DE\s+.*$",
+    r"^\d+e\s+S[ÉEée]ANCE\s+DU.*$",
+    r"^\d+re\s+S[ÉEée]ANCE\s+DU.*$",
+    r"^\d+\s+S[ÉEée]ANCE\s+DU.*$",
+    r"^S[ÉEée]ANCE\s+DU\s+.*$",
+    r"^PR[ÉEée]SIDENCE\s+DE\s+.*$",
 ]
 
 # Compiled header patterns
@@ -69,6 +70,26 @@ _DATE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+# Homoglyph map: Cyrillic/Greek visually-similar chars → Latin equivalents.
+# Google Document AI occasionally misrecognizes Latin chars as look-alikes.
+_HOMOGLYPH_MAP = str.maketrans({
+    # Cyrillic lowercase → Latin
+    '\u0430': 'a', '\u0435': 'e', '\u043e': 'o', '\u0441': 'c',
+    '\u0440': 'p', '\u0443': 'y', '\u0445': 'x', '\u0456': 'i', '\u0458': 'j',
+    # Cyrillic uppercase → Latin
+    '\u0410': 'A', '\u0412': 'B', '\u0415': 'E', '\u041a': 'K',
+    '\u041c': 'M', '\u041d': 'H', '\u041e': 'O', '\u0420': 'P',
+    '\u0421': 'C', '\u0422': 'T', '\u0425': 'X',
+    # Greek lowercase → Latin
+    '\u03b1': 'a', '\u03b5': 'e', '\u03bf': 'o', '\u03b9': 'i',
+    '\u03ba': 'k', '\u03bd': 'v', '\u03c1': 'p', '\u03c5': 'u',
+    # Greek uppercase → Latin
+    '\u0391': 'A', '\u0392': 'B', '\u0395': 'E', '\u0396': 'Z',
+    '\u0397': 'H', '\u0399': 'I', '\u039a': 'K', '\u039c': 'M',
+    '\u039d': 'N', '\u039f': 'O', '\u03a1': 'P', '\u03a4': 'T',
+    '\u03a5': 'Y', '\u03a7': 'X',
+})
+
 # Speaker pattern (works after ALL-CAPS normalization)
 # Matches at line start: "M. Dupont." "M. Chaban-Delmas —" "Mme Martin :"
 # Uses \n (line boundary) because PyMuPDF produces single \n between lines,
@@ -82,15 +103,31 @@ _DATE_PATTERN = re.compile(
 _SPEAKER_PATTERN = re.compile(
     r"(?:^|\n)"
     r"("
-    # Named speakers: "M. Dupont.", "Mme Chaban-Delmas,", etc.
-    r"M(?:me|lle)?\.?\s+[A-ZÀ-Ý][a-zà-ÿ]+(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*(?:\s+[A-ZÀ-Ý][a-zà-ÿ]+(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*)*"
+    # Named speakers: "M. Dupont.", "Mme de Chaban-Delmas,", etc.
+    # Optional particle (de, du, d') for noble names.
+    r"M(?:me|lle)?\.?\s+(?:(?:de|du)\s+|d'\s*)?[A-ZÀ-Ý][a-zà-ÿ]+(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*(?:\s+[A-ZÀ-Ý][a-zà-ÿ]+(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*)*"
     r")\s*[:\.\-–—,]"
     r"|(?:^|\n)("
-    # Role-based: "M. le président.", "M. le ministre de l'économie.", "M. le secrétaire d'État."
-    # Allows optional qualifying text (e.g., "de l'économie et des finances") after the role word.
-    r"M(?:me)?\.?\s+l[ea]\s+(?:président(?:e)?|ministre|secrétaire\s+d'[ÉEée]tat)"
-    r"(?:\s+[a-zà-ÿA-ZÀ-Ý'',()\-\s]+?)?"  # optional qualifier like "de l'économie et des finances"
-    r")\s*[\.\:–—]"
+    # Role-based: "M. le président.", "M. le garde des sceaux.", etc.
+    # With OCR tolerance: "le" can be mangled to "Je", "Ie", "1e"; "la" to "Ia"
+    r"M(?:me)?\.?\s+(?:l[ea]|[JI]e|1e|Ia)\s+(?:"
+    r"président(?:e)?"
+    r"|ministre(?:\s+d'[ÉEée]tat)?(?:\s+délégué(?:e)?)?"
+    r"|secrétaire\s+d'[ÉEée]tat"
+    r"|garde\s+des\s+sceaux"
+    r"|rapporteur(?:e)?(?:\s+général(?:e)?)?"
+    r"|commissaire\s+du\s+[Gg]ouvernement"
+    r")"
+    # Optional qualifier: single prepositional phrase, lowercase only, max 40 chars.
+    # No uppercase/newlines to avoid capturing sentence text after the title.
+    r"(?:\s+(?:"
+    r"(?:de|du|des|aux|et|à|au|pour)\s+"
+    r"|d'\s*"
+    r"|chargé(?:e)?\s+(?:(?:de|du|des)\s+|d'\s*)"
+    r"|auprès\s+(?:(?:de|du)\s+|d'\s*)"
+    r"|délégué(?:e)?\s+(?:(?:à|au|aux)\s+|auprès\s+(?:(?:de|du)\s+|d'\s*))"
+    r")[a-zà-ÿ'' ]{1,40})?"
+    r")\s*[\.\:–—,]"
 )
 
 # Speaker intro pattern for function detection (the text between speaker name and first sentence)
@@ -100,6 +137,8 @@ _SPEAKER_INTRO_KEYWORDS = {
     "ministre": "ministre",
     "secrétaire d'état": "ministre",
     "secrétaire d'etat": "ministre",
+    "garde des sceaux": "ministre",
+    "commissaire du gouvernement": "ministre",
     "rapporteur": "rapporteur",
     "rapporteure": "rapporteur",
 }
@@ -157,17 +196,40 @@ def clean_archive_text(raw_text: str) -> str:
     """
     text = raw_text
 
+    # Normalize Cyrillic/Greek homoglyphs to Latin equivalents
+    text = text.translate(_HOMOGLYPH_MAP)
+
     # Remove form feeds / page breaks
     text = text.replace("\f", "\n")
+
+    # Truncate at Questions sections (not debate content).
+    # Must happen BEFORE JO header removal which strips "QUESTIONS ÉCRITES" markers.
+    # Matches: QUESTIONS\nREMISES, QUESTIONS ÉCRITES, QUESTIONS ORALES,
+    # QUESTIONS FORITES (OCR error), QUESTIONS CRALES (OCR error), etc.
+    # Does NOT match "questions au Gouvernement" (lowercase after QUESTIONS).
+    questions_match = re.search(
+        r"(?:^|\n)\s*QUESTIONS\s*(?:\n|[^a-z])",
+        text,
+    )
+    if questions_match:
+        text = text[:questions_match.start()]
 
     # Remove JO header lines
     text = _JO_HEADER_RE.sub("", text)
 
+    # Remove JO footnote blocks: "(1) Cette question, n° XX, est ainsi rédigée: ..."
+    text = re.sub(
+        r"\n\(\d+\)\s+Cette question.*?(?=\nM[.me]|\n[A-Z]{3,}|\Z)",
+        "", text, flags=re.DOTALL,
+    )
+
     # Fix common OCR spacing: "N ° " → "N° "
     text = re.sub(r"N\s+°\s*", "N° ", text)
 
-    # Rejoin words split across lines by OCR hyphenation: "Chaban-\nDelmas" → "Chaban-Delmas"
-    text = re.sub(r"-\n(\S)", r"-\1", text)
+    # Rejoin typographic hyphenation: "com-\nmission" → "commission" (lowercase after = word split)
+    text = re.sub(r"-\n([a-zà-ÿ])", r"\1", text)
+    # Keep compound name hyphens: "Chaban-\nDelmas" → "Chaban-Delmas" (uppercase after = real hyphen)
+    text = re.sub(r"-\n([A-ZÀ-Ý])", r"-\1", text)
 
     # Rejoin speaker titles split across lines by OCR: "M.\nle" → "M. le", "M.\nDupont" → "M. Dupont"
     text = re.sub(r"(M(?:me|lle)?\.)\s*\n\s*", r"\1 ", text)
@@ -282,61 +344,50 @@ def detect_archive_speaker_function(speaker_intro: str, orateur: str) -> str:
     return "autre"
 
 
-def parse_archive_debate(
-    pdf_path: Path,
+def parse_archive_debate_from_text(
+    raw_text: str,
     chambre: str,
-    url_source: str | None = None,
     session_name: str | None = None,
+    filename: str | None = None,
 ) -> ParsedDebat | None:
-    """Parse an archive PDF into a structured debate.
+    """Parse raw OCR text into a structured debate.
+
+    Use this when text has already been extracted (e.g., via Google Document AI
+    or other external OCR). For parsing directly from PDF, use parse_archive_debate().
 
     Args:
-        pdf_path: Path to the PDF file.
+        raw_text: Raw OCR text (all pages concatenated).
         chambre: "AN" or "SENAT".
-        url_source: Original URL of the PDF.
-        session_name: Session name for fallback date extraction.
+        session_name: Session name for fallback date extraction and reference.
+        filename: PDF filename stem (e.g., "045") for reference key.
 
     Returns:
-        ParsedDebat or None if parsing fails (e.g., no date found).
+        ParsedDebat or None if parsing fails.
     """
-    # 1. Extract text
-    try:
-        raw_text = extract_text_from_pdf(pdf_path)
-    except Exception as e:
-        logger.error(f"Failed to extract text from {pdf_path}: {e}")
-        return None
-
     if not raw_text or len(raw_text) < 200:
-        logger.warning(f"Very little text in {pdf_path}: {len(raw_text or '')} chars")
+        logger.warning(f"Very little text ({len(raw_text or '')} chars), skipping")
         return None
 
-    # 2. Extract date BEFORE cleaning (headers contain the date)
+    # 1. Extract date BEFORE cleaning (headers contain the date)
     date = extract_date_from_text(raw_text)
 
-    # 3. Clean text
+    # 2. Clean text
     cleaned = clean_archive_text(raw_text)
     if date is None:
         date = extract_date_from_session_name(session_name)
     if date is None:
-        logger.warning(f"No date found in {pdf_path.name}, skipping")
+        logger.warning(f"No date found for {filename or 'unknown'}, skipping")
         return None
 
-    # 4. Build reference key
+    # 3. Build reference key
     if chambre == "AN" and session_name:
-        # archive_an:{leg}/{session}/{number}
-        filename = pdf_path.stem  # e.g., "045"
-        reference = f"archive_an:{session_name}/{filename}"
+        reference = f"archive_an:{session_name}/{filename or 'unknown'}"
     elif chambre == "SENAT":
-        # archive_senat:{YYYYMMDD}_{pages}
-        filename = pdf_path.stem  # e.g., "s19881004_0001_0120"
-        reference = f"archive_senat:{filename}"
+        reference = f"archive_senat:{filename or 'unknown'}"
     else:
-        reference = f"archive_{chambre.lower()}:{pdf_path.stem}"
+        reference = f"archive_{chambre.lower()}:{filename or 'unknown'}"
 
-    # 5. Split by speakers
-    # _SPEAKER_PATTERN has 2 capture groups (named speaker, role speaker).
-    # re.split produces: preamble, grp1, grp2, content, grp1, grp2, content, ...
-    # The speaker is whichever group is not None.
+    # 4. Split by speakers
     raw_parts = _SPEAKER_PATTERN.split(cleaned)
     interventions = []
 
@@ -347,7 +398,6 @@ def parse_archive_debate(
         if not contenu or len(contenu) < 10:
             continue
 
-        # Get the intro line (first ~80 chars) for function detection
         intro_line = contenu[:80]
         fonction = detect_archive_speaker_function(intro_line, orateur)
         articles = extract_article_mentions(contenu)
@@ -360,13 +410,48 @@ def parse_archive_debate(
             ordre=len(interventions) + 1,
         ))
 
-    # 6. Return ParsedDebat
     return ParsedDebat(
         chambre=chambre,
         date=date,
         etape="seance_publique",
-        url_source=url_source,
+        url_source=None,
         reference=reference,
         interventions=interventions,
-        contenu_integral="",  # Empty — archive PDFs are too large to store full text
+        contenu_integral="\n\n".join(
+            f"{interv.orateur}: {interv.contenu}" for interv in interventions
+        ) if interventions else "",
     )
+
+
+def parse_archive_debate(
+    pdf_path: Path,
+    chambre: str,
+    url_source: str | None = None,
+    session_name: str | None = None,
+) -> ParsedDebat | None:
+    """Parse an archive PDF into a structured debate.
+
+    Extracts text via PyMuPDF then delegates to parse_archive_debate_from_text().
+
+    Args:
+        pdf_path: Path to the PDF file.
+        chambre: "AN" or "SENAT".
+        url_source: Original URL of the PDF.
+        session_name: Session name for fallback date extraction.
+
+    Returns:
+        ParsedDebat or None if parsing fails (e.g., no date found).
+    """
+    try:
+        raw_text = extract_text_from_pdf(pdf_path)
+    except Exception as e:
+        logger.error(f"Failed to extract text from {pdf_path}: {e}")
+        return None
+
+    filename = pdf_path.stem
+    result = parse_archive_debate_from_text(
+        raw_text, chambre, session_name=session_name, filename=filename,
+    )
+    if result and url_source:
+        result.url_source = url_source
+    return result

@@ -222,7 +222,7 @@ def collect_all_article_ids(client: LegifranceCodeClient,
                 child_toc = client.get_code_toc(text_id, sct_id=sct_id)
                 # Don't collect new empty leaves — only extract articles
                 _walk(child_toc, collect_leaves=False)
-            except httpx.HTTPStatusError:
+            except (httpx.HTTPStatusError, json.JSONDecodeError):
                 pass
             if (i + 1) % 100 == 0:
                 logger.info(f"  Drilled {i + 1}/{len(leaves_to_drill)} leaves "
@@ -235,11 +235,16 @@ def collect_all_article_ids(client: LegifranceCodeClient,
 
 
 def extract_laws_from_article(client: LegifranceCodeClient,
-                              article: dict) -> list[dict]:
+                              article: dict,
+                              deep: bool = False) -> list[dict]:
     """Extract all modifying laws from an article via getArticle endpoint.
 
     getArticle returns fields: lienModifications, lienCitations, lienAutres
     with keys: linkType, textTitle, textCid, numTexte, natureText, datePubli
+
+    If deep=True, also fetches all historical versions of the article
+    and extracts their lienModifications (captures older modifications
+    not linked from the current version).
     """
     article_id = article["id"]
     laws = []
@@ -269,6 +274,27 @@ def extract_laws_from_article(client: LegifranceCodeClient,
             law_info = _parse_law_from_lien(lien)
             if law_info:
                 laws.append(law_info)
+
+    # Deep mode: fetch all historical versions' modifications
+    if deep:
+        versions = art_data.get("articleVersions", [])
+        seen_ids = {article_id}
+        for version in versions:
+            vid = version.get("id")
+            if not vid or vid in seen_ids:
+                continue
+            seen_ids.add(vid)
+            try:
+                vdata = client.get_article(vid)
+            except httpx.HTTPStatusError:
+                continue
+            vart = vdata.get("article")
+            if not vart or not isinstance(vart, dict):
+                continue
+            for lien in (vart.get("lienModifications") or []):
+                law_info = _parse_law_from_lien(lien)
+                if law_info:
+                    laws.append(law_info)
 
     return laws
 
@@ -347,6 +373,8 @@ def _extract_numero(text: str) -> str | None:
 def _classify_law_type(titre: str) -> str:
     """Classify law type from title text."""
     t = titre.lower()
+    if "qpc" in t and "décision" in t:
+        return "QPC"
     if "finances pour" in t or "budget" in t:
         return "LF"
     if "finances rectificative" in t or "fin de gestion" in t:
@@ -411,7 +439,7 @@ def _load_finance_law_types() -> dict[str, tuple[str, int]]:
     # 2. Historical LF (loi de finances initiale) — from 1959 to 2011
     # format: (numero, annee_budgetaire)
     historical_lf = [
-        ("58-1374", 1959), ("59-1454", 1960), ("59-1472", 1960),
+        ("58-1374", 1959), ("59-1454", 1960),
         ("60-1384", 1961), ("61-1396", 1962), ("62-1529", 1963),
         ("63-1241", 1964), ("64-1279", 1965), ("65-997", 1966),
         ("66-935", 1967), ("67-1114", 1968), ("68-1172", 1969),
@@ -421,12 +449,12 @@ def _load_finance_law_types() -> dict[str, tuple[str, int]]:
         ("78-1239", 1979), ("79-1102", 1980), ("80-1094", 1981),
         ("81-1160", 1982), ("82-1126", 1983), ("83-1179", 1984),
         ("84-1208", 1985), ("85-1403", 1986), ("86-1317", 1987),
-        ("87-1060", 1988), ("87-1158", 1988), ("88-1149", 1989),
+        ("87-1060", 1988), ("88-1149", 1989),
         ("89-935", 1990), ("90-1168", 1991), ("91-1322", 1992),
         ("92-1376", 1993), ("93-1352", 1994), ("94-1162", 1995),
         ("95-1346", 1996), ("96-1181", 1997), ("97-1269", 1998),
         ("98-1266", 1999), ("99-1172", 2000), ("2000-1352", 2001),
-        ("2001-1275", 2002), ("2001-1276", 2002),
+        ("2001-1275", 2002),
         ("2002-1575", 2003), ("2003-1311", 2004), ("2004-1484", 2005),
         ("2005-1719", 2006), ("2006-1666", 2007), ("2007-1822", 2008),
         ("2008-1425", 2009), ("2009-1673", 2010), ("2010-1657", 2011),
@@ -438,6 +466,24 @@ def _load_finance_law_types() -> dict[str, tuple[str, int]]:
 
     # 3. Historical LFR (loi de finances rectificative) — major ones
     historical_lfr = [
+        # Pre-1982 LFR
+        ("60-706", 1960), ("60-859", 1960),
+        ("61-825", 1961),
+        ("62-873", 1962),
+        ("63-628", 1963), ("63-1293", 1963),
+        ("64-1278", 1964),
+        ("65-1154", 1965),
+        ("66-948", 1966),
+        ("69-1160", 1969),
+        ("71-1025", 1971),
+        ("72-1147", 1972),
+        ("74-1114", 1974),
+        ("75-408", 1975),
+        ("76-978", 1976),
+        ("78-653", 1978),
+        ("80-1039", 1980),
+        ("81-734", 1981), ("81-1179", 1981),
+        # Post-1982
         ("82-540", 1982), ("85-1404", 1985), ("86-824", 1986),
         ("88-1193", 1988), ("91-1323", 1991), ("92-1476", 1992),
         ("93-859", 1993), ("93-1353", 1993), ("94-1163", 1994),
@@ -566,14 +612,7 @@ def deduplicate_laws(raw_laws: list[dict]) -> list[dict]:
 
 
 def _fix_known_data_issues(laws: list[dict]) -> None:
-    """Fix specific data issues found during verification.
-
-    - 89-935/89-936: JORF IDs are swapped in Légifrance API data
-    - 82-1202: should be 88-1202 (misparse of old title format)
-    - 97-34: wrong JORF ID (198921 -> 198986)
-    - EU regulations: annee_budgetaire derived from regulation number, not year
-    - Aberrant annee_budgetaire values (e.g. 2999)
-    """
+    """Fix specific data issues found during verification."""
     by_num = {law["numero"]: law for law in laws}
 
     # 1. Swap 89-935 / 89-936 JORF IDs
@@ -584,16 +623,7 @@ def _fix_known_data_issues(laws: list[dict]) -> None:
         lf["url_legifrance"] = f"https://www.legifrance.gouv.fr/jorf/id/{lf['jorf']}"
         lfr["url_legifrance"] = f"https://www.legifrance.gouv.fr/jorf/id/{lfr['jorf']}"
 
-    # 2. Fix 82-1202 -> 88-1202 (loi du 30 décembre 1988)
-    if "82-1202" in by_num:
-        law = by_num["82-1202"]
-        law["numero"] = "88-1202"
-        law["titre"] = (
-            "Loi n°88-1202 du 30 décembre 1988 relative à l'adaptation "
-            "de l'exploitation agricole à son environnement économique et social"
-        )
-
-    # 3. Fix 97-34: wrong JORF ID (discovered via web search)
+    # 2. Fix 97-34: wrong JORF ID
     if "97-34" in by_num:
         law = by_num["97-34"]
         law["jorf"] = "JORFTEXT000000198986"
@@ -603,7 +633,7 @@ def _fix_known_data_issues(laws: list[dict]) -> None:
             "des décisions administratives individuelles"
         )
 
-    # 4. Fix EU regulations: use year from date_promulgation, type=LOI
+    # 3. Fix EU regulations: use year from date_promulgation
     for law in laws:
         titre = law.get("titre", "")
         if "Règlement CE" in titre or "Règlement CEE" in titre or "JOCE" in titre:
@@ -611,12 +641,32 @@ def _fix_known_data_issues(laws: list[dict]) -> None:
             if dp and len(dp) >= 4:
                 law["annee_budgetaire"] = int(dp[:4])
 
-    # 5. Fix any remaining aberrant annee_budgetaire
+    # 4. Fix any remaining aberrant annee_budgetaire
     for law in laws:
         ab = law.get("annee_budgetaire", 0)
         dp = law.get("date_promulgation", "")
         if ab > 2030 and dp and len(dp) >= 4:
             law["annee_budgetaire"] = int(dp[:4])
+
+    # 5. Remove misparsed duplicates and arrêtés (not laws)
+    nums_to_remove = {
+        "82-1179", "83-1317", "82-1202", "93-63",  # misparsed numbers
+        "1986-05", "1988-03", "2002-03", "2006-12",  # arrêtés
+    }
+    laws[:] = [l for l in laws if l["numero"] not in nums_to_remove]
+
+    # 6. Reclassify laws incorrectly typed as LF
+    for numero in ("83-25", "84-1203"):
+        if numero in by_num:
+            by_num[numero]["type"] = "LOI"
+    if "83-25" in by_num:
+        by_num["83-25"]["annee_budgetaire"] = 1983
+
+    # 7. Reclassify QPC decisions (not laws, but do modify the CGI)
+    for law in laws:
+        titre = law.get("titre", "")
+        if "QPC" in titre and ("Décision" in titre or "DÉCISION" in titre):
+            law["type"] = "QPC"
 
 
 # Known finance laws (LF/LFR/LFSS) that modify the CGI but are not always
@@ -642,6 +692,9 @@ _KNOWN_FINANCE_LAWS = [
     ("63-1241", "LF", 1964,
      "Loi n°63-1241 du 19 décembre 1963 de finances pour 1964",
      "1963-12-19", "JORFTEXT000000875392"),
+    ("64-1279", "LF", 1965,
+     "Loi n° 64-1279 du 23 décembre 1964 portant loi de finances pour 1965",
+     "1964-12-23", "JORFTEXT000000880293"),
     ("66-935", "LF", 1967,
      "LOI de finances pour 1967 (n° 66-935 du 17 décembre 1966)",
      "1966-12-17", "JORFTEXT000000320872"),
@@ -685,7 +738,47 @@ _KNOWN_FINANCE_LAWS = [
     ("2006-1640", "LFSS", 2007,
      "Loi n° 2006-1640 du 21 décembre 2006 de financement de la sécurité sociale pour 2007",
      "2006-12-21", "JORFTEXT000000817095"),
-    # LFR not always linked from CGI articles
+    # Pre-1982 LFR not always linked from CGI articles
+    ("60-706", "LFR", 1960,
+     "Loi n° 60-706 du 21 juillet 1960 de finances rectificative pour 1960",
+     "1960-07-21", "JORFTEXT000000512208"),
+    ("61-825", "LFR", 1961,
+     "Loi n° 61-825 du 29 juillet 1961 de finances rectificative pour 1961",
+     "1961-07-29", ""),
+    ("63-1293", "LFR", 1963,
+     "Loi n° 63-1293 du 21 décembre 1963 de finances rectificative pour 1963",
+     "1963-12-21", ""),
+    ("64-1278", "LFR", 1964,
+     "Loi n° 64-1278 du 23 décembre 1964 de finances rectificative pour 1964",
+     "1964-12-23", ""),
+    ("65-1154", "LFR", 1965,
+     "Loi n° 65-1154 du 30 décembre 1965 de finances rectificative pour 1965",
+     "1965-12-30", ""),
+    ("66-948", "LFR", 1966,
+     "Loi n° 66-948 du 22 décembre 1966 de finances rectificative pour 1966",
+     "1966-12-22", ""),
+    ("69-1160", "LFR", 1969,
+     "Loi n° 69-1160 du 24 décembre 1969 de finances rectificative pour 1969",
+     "1969-12-24", ""),
+    ("72-1147", "LFR", 1972,
+     "Loi n° 72-1147 du 23 décembre 1972 de finances rectificative pour 1972",
+     "1972-12-23", ""),
+    ("74-1114", "LFR", 1974,
+     "Loi n° 74-1114 du 27 décembre 1974 de finances rectificative pour 1974",
+     "1974-12-27", ""),
+    ("76-978", "LFR", 1976,
+     "Loi n° 76-978 du 29 octobre 1976 de finances rectificative pour 1976",
+     "1976-10-29", ""),
+    ("78-653", "LFR", 1978,
+     "Loi n° 78-653 du 22 juin 1978 de finances rectificative pour 1978",
+     "1978-06-22", ""),
+    ("80-1039", "LFR", 1980,
+     "Loi n° 80-1039 du 23 décembre 1980 de finances rectificative pour 1980",
+     "1980-12-23", "JORFTEXT000000339354"),
+    ("81-734", "LFR", 1981,
+     "Loi n° 81-734 du 3 août 1981 de finances rectificative pour 1981",
+     "1981-08-03", ""),
+    # Post-2002 LFR not always linked from CGI articles
     ("2020-289", "LFR", 2020,
      "LOI n° 2020-289 du 23 mars 2020 de finances rectificative pour 2020 (1)",
      "2020-03-23", "JORFTEXT000041746298"),
@@ -771,6 +864,9 @@ def main():
                         help="Limit number of articles to process (0=all)")
     parser.add_argument("--workers", type=int, default=8,
                         help="Number of parallel workers for phase 2 (default: 8)")
+    parser.add_argument("--deep", action="store_true",
+                        help="Fetch all historical versions of each article "
+                             "(slower but finds older modifications)")
     parser.add_argument("--output", type=Path, default=OUTPUT_FILE,
                         help="Output file path")
 
@@ -810,7 +906,7 @@ def main():
         processed = 0
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = {
-                executor.submit(extract_laws_from_article, client, art): art
+                executor.submit(extract_laws_from_article, client, art, args.deep): art
                 for art in remaining
             }
             for future in as_completed(futures):

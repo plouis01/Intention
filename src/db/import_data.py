@@ -830,6 +830,23 @@ def import_articles_from_legifrance(
     # Extract articles from JSON
     articles_data = extract_articles_from_legifrance_json(data)
 
+    # Fallback: use LEGI dump articles if JORF articles are empty
+    if not articles_data and data.get("legi_articles"):
+        logger.info(f"Using LEGI dump articles for {loi.numero}")
+        for idx, art in enumerate(data["legi_articles"]):
+            num = art.get("num")
+            content = art.get("content", "")
+            if content:
+                content = re.sub(r"<[^>]+>", " ", content)
+                content = re.sub(r"\s+", " ", content).strip()
+            if num and content:
+                articles_data.append({
+                    "numero_article": num,
+                    "contenu_texte": content,
+                    "position_dans_loi": idx + 1,
+                    "section_path": None,
+                })
+
     if not articles_data:
         logger.warning(f"No articles found in {json_file}")
         return []
@@ -1206,10 +1223,16 @@ def import_debates_from_senat_xml(
         # Extract interventions using text-based approach
         interventions_data = []
 
-        # Split by speaker patterns
+        # Split by speaker patterns — strict regex to avoid false positives
         speaker_pattern = re.compile(
-            r"((?:M\.|Mme|Mlle)\s+[A-ZÉÈÊËÀÂÄÙÛÜÔÖÎÏÇ][a-zéèêëàâäùûüôöîïç\-']+(?:\s+[A-Za-zÉÈÊËÀÂÄÙÛÜÔÖÎÏÇéèêëàâäùûüôöîïç\-']+)*)"
-            r"(?:,\s*([^\.]+))?"
+            r"((?:M\.|Mme|Mlle)\s+"
+            r"(?:l[ea]\s+(?:président(?:e)?|ministre|secrétaire|rapporteur)"
+            r"|(?:[A-ZÀ-Ý][a-zà-ÿ]+|d'[A-ZÀ-Ý][a-zà-ÿ]+|(?:de|du|le|la|des)\s+[A-ZÀ-Ý])[a-zà-ÿ]*"
+            r"(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*"
+            r"(?:\s+(?:[A-ZÀ-Ý][a-zà-ÿ]+(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*|d'[A-ZÀ-Ý][a-zà-ÿ]+|(?:de|du|le|la|des)))*"
+            r"))"
+            r"(?:\s*\([^)]+\))?"
+            r"(?:\s*,\s*([^\.]+))?"
             r"\.\s*[-\u2013\u2014]?\s*"
         )
 
@@ -1217,6 +1240,13 @@ def import_debates_from_senat_xml(
 
         for idx, match in enumerate(matches):
             speaker = match.group(1).strip()
+            # Extract first speaker if multi ("M. X et M. Y")
+            multi = re.match(
+                r'^((?:M\.|Mme|Mlle)\s+[A-ZÀ-Ý][a-zà-ÿ-]+(?:\s+[A-ZÀ-Ý][a-zà-ÿ-]+)*)\s+et\s+',
+                speaker
+            )
+            if multi:
+                speaker = multi.group(1).strip()
             function_str = match.group(2).strip() if match.group(2) else None
 
             start = match.end()
@@ -1517,8 +1547,14 @@ def _extract_cri_interventions(root: ET.Element | None, all_text: str) -> list[d
 
     # --- Attempt 2: text-based speaker detection (fallback) ---
     speaker_pattern = re.compile(
-        r"((?:M\.|Mme|Mlle)\s+[A-ZÉÈÊËÀÂÄÙÛÜÔÖÎÏÇ][a-zéèêëàâäùûüôöîïç\-']+(?:\s+[A-Za-zÉÈÊËÀÂÄÙÛÜÔÖÎÏÇéèêëàâäùûüôöîïç\-']+)*)"
-        r"(?:,\s*([^\.]+))?"
+        r"((?:M\.|Mme|Mlle)\s+"
+        r"(?:l[ea]\s+(?:président(?:e)?|ministre|secrétaire|rapporteur)"
+        r"|(?:[A-ZÀ-Ý][a-zà-ÿ]+|d'[A-ZÀ-Ý][a-zà-ÿ]+|(?:de|du|le|la|des)\s+[A-ZÀ-Ý])[a-zà-ÿ]*"
+        r"(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*"
+        r"(?:\s+(?:[A-ZÀ-Ý][a-zà-ÿ]+(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*|d'[A-ZÀ-Ý][a-zà-ÿ]+|(?:de|du|le|la|des)))*"
+        r"))"
+        r"(?:\s*\([^)]+\))?"
+        r"(?:\s*,\s*([^\.]+))?"
         r"\.\s*[-\u2013\u2014]?\s*"
     )
 
@@ -1526,6 +1562,13 @@ def _extract_cri_interventions(root: ET.Element | None, all_text: str) -> list[d
 
     for idx, match in enumerate(matches):
         speaker = match.group(1).strip()
+        # Extract first speaker if multi ("M. X et M. Y")
+        multi = re.match(
+            r'^((?:M\.|Mme|Mlle)\s+[A-ZÀ-Ý][a-zà-ÿ-]+(?:\s+[A-ZÀ-Ý][a-zà-ÿ-]+)*)\s+et\s+',
+            speaker
+        )
+        if multi:
+            speaker = multi.group(1).strip()
         function_str = match.group(2).strip() if match.group(2) else None
 
         start = match.end()

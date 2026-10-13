@@ -586,7 +586,7 @@ def generate_embeddings(output_dir: Path, checkpoint_every: int = 50000,
     settings = get_settings()
     logger.info("Generating embeddings (Phase 2)...")
 
-    if settings.vector_store_provider == "database":
+    if settings.vector_store_provider in ("database", "pgvector"):
         return _generate_embeddings_to_database(batch_size=DB_BATCH_SIZE, min_date=min_date)
 
     from sqlalchemy import func

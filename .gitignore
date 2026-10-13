@@ -11,10 +11,13 @@ data/processed/
 data/embeddings_cache/
 data/embeddings/
 data/*.dump
+data/ocr_pipeline/
 *.log
 *.db
 TODO.md
 reocr/
+data/ocr_output/
+legi/
 
 
 # Generated analysis outputs
@@ -27,6 +30,8 @@ data/article_modifications_auto.json
 data/samples_amendements
 data/legislateur.db-journal
 data/cache/*.json
+data/cgi_toc_cache.json
+data/*_checkpoint.json
 
 
 # IDE
@@ -43,11 +48,13 @@ build/
 .pytest_cache/
 .coverage
 htmlcov/
+backup_*
 
 #bmad-method
 _bmad/
 _bmad-output/
 .claude/commands/
+.claude/skills/
 
 .DS_Store
 /rapports

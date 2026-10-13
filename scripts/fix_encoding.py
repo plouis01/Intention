@@ -113,12 +113,22 @@ def fix_interventions():
         # Phase 1: SQL-based character replacement (batched)
         updated_contenu = _sql_fix_column(session, "interventions", "contenu")
         updated_orateur = _sql_fix_column(session, "interventions", "orateur")
-        print(f"  SQL replacements: {updated_contenu} contenu, {updated_orateur} orateur rows updated")
+        updated_fonction = _sql_fix_column(session, "interventions", "fonction")
+        print(f"  SQL replacements: {updated_contenu} contenu, {updated_orateur} orateur, {updated_fonction} fonction rows updated")
 
         # Phase 2: Python-based HTML entity decoding (only affected rows)
         session.expire_all()
-        html_fixed = _python_fix_html_entities(session, Intervention, ["contenu", "orateur"])
+        html_fixed = _python_fix_html_entities(session, Intervention, ["contenu", "orateur", "fonction"])
         print(f"  HTML entities: {html_fixed} rows updated")
+
+        # Phase 3: Clean fonction field (trailing dots, leading spaces)
+        result = session.execute(text("""
+            UPDATE interventions SET fonction = TRIM(TRAILING '.' FROM TRIM(fonction))
+            WHERE fonction IS NOT NULL
+              AND (fonction LIKE '%.' OR fonction LIKE ' %')
+        """))
+        session.commit()
+        print(f"  Fonction cleanup (dots/spaces): {result.rowcount} rows updated")
     finally:
         session.close()
 

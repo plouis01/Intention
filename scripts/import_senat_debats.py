@@ -94,7 +94,7 @@ def import_senat_debates():
 
     # Load reference laws (CGI + finance overlay, LF/LFR/LFSS only, 2002+)
     finance_types = {"LF", "LFR", "LFSS"}
-    min_date = "2002-01-01"
+    min_date = "1996-01-01"
     laws_by_numero = {}
 
     if CGI_LAWS_FILE.exists():
@@ -271,7 +271,214 @@ def import_senat_debates():
     session.close()
 
 
+def import_senat_debates_full_period(
+    start_year: int = 1996,
+    start_month: int = 6,
+    end_year: int = 2002,
+    end_month: int = 12,
+    skip_finance_filter: bool = True,
+    dry_run: bool = False,
+):
+    """
+    Import ALL Sénat debates for a date range using monthly index pages.
+
+    Unlike the windowed import, this discovers actual session dates from
+    senat.fr monthly indexes and optionally imports non-finance debates too.
+    """
+    session = get_session()
+    collector = SenatDebatCollector()
+
+    # Load lois and dossiers for content-based matching
+    lois = session.query(Loi).all()
+    dossiers_list = session.query(DossierLegislatif).all()
+
+    # Get existing references to skip duplicates
+    existing_refs = {
+        row[0] for row in session.query(Debat.reference_externe).filter(
+            Debat.chambre == "SENAT"
+        ).all() if row[0]
+    }
+    existing_urls = {
+        row[0] for row in session.query(Debat.url_source).filter(
+            Debat.chambre == "SENAT"
+        ).all() if row[0]
+    }
+
+    print(f"Existing Sénat debates: {len(existing_refs)} refs, {len(existing_urls)} urls")
+    print(f"Scanning months {start_year}-{start_month:02d} to {end_year}-{end_month:02d}")
+    print(f"Finance filter: {'OFF' if skip_finance_filter else 'ON'}")
+    if dry_run:
+        print("DRY RUN — no database writes\n")
+    print()
+
+    imported = 0
+    skipped_exists = 0
+    skipped_empty = 0
+    skipped_finance = 0
+    failed = 0
+    total_sessions_found = 0
+
+    year, month = start_year, start_month
+    while (year, month) <= (end_year, end_month):
+        # Discover sessions from monthly index
+        sessions_list = collector.list_sessions_for_month(year, month)
+
+        if sessions_list:
+            print(f"{year}-{month:02d}: {len(sessions_list)} sessions found")
+            total_sessions_found += len(sessions_list)
+        else:
+            # Try next month
+            month += 1
+            if month > 12:
+                month = 1
+                year += 1
+            time.sleep(0.3)
+            continue
+
+        for sess in sessions_list:
+            date = sess["date"]
+            url = sess["url"]
+            ref = f"senat_{date.strftime('%Y%m%d')}_mono"
+
+            # Skip if already imported
+            if ref in existing_refs or url in existing_urls:
+                skipped_exists += 1
+                continue
+
+            try:
+                result = collector.fetch_seance(url)
+
+                if result is None:
+                    skipped_empty += 1
+                    time.sleep(0.5)
+                    continue
+
+                interventions = result.get("interventions", [])
+                if not interventions:
+                    skipped_empty += 1
+                    time.sleep(0.5)
+                    continue
+
+                # Build full text
+                full_text = " ".join(
+                    interv.get("contenu", "") for interv in interventions
+                )
+
+                # Optional finance filter
+                if not skip_finance_filter:
+                    content_lower = full_text.lower()
+                    is_finance = any(kw in content_lower for kw in FINANCE_LAW_KEYWORDS)
+                    if not is_finance:
+                        skipped_finance += 1
+                        time.sleep(0.5)
+                        continue
+
+                if dry_run:
+                    print(f"  [DRY] {date.strftime('%Y-%m-%d')}: "
+                          f"{len(interventions)} interventions")
+                    imported += 1
+                    time.sleep(0.5)
+                    continue
+
+                # Match to a dossier
+                matched_dossier = find_dossier_for_debate(
+                    dossiers_list, lois, full_text[:50000], date, chambre="SENAT"
+                )
+
+                debat = Debat(
+                    dossier_id=matched_dossier.id if matched_dossier else None,
+                    chambre="SENAT",
+                    date=date,
+                    etape="seance_publique",
+                    url_source=url,
+                    reference_externe=ref,
+                    contenu_integral=full_text[:50000] if full_text else None,
+                )
+                session.add(debat)
+                session.flush()
+
+                for j, interv in enumerate(interventions):
+                    intervention = Intervention(
+                        debat_id=debat.id,
+                        orateur=interv["orateur"],
+                        fonction=interv.get("fonction"),
+                        contenu=interv["contenu"],
+                        articles_mentionnes=extract_article_mentions(interv["contenu"]),
+                        ordre=j + 1,
+                    )
+                    session.add(intervention)
+
+                existing_refs.add(ref)
+                existing_urls.add(url)
+                imported += 1
+                print(f"  + {date.strftime('%Y-%m-%d')}: "
+                      f"{len(interventions)} interventions")
+
+                if imported % 5 == 0:
+                    session.commit()
+
+            except Exception as e:
+                session.rollback()
+                failed += 1
+                logger.warning(f"Error processing {url}: {e}")
+
+            time.sleep(1)
+
+        # Next month
+        month += 1
+        if month > 12:
+            month = 1
+            year += 1
+
+    if not dry_run:
+        session.commit()
+    collector.close()
+
+    print(f"\n--- Summary ---")
+    print(f"Sessions discovered: {total_sessions_found}")
+    print(f"Imported: {imported} new debates")
+    print(f"Skipped (already exists): {skipped_exists}")
+    print(f"Skipped (404/empty): {skipped_empty}")
+    if not skip_finance_filter:
+        print(f"Skipped (not finance): {skipped_finance}")
+    print(f"Failed: {failed}")
+
+    if not dry_run:
+        total_senat = session.query(Debat).filter_by(chambre="SENAT").count()
+        print(f"Total Sénat debates in DB: {total_senat}")
+
+    session.close()
+
+
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Sénat debate importer")
+    parser.add_argument("--full-history", action="store_true",
+                        help="Import ALL debates for June 1996 - Dec 2002 "
+                             "using monthly index pages (no finance filter)")
+    parser.add_argument("--start-year", type=int, default=1996)
+    parser.add_argument("--start-month", type=int, default=6)
+    parser.add_argument("--end-year", type=int, default=2002)
+    parser.add_argument("--end-month", type=int, default=12)
+    parser.add_argument("--finance-filter", action="store_true",
+                        help="Keep finance keyword filter (default: OFF in full-history)")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Discover sessions without writing to DB")
+    args = parser.parse_args()
+
     logging.basicConfig(level=logging.INFO)
-    print("Systematic Sénat debate import...\n")
-    import_senat_debates()
+
+    if args.full_history:
+        print("Full history Sénat debate import...\n")
+        import_senat_debates_full_period(
+            start_year=args.start_year,
+            start_month=args.start_month,
+            end_year=args.end_year,
+            end_month=args.end_month,
+            skip_finance_filter=not args.finance_filter,
+            dry_run=args.dry_run,
+        )
+    else:
+        print("Systematic Sénat debate import (windowed)...\n")
+        import_senat_debates()
