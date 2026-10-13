@@ -263,7 +263,7 @@ def build_relevance_keywords(article_ref: str, article_data: dict) -> set[str]:
             kws.add(kw_lower)
         elif len(kw_lower) >= 6 and kw_lower not in _GENERIC_WORDS:
             kws.add(kw_lower)
-    # Add titre words — only specific ones
+    # Add titre words - only specific ones
     titre = article_data.get("titre", "")
     for word in titre.lower().split():
         if len(word) >= 6 and word not in _GENERIC_WORDS and not word.isdigit():
@@ -1046,7 +1046,7 @@ def enrich_from_law_debates(
                         stats["quotes_years_added"] += 1
             art["curated_quotes"] = existing
         else:
-            # Article has no quotes at all — add all
+            # Article has no quotes at all - add all
             curated = {}
             for year, quotes in year_quotes.items():
                 deduped = _dedupe_quotes(quotes)

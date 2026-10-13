@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass, field
 from datetime import date
 from enum import Enum
-from typing import Optional
 
 
 class CertitudeLevel(str, Enum):
@@ -103,6 +103,8 @@ class ModificationNature(str, Enum):
     CREATION = "Création"
     MODIFICATION = "Modification"
     ABROGATION = "Abrogation"
+    CODIFICATION = "Codification"
+    TRANSFERT = "Transfert"
 
 
 @dataclass
@@ -117,6 +119,10 @@ class LawModification:
     nature: ModificationNature
     legifrance_url: str = ""
     law_title: str = ""  # Full title of the law
+    objet: str = ""  # Description of the modification from Légifrance
+    date_debut_vigueur: str = ""  # Start of validity period
+    date_fin_vigueur: str = ""  # End of validity period
+    nor: str = ""  # NOR number of the modifying text
 
     @property
     def law_ref(self) -> str:
@@ -139,9 +145,11 @@ class QuotedSource:
     date: str  # ISO format
     chambre: str  # "AN" or "Sénat"
     is_curated: bool = False  # True if from manually curated data
+    passage_cle: str = ""  # Original LLM passage_cle for traceability
+    extrait_id: str = ""  # Original LLM extrait_id (EXTRAIT-N or AMEND-N)
 
     def to_dict(self) -> dict:
-        return {
+        d = {
             "citation": self.citation,
             "orateur": self.orateur,
             "fonction": self.fonction,
@@ -149,6 +157,11 @@ class QuotedSource:
             "chambre": self.chambre,
             "is_curated": self.is_curated,
         }
+        if self.passage_cle:
+            d["passage_cle"] = self.passage_cle
+        if self.extrait_id:
+            d["extrait_id"] = self.extrait_id
+        return d
 
 
 @dataclass
@@ -162,11 +175,14 @@ class SectionAnalysis:
     sources_senat: list[QuotedSource] = field(default_factory=list)  # Sénat sources
     evolution_debats: str = ""  # How text evolved during debates
     points_vigilance: list[str] = field(default_factory=list)  # Rejected amendments, objections
+    amendements_rejetes_detailles: list[dict] = field(default_factory=list)  # Structured rejected amendments
     niveau_certitude: CertitudeLevel = CertitudeLevel.MOYEN
     certitude_justification: str = ""
     debates_analyzed: int = 0  # Number of debate chunks analyzed
     amendments_analyzed: int = 0  # Number of amendments analyzed
     operational_params: OperationalParameters | None = None  # Extracted operational parameters
+    doctrine_convergence: str = ""  # How doctrine/jurisprudence aligns: confirme|contredit|silencieux
+    doctrine_references: list[str] = field(default_factory=list)  # BOFiP/CE refs cited
 
     @property
     def sources(self) -> list[QuotedSource]:
@@ -197,19 +213,6 @@ class ConsolidationPeriod:
 
 
 @dataclass
-class JurisprudenceEntry:
-    """A jurisprudence entry."""
-
-    juridiction: str  # "CE", "CC", "CADF"
-    date: str
-    reference: str  # "n° 472835"
-    titre: str
-    faits: str = ""
-    solution: str = ""
-    portee: str = ""
-
-
-@dataclass
 class ArticleInfo:
     """Information about an article from the index."""
 
@@ -219,7 +222,12 @@ class ArticleInfo:
     keywords: list[str]
     modifications: list[LawModification]
     legifrance_url: str = ""
-    bofip_url: str = ""
+    etat_actuel: str = ""  # "VIGUEUR", "ABROGE", etc.
+    texte_actuel: str = ""  # Full current text of the article
+    nota: str = ""  # Application conditions / nota
+    hierarchie: list[str] = field(default_factory=list)  # Position in CGI hierarchy
+    article_ids: list[str] = field(default_factory=list)  # LEGIARTI historical IDs
+    references_croisees: list[str] = field(default_factory=list)  # Cross-referenced articles
 
 
 @dataclass
@@ -236,16 +244,6 @@ class SynthesisRow:
     periode: str
     parameters: dict[str, str] = field(default_factory=dict)
 
-
-@dataclass
-class ForwardLookingSection:
-    """Section for ongoing PLF discussions (projets de modification)."""
-
-    plf_year: int  # 2025, 2026
-    status: str  # "en cours", "projet", "adopté"
-    propositions: list[str]  # Proposed changes
-    citations: list[QuotedSource] = field(default_factory=list)
-    niveau_certitude: CertitudeLevel = CertitudeLevel.MOYEN
 
 
 @dataclass
@@ -419,26 +417,17 @@ class ArticleAnalysisResult:
     consolidation_periods: list[ConsolidationPeriod] = field(default_factory=list)
 
     # Synthesis
-    synthese_objectif: str = ""
     synthese_evolution: list[SynthesisRow] = field(default_factory=list)
-    synthese_preoccupations: list[str] = field(default_factory=list)
-
-    # Forward-looking analysis (PLF discussions)
-    forward_looking: list[ForwardLookingSection] = field(default_factory=list)
 
     # Additional content
-    jurisprudence: list[JurisprudenceEntry] = field(default_factory=list)
-    doctrine_bofip: list[str] = field(default_factory=list)
-    bofip_url: str = ""
     legifrance_url: str = ""
+    etat_actuel: str = ""  # "VIGUEUR", "ABROGE", etc.
 
-    # Enhanced methodology sources
-    rapports_parlementaires: list[dict] = field(default_factory=list)
-    dila_sources: list[str] = field(default_factory=list)
-
-    # Cross-law references and PLF-LF deltas
+    # Cross-law references
     cross_references: list[dict] = field(default_factory=list)
-    plf_lf_deltas: list[dict] = field(default_factory=list)
+
+    # Jurisprudence (verified from DB, not LLM-generated)
+    jurisprudence: list[dict] = field(default_factory=list)
 
     # Methodology
     sources_legislatives: list[str] = field(default_factory=list)
@@ -466,6 +455,108 @@ class ArticleAnalysisResult:
                     evolution[param_name] = []
                 evolution[param_name].append((periode, value))
         return evolution
+
+
+# ============================================================================
+# Token Usage Tracking
+# ============================================================================
+
+
+@dataclass
+class TokenUsage:
+    """Token usage from a single LLM call."""
+
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cache_creation_input_tokens: int = 0
+    cache_read_input_tokens: int = 0
+    phase: str = ""
+    provider: str = ""
+
+
+@dataclass
+class TokenTracker:
+    """Accumulates token usage across all LLM calls of one analysis."""
+
+    calls: list[TokenUsage] = field(default_factory=list)
+    _current_phase: str = field(default="", repr=False)
+    _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
+
+    # Haiku 4.5 pricing ($ per million tokens)
+    PRICING: dict = field(default_factory=lambda: {
+        "anthropic": {"input": 1.00, "output": 5.00, "cache_write": 1.25, "cache_read": 0.10},
+        "groq": {"input": 0.0, "output": 0.0, "cache_write": 0.0, "cache_read": 0.0},
+    }, repr=False)
+
+    def set_phase(self, phase: str) -> None:
+        self._current_phase = phase
+
+    def record(self, usage: TokenUsage) -> None:
+        with self._lock:
+            self.calls.append(usage)
+
+    @property
+    def total_input(self) -> int:
+        return sum(c.input_tokens for c in self.calls)
+
+    @property
+    def total_output(self) -> int:
+        return sum(c.output_tokens for c in self.calls)
+
+    @property
+    def total_cache_write(self) -> int:
+        return sum(c.cache_creation_input_tokens for c in self.calls)
+
+    @property
+    def total_cache_read(self) -> int:
+        return sum(c.cache_read_input_tokens for c in self.calls)
+
+    def estimated_cost_usd(self) -> float:
+        cost = 0.0
+        for c in self.calls:
+            p = self.PRICING.get(c.provider, self.PRICING["groq"])
+            cost += c.input_tokens * p["input"] / 1_000_000
+            cost += c.output_tokens * p["output"] / 1_000_000
+            cost += c.cache_creation_input_tokens * p["cache_write"] / 1_000_000
+            cost += c.cache_read_input_tokens * p["cache_read"] / 1_000_000
+        return round(cost, 6)
+
+    @staticmethod
+    def summarize_calls(calls: list[TokenUsage]) -> dict:
+        """Summarize a subset of calls (e.g. for a single section)."""
+        return {
+            "calls": len(calls),
+            "input_tokens": sum(c.input_tokens for c in calls),
+            "output_tokens": sum(c.output_tokens for c in calls),
+            "cache_write_tokens": sum(c.cache_creation_input_tokens for c in calls),
+            "cache_read_tokens": sum(c.cache_read_input_tokens for c in calls),
+        }
+
+    def to_dict(self) -> dict:
+        by_phase: dict[str, dict] = {}
+        for c in self.calls:
+            phase = c.phase or "unknown"
+            if phase not in by_phase:
+                by_phase[phase] = {
+                    "calls": 0, "input_tokens": 0, "output_tokens": 0,
+                    "cache_write_tokens": 0, "cache_read_tokens": 0,
+                }
+            bp = by_phase[phase]
+            bp["calls"] += 1
+            bp["input_tokens"] += c.input_tokens
+            bp["output_tokens"] += c.output_tokens
+            bp["cache_write_tokens"] += c.cache_creation_input_tokens
+            bp["cache_read_tokens"] += c.cache_read_input_tokens
+
+        return {
+            "total_calls": len(self.calls),
+            "total_input_tokens": self.total_input,
+            "total_output_tokens": self.total_output,
+            "total_cache_write_tokens": self.total_cache_write,
+            "total_cache_read_tokens": self.total_cache_read,
+            "estimated_cost_usd": self.estimated_cost_usd(),
+            "by_phase": by_phase,
+        }
 
     def get_sections_with_consolidations(self) -> list:
         """

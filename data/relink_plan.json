@@ -1,0 +1,1451 @@
+[
+  {
+    "debate_id": 1232,
+    "current_dossier_id": 1,
+    "current_law": "2019-1479",
+    "correct_dossier_id": 23,
+    "correct_law": "2022-1157",
+    "debate_date": "2022-02-16",
+    "distance_days": 181
+  },
+  {
+    "debate_id": 7893,
+    "current_dossier_id": 2,
+    "current_law": "2019-1479",
+    "correct_dossier_id": 22,
+    "correct_law": "2021-953",
+    "debate_date": "2021-03-23",
+    "distance_days": 118
+  },
+  {
+    "debate_id": 2334,
+    "current_dossier_id": 2,
+    "current_law": "2019-1479",
+    "correct_dossier_id": 22,
+    "correct_law": "2021-953",
+    "debate_date": "2021-05-20",
+    "distance_days": 60
+  },
+  {
+    "debate_id": 7915,
+    "current_dossier_id": 2,
+    "current_law": "2019-1479",
+    "correct_dossier_id": 22,
+    "correct_law": "2021-953",
+    "debate_date": "2021-05-20",
+    "distance_days": 60
+  },
+  {
+    "debate_id": 2346,
+    "current_dossier_id": 2,
+    "current_law": "2019-1479",
+    "correct_dossier_id": 22,
+    "correct_law": "2021-953",
+    "debate_date": "2021-06-16",
+    "distance_days": 33
+  },
+  {
+    "debate_id": 7927,
+    "current_dossier_id": 2,
+    "current_law": "2019-1479",
+    "correct_dossier_id": 22,
+    "correct_law": "2021-953",
+    "debate_date": "2021-06-16",
+    "distance_days": 33
+  },
+  {
+    "debate_id": 7961,
+    "current_dossier_id": 2,
+    "current_law": "2019-1479",
+    "correct_dossier_id": 32,
+    "correct_law": "2021-1754",
+    "debate_date": "2021-10-12",
+    "distance_days": 72
+  },
+  {
+    "debate_id": 8002,
+    "current_dossier_id": 2,
+    "current_law": "2019-1479",
+    "correct_dossier_id": 24,
+    "correct_law": "2022-1157",
+    "debate_date": "2022-01-18",
+    "distance_days": 210
+  },
+  {
+    "debate_id": 8087,
+    "current_dossier_id": 2,
+    "current_law": "2019-1479",
+    "correct_dossier_id": 36,
+    "correct_law": "2023-1250",
+    "debate_date": "2023-02-08",
+    "distance_days": 321
+  },
+  {
+    "debate_id": 8212,
+    "current_dossier_id": 2,
+    "current_law": "2019-1479",
+    "correct_dossier_id": 146,
+    "correct_law": "2024-1167",
+    "debate_date": "2024-03-05",
+    "distance_days": 276
+  },
+  {
+    "debate_id": 8131,
+    "current_dossier_id": 4,
+    "current_law": "2020-1721",
+    "correct_dossier_id": 36,
+    "correct_law": "2023-1250",
+    "debate_date": "2023-06-13",
+    "distance_days": 196
+  },
+  {
+    "debate_id": 8234,
+    "current_dossier_id": 8,
+    "current_law": "2022-1726",
+    "correct_dossier_id": 146,
+    "correct_law": "2024-1167",
+    "debate_date": "2024-05-28",
+    "distance_days": 192
+  },
+  {
+    "debate_id": 238,
+    "current_dossier_id": 19,
+    "current_law": "2020-1473",
+    "correct_dossier_id": 25,
+    "correct_law": "2022-1499",
+    "debate_date": "2022-10-14",
+    "distance_days": 48
+  },
+  {
+    "debate_id": 917,
+    "current_dossier_id": 27,
+    "current_law": "2019-1446",
+    "correct_dossier_id": 21,
+    "correct_law": "2021-953",
+    "debate_date": "2021-06-15",
+    "distance_days": 34
+  },
+  {
+    "debate_id": 981,
+    "current_dossier_id": 27,
+    "current_law": "2019-1446",
+    "correct_dossier_id": 31,
+    "correct_law": "2021-1754",
+    "debate_date": "2021-11-04",
+    "distance_days": 49
+  },
+  {
+    "debate_id": 843,
+    "current_dossier_id": 27,
+    "current_law": "2019-1446",
+    "correct_dossier_id": 31,
+    "correct_law": "2021-1754",
+    "debate_date": "2021-11-05",
+    "distance_days": 48
+  },
+  {
+    "debate_id": 758,
+    "current_dossier_id": 27,
+    "current_law": "2019-1446",
+    "correct_dossier_id": 23,
+    "correct_law": "2022-1157",
+    "debate_date": "2022-01-06",
+    "distance_days": 222
+  },
+  {
+    "debate_id": 56,
+    "current_dossier_id": 27,
+    "current_law": "2019-1446",
+    "correct_dossier_id": 77,
+    "correct_law": "2024-1167",
+    "debate_date": "2024-03-14",
+    "distance_days": 267
+  },
+  {
+    "debate_id": 8052,
+    "current_dossier_id": 28,
+    "current_law": "2019-1446",
+    "correct_dossier_id": 26,
+    "correct_law": "2022-1499",
+    "debate_date": "2022-11-12",
+    "distance_days": 19
+  },
+  {
+    "debate_id": 8170,
+    "current_dossier_id": 30,
+    "current_law": "2020-1576",
+    "correct_dossier_id": 36,
+    "correct_law": "2023-1250",
+    "debate_date": "2023-11-17",
+    "distance_days": 39
+  },
+  {
+    "debate_id": 2478,
+    "current_dossier_id": 30,
+    "current_law": "2020-1576",
+    "correct_dossier_id": 36,
+    "correct_law": "2023-1250",
+    "debate_date": "2023-11-17",
+    "distance_days": 39
+  },
+  {
+    "debate_id": 52,
+    "current_dossier_id": 31,
+    "current_law": "2021-1754",
+    "correct_dossier_id": 35,
+    "correct_law": "2023-1250",
+    "debate_date": "2023-07-12",
+    "distance_days": 167
+  },
+  {
+    "debate_id": 214,
+    "current_dossier_id": 31,
+    "current_law": "2021-1754",
+    "correct_dossier_id": 35,
+    "correct_law": "2023-1250",
+    "debate_date": "2023-11-20",
+    "distance_days": 36
+  },
+  {
+    "debate_id": 149,
+    "current_dossier_id": 31,
+    "current_law": "2021-1754",
+    "correct_dossier_id": 77,
+    "correct_law": "2024-1167",
+    "debate_date": "2024-03-12",
+    "distance_days": 269
+  },
+  {
+    "debate_id": 72,
+    "current_dossier_id": 31,
+    "current_law": "2021-1754",
+    "correct_dossier_id": 77,
+    "correct_law": "2024-1167",
+    "debate_date": "2024-04-02",
+    "distance_days": 248
+  },
+  {
+    "debate_id": 491,
+    "current_dossier_id": 31,
+    "current_law": "2021-1754",
+    "correct_dossier_id": 37,
+    "correct_law": "2025-199",
+    "debate_date": "2025-04-01",
+    "distance_days": -32
+  },
+  {
+    "debate_id": 114,
+    "current_dossier_id": 33,
+    "current_law": "2022-1616",
+    "correct_dossier_id": 77,
+    "correct_law": "2024-1167",
+    "debate_date": "2024-03-19",
+    "distance_days": 262
+  },
+  {
+    "debate_id": 387,
+    "current_dossier_id": 33,
+    "current_law": "2022-1616",
+    "correct_dossier_id": 11,
+    "correct_law": "2025-127",
+    "debate_date": "2025-01-28",
+    "distance_days": 17
+  },
+  {
+    "debate_id": 265,
+    "current_dossier_id": 33,
+    "current_law": "2022-1616",
+    "correct_dossier_id": 37,
+    "correct_law": "2025-199",
+    "debate_date": "2025-04-08",
+    "distance_days": -39
+  },
+  {
+    "debate_id": 8262,
+    "current_dossier_id": 34,
+    "current_law": "2022-1616",
+    "correct_dossier_id": 146,
+    "correct_law": "2024-1167",
+    "debate_date": "2024-11-21",
+    "distance_days": 15
+  },
+  {
+    "debate_id": 2524,
+    "current_dossier_id": 34,
+    "current_law": "2022-1616",
+    "correct_dossier_id": 146,
+    "correct_law": "2024-1167",
+    "debate_date": "2024-11-21",
+    "distance_days": 15
+  },
+  {
+    "debate_id": 465,
+    "current_dossier_id": 35,
+    "current_law": "2023-1250",
+    "correct_dossier_id": 37,
+    "correct_law": "2025-199",
+    "debate_date": "2025-03-25",
+    "distance_days": -25
+  },
+  {
+    "debate_id": 6945,
+    "current_dossier_id": 39,
+    "current_law": "2011-1977",
+    "correct_dossier_id": 138,
+    "correct_law": "2013-1203",
+    "debate_date": "2013-04-24",
+    "distance_days": 243
+  },
+  {
+    "debate_id": 22613,
+    "current_dossier_id": 42,
+    "current_law": "2012-1510",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-06-17",
+    "distance_days": 52
+  },
+  {
+    "debate_id": 1346,
+    "current_dossier_id": 42,
+    "current_law": "2012-1510",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-06-18",
+    "distance_days": 51
+  },
+  {
+    "debate_id": 22638,
+    "current_dossier_id": 42,
+    "current_law": "2012-1510",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-07-03",
+    "distance_days": 36
+  },
+  {
+    "debate_id": 22813,
+    "current_dossier_id": 42,
+    "current_law": "2012-1510",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-02-06",
+    "distance_days": 319
+  },
+  {
+    "debate_id": 1583,
+    "current_dossier_id": 42,
+    "current_law": "2012-1510",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-02-07",
+    "distance_days": 318
+  },
+  {
+    "debate_id": 23234,
+    "current_dossier_id": 45,
+    "current_law": "2014-1654",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-07-18",
+    "distance_days": 158
+  },
+  {
+    "debate_id": 1654,
+    "current_dossier_id": 45,
+    "current_law": "2014-1654",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-07-19",
+    "distance_days": 157
+  },
+  {
+    "debate_id": 23302,
+    "current_dossier_id": 45,
+    "current_law": "2014-1654",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-11-23",
+    "distance_days": 30
+  },
+  {
+    "debate_id": 23321,
+    "current_dossier_id": 45,
+    "current_law": "2014-1654",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-12-08",
+    "distance_days": 15
+  },
+  {
+    "debate_id": 1237,
+    "current_dossier_id": 46,
+    "current_law": "2015-1785",
+    "correct_dossier_id": 63,
+    "correct_law": "2017-1775",
+    "debate_date": "2017-12-18",
+    "distance_days": 10
+  },
+  {
+    "debate_id": 1005,
+    "current_dossier_id": 46,
+    "current_law": "2015-1785",
+    "correct_dossier_id": 92,
+    "correct_law": "2018-1203",
+    "debate_date": "2018-04-04",
+    "distance_days": 262
+  },
+  {
+    "debate_id": 1213,
+    "current_dossier_id": 46,
+    "current_law": "2015-1785",
+    "correct_dossier_id": 92,
+    "correct_law": "2018-1203",
+    "debate_date": "2018-06-18",
+    "distance_days": 187
+  },
+  {
+    "debate_id": 1021,
+    "current_dossier_id": 47,
+    "current_law": "2016-1917",
+    "correct_dossier_id": 27,
+    "correct_law": "2019-1446",
+    "debate_date": "2019-06-17",
+    "distance_days": 190
+  },
+  {
+    "debate_id": 752,
+    "current_dossier_id": 47,
+    "current_law": "2016-1917",
+    "correct_dossier_id": 27,
+    "correct_law": "2019-1446",
+    "debate_date": "2019-06-20",
+    "distance_days": 187
+  },
+  {
+    "debate_id": 108,
+    "current_dossier_id": 47,
+    "current_law": "2016-1917",
+    "correct_dossier_id": 35,
+    "correct_law": "2023-1250",
+    "debate_date": "2023-06-08",
+    "distance_days": 201
+  },
+  {
+    "debate_id": 8014,
+    "current_dossier_id": 48,
+    "current_law": "2017-1837",
+    "correct_dossier_id": 24,
+    "correct_law": "2022-1157",
+    "debate_date": "2022-02-16",
+    "distance_days": 181
+  },
+  {
+    "debate_id": 7891,
+    "current_dossier_id": 49,
+    "current_law": "2018-1317",
+    "correct_dossier_id": 22,
+    "correct_law": "2021-953",
+    "debate_date": "2021-03-17",
+    "distance_days": 124
+  },
+  {
+    "debate_id": 2356,
+    "current_dossier_id": 49,
+    "current_law": "2018-1317",
+    "correct_dossier_id": 22,
+    "correct_law": "2021-953",
+    "debate_date": "2021-07-01",
+    "distance_days": 18
+  },
+  {
+    "debate_id": 7937,
+    "current_dossier_id": 49,
+    "current_law": "2018-1317",
+    "correct_dossier_id": 22,
+    "correct_law": "2021-953",
+    "debate_date": "2021-07-01",
+    "distance_days": 18
+  },
+  {
+    "debate_id": 2365,
+    "current_dossier_id": 49,
+    "current_law": "2018-1317",
+    "correct_dossier_id": 22,
+    "correct_law": "2021-953",
+    "debate_date": "2021-07-19",
+    "distance_days": 0
+  },
+  {
+    "debate_id": 7946,
+    "current_dossier_id": 49,
+    "current_law": "2018-1317",
+    "correct_dossier_id": 22,
+    "correct_law": "2021-953",
+    "debate_date": "2021-07-19",
+    "distance_days": 0
+  },
+  {
+    "debate_id": 7987,
+    "current_dossier_id": 49,
+    "current_law": "2018-1317",
+    "correct_dossier_id": 32,
+    "correct_law": "2021-1754",
+    "debate_date": "2021-11-30",
+    "distance_days": 23
+  },
+  {
+    "debate_id": 2395,
+    "current_dossier_id": 49,
+    "current_law": "2018-1317",
+    "correct_dossier_id": 32,
+    "correct_law": "2021-1754",
+    "debate_date": "2021-11-30",
+    "distance_days": 23
+  },
+  {
+    "debate_id": 8133,
+    "current_dossier_id": 49,
+    "current_law": "2018-1317",
+    "correct_dossier_id": 36,
+    "correct_law": "2023-1250",
+    "debate_date": "2023-06-15",
+    "distance_days": 194
+  },
+  {
+    "debate_id": 22883,
+    "current_dossier_id": 50,
+    "current_law": "2013-1203",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-04-09",
+    "distance_days": 257
+  },
+  {
+    "debate_id": 23066,
+    "current_dossier_id": 50,
+    "current_law": "2013-1203",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-12-03",
+    "distance_days": 19
+  },
+  {
+    "debate_id": 1516,
+    "current_dossier_id": 50,
+    "current_law": "2013-1203",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-12-04",
+    "distance_days": 18
+  },
+  {
+    "debate_id": 23355,
+    "current_dossier_id": 50,
+    "current_law": "2013-1203",
+    "correct_dossier_id": 63,
+    "correct_law": "2017-1775",
+    "debate_date": "2017-02-02",
+    "distance_days": 329
+  },
+  {
+    "debate_id": 22574,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-05-06",
+    "distance_days": 94
+  },
+  {
+    "debate_id": 1415,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-05-07",
+    "distance_days": 93
+  },
+  {
+    "debate_id": 22590,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-05-22",
+    "distance_days": 78
+  },
+  {
+    "debate_id": 1353,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-05-23",
+    "distance_days": 77
+  },
+  {
+    "debate_id": 22601,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-06-05",
+    "distance_days": 64
+  },
+  {
+    "debate_id": 1388,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-06-06",
+    "distance_days": 63
+  },
+  {
+    "debate_id": 22642,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-07-08",
+    "distance_days": 31
+  },
+  {
+    "debate_id": 22796,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-01-28",
+    "distance_days": 328
+  },
+  {
+    "debate_id": 22810,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-02-05",
+    "distance_days": 320
+  },
+  {
+    "debate_id": 1604,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-02-06",
+    "distance_days": 319
+  },
+  {
+    "debate_id": 22919,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-05-28",
+    "distance_days": 208
+  },
+  {
+    "debate_id": 1609,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-05-29",
+    "distance_days": 207
+  },
+  {
+    "debate_id": 22922,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-06-02",
+    "distance_days": 203
+  },
+  {
+    "debate_id": 23148,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-03-24",
+    "distance_days": 274
+  },
+  {
+    "debate_id": 1720,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-03-25",
+    "distance_days": 273
+  },
+  {
+    "debate_id": 1706,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-07-08",
+    "distance_days": 168
+  },
+  {
+    "debate_id": 23367,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 63,
+    "correct_law": "2017-1775",
+    "debate_date": "2017-02-21",
+    "distance_days": 310
+  },
+  {
+    "debate_id": 1243,
+    "current_dossier_id": 51,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 63,
+    "correct_law": "2017-1775",
+    "debate_date": "2017-07-26",
+    "distance_days": 155
+  },
+  {
+    "debate_id": 251,
+    "current_dossier_id": 52,
+    "current_law": "2014-1655",
+    "correct_dossier_id": 25,
+    "correct_law": "2022-1499",
+    "debate_date": "2022-10-17",
+    "distance_days": 45
+  },
+  {
+    "debate_id": 805,
+    "current_dossier_id": 54,
+    "current_law": "2016-1918",
+    "correct_dossier_id": 92,
+    "correct_law": "2018-1203",
+    "debate_date": "2018-11-08",
+    "distance_days": 44
+  },
+  {
+    "debate_id": 1017,
+    "current_dossier_id": 60,
+    "current_law": "2016-1827",
+    "correct_dossier_id": 92,
+    "correct_law": "2018-1203",
+    "debate_date": "2018-11-06",
+    "distance_days": 46
+  },
+  {
+    "debate_id": 811,
+    "current_dossier_id": 60,
+    "current_law": "2016-1827",
+    "correct_dossier_id": 92,
+    "correct_law": "2018-1203",
+    "debate_date": "2018-11-27",
+    "distance_days": 25
+  },
+  {
+    "debate_id": 22565,
+    "current_dossier_id": 74,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-04-15",
+    "distance_days": 115
+  },
+  {
+    "debate_id": 1427,
+    "current_dossier_id": 74,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-04-16",
+    "distance_days": 114
+  },
+  {
+    "debate_id": 22610,
+    "current_dossier_id": 74,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-06-12",
+    "distance_days": 57
+  },
+  {
+    "debate_id": 1400,
+    "current_dossier_id": 74,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-06-13",
+    "distance_days": 56
+  },
+  {
+    "debate_id": 22880,
+    "current_dossier_id": 74,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-04-08",
+    "distance_days": 258
+  },
+  {
+    "debate_id": 1587,
+    "current_dossier_id": 74,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-04-09",
+    "distance_days": 257
+  },
+  {
+    "debate_id": 22929,
+    "current_dossier_id": 74,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-06-08",
+    "distance_days": 197
+  },
+  {
+    "debate_id": 1559,
+    "current_dossier_id": 74,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-06-09",
+    "distance_days": 196
+  },
+  {
+    "debate_id": 22978,
+    "current_dossier_id": 74,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-09-15",
+    "distance_days": 98
+  },
+  {
+    "debate_id": 1510,
+    "current_dossier_id": 74,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-09-16",
+    "distance_days": 97
+  },
+  {
+    "debate_id": 760,
+    "current_dossier_id": 74,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 27,
+    "correct_law": "2019-1446",
+    "debate_date": "2019-10-18",
+    "distance_days": 67
+  },
+  {
+    "debate_id": 22633,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-06-30",
+    "distance_days": 39
+  },
+  {
+    "debate_id": 22661,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 89,
+    "correct_law": "2014-1554",
+    "debate_date": "2014-09-09",
+    "distance_days": 104
+  },
+  {
+    "debate_id": 22745,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 89,
+    "correct_law": "2014-1554",
+    "debate_date": "2014-11-25",
+    "distance_days": 27
+  },
+  {
+    "debate_id": 22748,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 89,
+    "correct_law": "2014-1554",
+    "debate_date": "2014-11-26",
+    "distance_days": 26
+  },
+  {
+    "debate_id": 1343,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 89,
+    "correct_law": "2014-1554",
+    "debate_date": "2014-11-26",
+    "distance_days": 26
+  },
+  {
+    "debate_id": 1365,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 89,
+    "correct_law": "2014-1554",
+    "debate_date": "2014-11-27",
+    "distance_days": 25
+  },
+  {
+    "debate_id": 22862,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-03-19",
+    "distance_days": 278
+  },
+  {
+    "debate_id": 1532,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-03-20",
+    "distance_days": 277
+  },
+  {
+    "debate_id": 22872,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-04-01",
+    "distance_days": 265
+  },
+  {
+    "debate_id": 1542,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-04-02",
+    "distance_days": 264
+  },
+  {
+    "debate_id": 22884,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-04-10",
+    "distance_days": 256
+  },
+  {
+    "debate_id": 1475,
+    "current_dossier_id": 78,
+    "current_law": "2012-1404",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-04-11",
+    "distance_days": 255
+  },
+  {
+    "debate_id": 892,
+    "current_dossier_id": 81,
+    "current_law": "2017-1836",
+    "correct_dossier_id": 13,
+    "correct_law": "2020-289",
+    "debate_date": "2020-03-05",
+    "distance_days": 18
+  },
+  {
+    "debate_id": 868,
+    "current_dossier_id": 81,
+    "current_law": "2017-1836",
+    "correct_dossier_id": 23,
+    "correct_law": "2022-1157",
+    "debate_date": "2022-01-07",
+    "distance_days": 221
+  },
+  {
+    "debate_id": 478,
+    "current_dossier_id": 81,
+    "current_law": "2017-1836",
+    "correct_dossier_id": 37,
+    "correct_law": "2025-199",
+    "debate_date": "2025-03-31",
+    "distance_days": -31
+  },
+  {
+    "debate_id": 23193,
+    "current_dossier_id": 89,
+    "current_law": "2014-1554",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-06-06",
+    "distance_days": 200
+  },
+  {
+    "debate_id": 1689,
+    "current_dossier_id": 89,
+    "current_law": "2014-1554",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-06-07",
+    "distance_days": 199
+  },
+  {
+    "debate_id": 761,
+    "current_dossier_id": 89,
+    "current_law": "2014-1554",
+    "correct_dossier_id": 92,
+    "correct_law": "2018-1203",
+    "debate_date": "2018-11-29",
+    "distance_days": 23
+  },
+  {
+    "debate_id": 850,
+    "current_dossier_id": 92,
+    "current_law": "2018-1203",
+    "correct_dossier_id": 19,
+    "correct_law": "2020-1473",
+    "debate_date": "2020-11-09",
+    "distance_days": 21
+  },
+  {
+    "debate_id": 819,
+    "current_dossier_id": 92,
+    "current_law": "2018-1203",
+    "correct_dossier_id": 3,
+    "correct_law": "2020-1721",
+    "debate_date": "2020-12-15",
+    "distance_days": 14
+  },
+  {
+    "debate_id": 1156,
+    "current_dossier_id": 92,
+    "current_law": "2018-1203",
+    "correct_dossier_id": 21,
+    "correct_law": "2021-953",
+    "debate_date": "2021-07-19",
+    "distance_days": 0
+  },
+  {
+    "debate_id": 634,
+    "current_dossier_id": 92,
+    "current_law": "2018-1203",
+    "correct_dossier_id": 31,
+    "correct_law": "2021-1754",
+    "debate_date": "2021-10-14",
+    "distance_days": 70
+  },
+  {
+    "debate_id": 733,
+    "current_dossier_id": 92,
+    "current_law": "2018-1203",
+    "correct_dossier_id": 31,
+    "correct_law": "2021-1754",
+    "debate_date": "2021-11-10",
+    "distance_days": 43
+  },
+  {
+    "debate_id": 225,
+    "current_dossier_id": 92,
+    "current_law": "2018-1203",
+    "correct_dossier_id": 35,
+    "correct_law": "2023-1250",
+    "debate_date": "2023-02-16",
+    "distance_days": 313
+  },
+  {
+    "debate_id": 7148,
+    "current_dossier_id": 102,
+    "current_law": "2012-1510",
+    "correct_dossier_id": 106,
+    "correct_law": "2014-1554",
+    "debate_date": "2014-11-24",
+    "distance_days": 28
+  },
+  {
+    "debate_id": 1983,
+    "current_dossier_id": 102,
+    "current_law": "2012-1510",
+    "correct_dossier_id": 106,
+    "correct_law": "2014-1554",
+    "debate_date": "2014-11-24",
+    "distance_days": 28
+  },
+  {
+    "debate_id": 7352,
+    "current_dossier_id": 107,
+    "current_law": "2014-1654",
+    "correct_dossier_id": 141,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-04-07",
+    "distance_days": 260
+  },
+  {
+    "debate_id": 7396,
+    "current_dossier_id": 107,
+    "current_law": "2014-1654",
+    "correct_dossier_id": 141,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-07-19",
+    "distance_days": 157
+  },
+  {
+    "debate_id": 7670,
+    "current_dossier_id": 107,
+    "current_law": "2014-1654",
+    "correct_dossier_id": 28,
+    "correct_law": "2019-1446",
+    "debate_date": "2019-04-02",
+    "distance_days": 266
+  },
+  {
+    "debate_id": 8120,
+    "current_dossier_id": 107,
+    "current_law": "2014-1654",
+    "correct_dossier_id": 36,
+    "correct_law": "2023-1250",
+    "debate_date": "2023-05-16",
+    "distance_days": 224
+  },
+  {
+    "debate_id": 6929,
+    "current_dossier_id": 113,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 138,
+    "correct_law": "2013-1203",
+    "debate_date": "2013-03-27",
+    "distance_days": 271
+  },
+  {
+    "debate_id": 1975,
+    "current_dossier_id": 113,
+    "current_law": "2011-1906",
+    "correct_dossier_id": 106,
+    "correct_law": "2014-1554",
+    "debate_date": "2014-11-12",
+    "distance_days": 40
+  },
+  {
+    "debate_id": 1973,
+    "current_dossier_id": 119,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 106,
+    "correct_law": "2014-1554",
+    "debate_date": "2014-11-06",
+    "distance_days": 46
+  },
+  {
+    "debate_id": 2026,
+    "current_dossier_id": 119,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 124,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-11-12",
+    "distance_days": 40
+  },
+  {
+    "debate_id": 7453,
+    "current_dossier_id": 119,
+    "current_law": "2012-1509",
+    "correct_dossier_id": 144,
+    "correct_law": "2017-1775",
+    "debate_date": "2017-02-08",
+    "distance_days": 323
+  },
+  {
+    "debate_id": 7223,
+    "current_dossier_id": 138,
+    "current_law": "2013-1203",
+    "correct_dossier_id": 124,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-05-12",
+    "distance_days": 224
+  },
+  {
+    "debate_id": 7296,
+    "current_dossier_id": 138,
+    "current_law": "2013-1203",
+    "correct_dossier_id": 124,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-11-20",
+    "distance_days": 32
+  },
+  {
+    "debate_id": 7858,
+    "current_dossier_id": 145,
+    "current_law": "2018-1203",
+    "correct_dossier_id": 30,
+    "correct_law": "2020-1576",
+    "debate_date": "2020-12-03",
+    "distance_days": 11
+  },
+  {
+    "debate_id": 22324,
+    "current_dossier_id": 147,
+    "current_law": "2011-1977",
+    "correct_dossier_id": 50,
+    "correct_law": "2013-1203",
+    "debate_date": "2013-06-25",
+    "distance_days": 181
+  },
+  {
+    "debate_id": 22530,
+    "current_dossier_id": 147,
+    "current_law": "2011-1977",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-02-04",
+    "distance_days": 185
+  },
+  {
+    "debate_id": 1345,
+    "current_dossier_id": 147,
+    "current_law": "2011-1977",
+    "correct_dossier_id": 44,
+    "correct_law": "2014-891",
+    "debate_date": "2014-02-05",
+    "distance_days": 184
+  },
+  {
+    "debate_id": 22665,
+    "current_dossier_id": 147,
+    "current_law": "2011-1977",
+    "correct_dossier_id": 89,
+    "correct_law": "2014-1554",
+    "debate_date": "2014-09-11",
+    "distance_days": 102
+  },
+  {
+    "debate_id": 23182,
+    "current_dossier_id": 147,
+    "current_law": "2011-1977",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-05-24",
+    "distance_days": 213
+  },
+  {
+    "debate_id": 22866,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-03-25",
+    "distance_days": 272
+  },
+  {
+    "debate_id": 22892,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-04-15",
+    "distance_days": 251
+  },
+  {
+    "debate_id": 22907,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-05-19",
+    "distance_days": 217
+  },
+  {
+    "debate_id": 22939,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-06-17",
+    "distance_days": 188
+  },
+  {
+    "debate_id": 1552,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-06-18",
+    "distance_days": 187
+  },
+  {
+    "debate_id": 22967,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-07-16",
+    "distance_days": 159
+  },
+  {
+    "debate_id": 1549,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-07-17",
+    "distance_days": 158
+  },
+  {
+    "debate_id": 23051,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-11-24",
+    "distance_days": 28
+  },
+  {
+    "debate_id": 1599,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 59,
+    "correct_law": "2015-1702",
+    "debate_date": "2015-11-25",
+    "distance_days": 27
+  },
+  {
+    "debate_id": 23154,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-03-30",
+    "distance_days": 268
+  },
+  {
+    "debate_id": 23199,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-06-09",
+    "distance_days": 197
+  },
+  {
+    "debate_id": 1718,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-06-10",
+    "distance_days": 196
+  },
+  {
+    "debate_id": 23249,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 60,
+    "correct_law": "2016-1827",
+    "debate_date": "2016-10-05",
+    "distance_days": 79
+  },
+  {
+    "debate_id": 1162,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 92,
+    "correct_law": "2018-1203",
+    "debate_date": "2018-09-19",
+    "distance_days": 94
+  },
+  {
+    "debate_id": 1032,
+    "current_dossier_id": 150,
+    "current_law": "2013-1278",
+    "correct_dossier_id": 92,
+    "correct_law": "2018-1203",
+    "debate_date": "2018-12-11",
+    "distance_days": 11
+  },
+  {
+    "debate_id": 1113,
+    "current_dossier_id": 151,
+    "current_law": "2017-1837",
+    "correct_dossier_id": 27,
+    "correct_law": "2019-1446",
+    "debate_date": "2019-04-04",
+    "distance_days": 264
+  },
+  {
+    "debate_id": 879,
+    "current_dossier_id": 151,
+    "current_law": "2017-1837",
+    "correct_dossier_id": 27,
+    "correct_law": "2019-1446",
+    "debate_date": "2019-05-20",
+    "distance_days": 218
+  },
+  {
+    "debate_id": 952,
+    "current_dossier_id": 151,
+    "current_law": "2017-1837",
+    "correct_dossier_id": 27,
+    "correct_law": "2019-1446",
+    "debate_date": "2019-06-14",
+    "distance_days": 193
+  },
+  {
+    "debate_id": 803,
+    "current_dossier_id": 151,
+    "current_law": "2017-1837",
+    "correct_dossier_id": 27,
+    "correct_law": "2019-1446",
+    "debate_date": "2019-06-18",
+    "distance_days": 189
+  },
+  {
+    "debate_id": 756,
+    "current_dossier_id": 151,
+    "current_law": "2017-1837",
+    "correct_dossier_id": 27,
+    "correct_law": "2019-1446",
+    "debate_date": "2019-10-10",
+    "distance_days": 75
+  },
+  {
+    "debate_id": 1132,
+    "current_dossier_id": 151,
+    "current_law": "2017-1837",
+    "correct_dossier_id": 27,
+    "correct_law": "2019-1446",
+    "debate_date": "2019-12-17",
+    "distance_days": 7
+  },
+  {
+    "debate_id": 791,
+    "current_dossier_id": 152,
+    "current_law": "2018-1317",
+    "correct_dossier_id": 21,
+    "correct_law": "2021-953",
+    "debate_date": "2021-05-25",
+    "distance_days": 55
+  },
+  {
+    "debate_id": 966,
+    "current_dossier_id": 152,
+    "current_law": "2018-1317",
+    "correct_dossier_id": 21,
+    "correct_law": "2021-953",
+    "debate_date": "2021-06-17",
+    "distance_days": 32
+  },
+  {
+    "debate_id": 1150,
+    "current_dossier_id": 152,
+    "current_law": "2018-1317",
+    "correct_dossier_id": 23,
+    "correct_law": "2022-1157",
+    "debate_date": "2022-02-08",
+    "distance_days": 189
+  }
+]

@@ -1,8 +1,12 @@
 """
-PostgreSQL idle cache cleaner for Railway.
+PostgreSQL idle cache cleaner + zombie session purger for Railway.
 
 Monitors pg_stat_activity and runs CHECKPOINT + DISCARD ALL
 when the database has been idle for more than IDLE_THRESHOLD_MINUTES.
+
+Also purges user_sessions rows older than the refresh-token TTL + safety
+margin, so the table doesn't grow indefinitely with zombies.
+
 Runs as a separate Railway worker service.
 """
 import logging
@@ -13,6 +17,9 @@ import psycopg2
 
 IDLE_THRESHOLD_MINUTES = 10
 CHECK_INTERVAL_SECONDS = 600  # 10 min
+# Refresh token TTL is 30 days; +5 days safety margin to avoid racing with
+# users actively using their refresh token at the boundary.
+SESSION_ZOMBIE_DAYS = 35
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
@@ -39,6 +46,23 @@ def free_cache(conn):
         logger.info("Running DISCARD ALL...")
         cur.execute("DISCARD ALL")
     logger.info("Cache released.")
+
+
+def purge_zombie_sessions(conn):
+    """Delete user_sessions rows whose refresh tokens are surely expired.
+
+    A row is a zombie once last_used_at is older than the refresh-token TTL
+    (30 days) plus a safety margin. Such rows cannot be ressuscitées and
+    only clutter the table + the user's "Connected devices" view.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            f"DELETE FROM user_sessions "
+            f"WHERE last_used_at < NOW() - INTERVAL '{SESSION_ZOMBIE_DAYS} days'"
+        )
+        deleted = cur.rowcount
+    if deleted:
+        logger.info(f"Purged {deleted} zombie user_sessions (>= {SESSION_ZOMBIE_DAYS} days idle).")
 
 
 def main():
@@ -77,6 +101,11 @@ def main():
 
             if should_free:
                 free_cache(conn)
+
+            try:
+                purge_zombie_sessions(conn)
+            except Exception as e:
+                logger.warning(f"Zombie session purge failed: {e}")
 
             conn.close()
 

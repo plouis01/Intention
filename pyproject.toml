@@ -29,6 +29,14 @@ dependencies = [
     "groq>=0.5.0",
     "defusedxml>=0.7.0",
     "rank-bm25>=0.2.2",
+    "bcrypt>=4.0.0",
+    "python-jose[cryptography]>=3.3.0",
+    "google-auth>=2.29.0",
+    "google-genai>=1.0.0",
+    "resend>=2.0.0",
+    "slowapi>=0.1.9",
+    "python-multipart>=0.0.9",
+    "stripe>=9.0.0",
 ]
 
 [project.optional-dependencies]
@@ -44,6 +52,7 @@ pgvector = [
 qdrant = [
     "qdrant-client>=1.8.0",
 ]
+vertex = []
 langextract = [
     "langextract>=0.1.0",
 ]

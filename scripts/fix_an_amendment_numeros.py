@@ -2,7 +2,7 @@
 """Fix AN amendments with numero='?' by reading identification.numeroLong from raw JSON files.
 
 After SQLite → PostgreSQL migration, 10,060 AN amendments have numero='?' because
-the parser read amend.get("numeroLong") which is None at top level — the actual
+the parser read amend.get("numeroLong") which is None at top level - the actual
 numero lives in amend["identification"]["numeroLong"].
 
 This script:

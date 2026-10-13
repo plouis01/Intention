@@ -68,7 +68,7 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# OCR functions — copied from scripts/test_reocr_quality.py (stable, tested)
+# OCR functions - copied from scripts/test_reocr_quality.py (stable, tested)
 # Adapted: process_page() uses logger.debug() instead of print()
 # ---------------------------------------------------------------------------
 
@@ -106,7 +106,7 @@ def check_tesseract_environment():
             size = fra_path.stat().st_size
             if size < _TESSDATA_BEST_FRA_MIN_SIZE:
                 logger.warning(
-                    f"fra.traineddata is {size / 1e6:.1f} MB — "
+                    f"fra.traineddata is {size / 1e6:.1f} MB - "
                     f"likely tessdata_fast, not tessdata_best. "
                     f"For best quality, install tessdata_best model."
                 )
@@ -131,7 +131,7 @@ def preprocess_image(gray: np.ndarray) -> np.ndarray:
     Input must be a single-channel (grayscale) numpy array.
     """
 
-    # Deskew — uses aspect-ratio method for angle, compatible with all OpenCV 4.x+
+    # Deskew - uses aspect-ratio method for angle, compatible with all OpenCV 4.x+
     coords = np.column_stack(np.where(gray < 200))
     if len(coords) >= 100:
         rect = cv2.minAreaRect(coords)
@@ -146,7 +146,7 @@ def preprocess_image(gray: np.ndarray) -> np.ndarray:
                 gray, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE
             )
 
-    # Denoise — medianBlur is ~10-20x faster than fastNlMeansDenoising
+    # Denoise - medianBlur is ~10-20x faster than fastNlMeansDenoising
     # and sufficient for offset-printed parliamentary scans (low noise).
     denoised = cv2.medianBlur(gray, 3)
 
@@ -193,7 +193,7 @@ def detect_and_split_columns(
     mean_density = np.mean(smoothed)
 
     if gutter_value < mean_density * 0.5:
-        # Two-column detected — split full image
+        # Two-column detected - split full image
         # Scale margin with DPI (15px at 400 DPI ≈ 1mm)
         margin = max(1, int(15 * dpi / 400))
         left = binary_image[:, : gutter_pos - margin]
@@ -221,7 +221,7 @@ def _extract_x_size(title_str: str) -> float | None:
 
 
 def _clean_hocr_text(raw_text: str) -> str:
-    """Clean text extracted from hOCR — rejoin chars split by newlines."""
+    """Clean text extracted from hOCR - rejoin chars split by newlines."""
     text = raw_text.replace("\n", " ")
     text = re.sub(r"  +", " ", text)
     return text.strip()
@@ -350,7 +350,7 @@ def separate_footnotes(
     if not lines:
         return ([extract_text_from_hocr(hocr_html)], [])
 
-    # Collect per-line data — x_size is on the ocr_line title, not ocrx_word
+    # Collect per-line data - x_size is on the ocr_line title, not ocrx_word
     line_data = []
     all_x_sizes = []
 
@@ -378,7 +378,7 @@ def separate_footnotes(
     footnote_size_threshold = median_size * 0.90
 
     # Footnote marker patterns (superscript digits or parenthesized numbers)
-    # Allow missing closing paren — OCR often drops it: "(1 Cette" instead of "(1) Cette"
+    # Allow missing closing paren - OCR often drops it: "(1 Cette" instead of "(1) Cette"
     footnote_marker_re = re.compile(
         r"^\s*([¹²³⁴⁵⁶⁷⁸⁹⁰]|\(\d+\)?\s)"
     )
@@ -397,7 +397,7 @@ def separate_footnotes(
 
         if footnote_marker_re.match(ld["text"]):
             marker_idx = idx
-            # Keep scanning upward — there might be a higher marker
+            # Keep scanning upward - there might be a higher marker
 
     # If no marker found, try font-size-only detection in bottom 20%
     if marker_idx is None:
@@ -410,7 +410,7 @@ def separate_footnotes(
             if ld["x_size"] is not None and ld["x_size"] < footnote_size_threshold:
                 marker_idx = idx
 
-    # Split into body and footnotes — everything from marker to end is footnote
+    # Split into body and footnotes - everything from marker to end is footnote
     if marker_idx is not None:
         body_lines = [ld["text"] for ld in line_data[:marker_idx]]
         footnote_lines = [
@@ -474,7 +474,7 @@ def process_page(
 def _render_page_grayscale(pdf_path: str, page_num: int, dpi: int) -> np.ndarray:
     """Render a single PDF page to a grayscale numpy array using PyMuPDF.
 
-    Uses fitz.Pixmap directly — no subprocess fork (unlike pdftoppm),
+    Uses fitz.Pixmap directly - no subprocess fork (unlike pdftoppm),
     and renders in grayscale to skip the RGB→gray conversion step.
     """
     doc = fitz.open(pdf_path)
@@ -551,7 +551,7 @@ def discover_and_download(legislatures: list[int], pdf_dir: Path) -> list[dict]:
     all_pdfs = []
 
     with ArchiveANCollector(pdf_dir) as collector:
-        # No fixed delay — the collector's adaptive backoff (429/503)
+        # No fixed delay - the collector's adaptive backoff (429/503)
         # handles rate limiting automatically if the server pushes back.
         collector._delay = 0
         for leg in legislatures:
@@ -662,7 +662,7 @@ def reocr_pdf(
     """Re-OCR a single PDF and write body + footnotes text files.
 
     Uses atomic write (write to .tmp, then os.replace) to ensure resume
-    reliability — partial files are never visible as completed.
+    reliability - partial files are never visible as completed.
 
     Args:
         executor: A persistent ProcessPoolExecutor for parallel page OCR.
@@ -927,7 +927,7 @@ def main():
             small_workers = max(p["page_count"] for p in small_pdfs)
             logger.info(f"  Starting pass 1: {small_workers} workers for small PDFs")
             if _USE_TESSEROCR:
-                logger.info("  Using tesserocr (CAPI binding) — persistent API per worker")
+                logger.info("  Using tesserocr (CAPI binding) - persistent API per worker")
             executor = _create_executor(small_workers)
             try:
                 executor = _process_batch(small_pdfs, executor, batch_offset)

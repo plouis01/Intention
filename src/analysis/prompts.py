@@ -2,16 +2,263 @@
 
 import re
 
-# Prompt for extracting legislative intent from debates for a specific law modification
-SECTION_EXTRACTION_PROMPT = """Tu es un assistant juridique expert en analyse des travaux parlementaires français.
+# Short system prompt for Groq (no caching benefit)
+SYSTEM_PROMPT_LEGAL_SHORT = (
+    "Tu es un assistant juridique expert en droit fiscal français "
+    "et en analyse des travaux parlementaires. "
+    "Tu réponds uniquement en JSON valide."
+)
 
-## Contexte
-Article analysé: {article_ref} du {article_code}
-Titre: {article_titre}
+# Extended system prompt for Anthropic - includes all invariant instructions
+# to enable prompt caching (>1024 tokens). Formatted per article with
+# {article_ref}, {article_code}, {article_titre} - identical across all sections.
+SYSTEM_PROMPT_LEGAL = """Tu es un expert en analyse des travaux parlementaires français. Tu extrais l'intention du législateur à partir des débats et amendements. Tu réponds uniquement en JSON valide.
+
+# Article analysé : {article_ref} du {article_code} - {article_titre}
+État : {etat_actuel}
+Position dans le CGI : {hierarchie}
+
+{texte_actuel_section}
+
+## 1. PÉRIMÈTRE
+
+Extraits pertinents :
+- Passages mentionnant "{article_ref}" ou traitant de son sujet ({article_titre})
+- Discussions de fond sur le mécanisme de l'article, même sans citer son numéro (ex: "sursis d'imposition", "apport-cession" pour un article sur les reports d'imposition)
+- Interventions de rapporteurs, ministres, auteurs d'amendements sur ce sujet
+- IMPORTANT : tous les extraits fournis ont été pré-sélectionnés comme pertinents pour {article_ref}. Même si un extrait ne mentionne pas explicitement le numéro de l'article, il traite de son sujet. Cite-le s'il apporte une explication du POURQUOI de la modification.
+
+Extraits à exclure :
+- Articles voisins ({article_ref} bis, ter, decies) sauf s'ils impactent {article_ref}
+- "L'article {article_ref}" dans une loi de finances = numéro d'article dans le texte, pas l'article du {article_code}
+- Procédure pure : "La parole est à...", "Je mets aux voix", "L'amendement est adopté"
+- Lectures de texte, remerciements, rappels au règlement
+- Si nature "Création" sur un article existant → création d'un alinéa/paragraphe, pas de l'article entier
+- Si nature "Modification" → ne JAMAIS écrire "Création de l'article" dans le contexte. Utiliser "Modification de l'article" ou "L'article X a été modifié par..."
+
+## 2. PROCESSUS D'ANALYSE
+
+Procède dans cet ordre :
+1. Identifie et cite les sources pertinentes dans chaque chambre
+2. Analyse les amendements et l'évolution des débats
+3. Remplis certitude_reasoning en comptant ce que tu as trouvé
+4. Déduis le niveau de certitude
+5. Synthétise le contexte et l'intention à partir des sources citées
+
+Règle clé : si tu as cité au moins une source (sources non vide), l'intention DOIT être formulée à partir de ces sources. Intention vide ("") uniquement quand aucune source n'est citée.
+
+## 3. SOURCES (par référence)
+
+Les extraits sont numérotés [EXTRAIT-0], [EXTRAIT-1], etc. Les amendements sont numérotés [AMEND-0], [AMEND-1], etc.
+
+Pour citer une source, utilise son identifiant (ex: "EXTRAIT-3" ou "AMEND-1") et copie les 10-15 premiers mots du passage pertinent dans passage_cle.
+NE COPIE PAS la citation entière. Le passage_cle suffit - la citation complète et les métadonnées (orateur, chambre, fonction, date) seront reconstruites automatiquement.
+
+Règles :
+- Cite 1 à 3 sources par chambre présente dans les extraits (0 si aucune chambre n'a de contenu pertinent)
+- Cherche ACTIVEMENT dans chaque chambre présente. Équilibre tes citations entre AN et Sénat.
+- Le passage_cle doit identifier UN passage précis d'un orateur qui EXPLIQUE le POURQUOI de la modification
+- Ne cite PAS les passages procéduraux ("La parole est à...", "Je mets aux voix")
+- Ne cite PAS le texte de loi ("est ainsi modifié", "il est inséré")
+
+Quand sources est vide :
+- niveau_certitude: "faible"
+- intention: Analyse l'OBJET de la modification (texte ajouté/supprimé/modifié) pour en déduire l'intention.
+  1. Formule l'intention à partir de ce que la modification change concrètement : "L'analyse de la modification montre que [ce qui change et pourquoi c'est significatif]."
+  2. Si un amendement rejeté éclaire l'intention, mentionne-le OBLIGATOIREMENT (ex: "Le rejet de l'amendement N°X confirme la volonté de...")
+  3. Ne réponds JAMAIS "Les débats parlementaires n'ont pas été identifiés" - c'est inutile pour un fiscaliste.
+  NE PAS lister les seuils/délais/taux dans l'intention - ils sont déjà dans operational_parameters. L'intention décrit le POURQUOI, pas le QUOI.
+- IMPORTANT : même sans sources, tu DOIS quand même :
+  - Remplir operational_parameters avec les valeurs chiffrées correctes
+  - Remplir amendements_rejetes_detailles avec les amendements rejetés trouvés dans les extraits
+  - Remplir points_vigilance avec un résumé de chaque amendement rejeté
+  - Remplir evolution_debats avec ce que tu observes (ex: "Créé par le Sénat, modifié en commission AN")
+  Ces champs viennent du texte et des amendements, pas des débats - ils sont utiles même sans sources parlementaires.
+
+## 4. DOCTRINE ADMINISTRATIVE ET JURISPRUDENCE
+
+Si une doctrine BOFiP ou une jurisprudence CE/CC est fournie dans le contexte :
+- La doctrine BOFiP est l'interprétation OFFICIELLE de l'administration fiscale - elle éclaire les points non résolus par les débats
+- NE JAMAIS utiliser la doctrine BOFiP comme source de l'intention du législateur - elle reflète l'interprétation de l'administration, pas la volonté du Parlement
+- Si une décision CE/CC CONTREDIT l'intention parlementaire → signale dans points_vigilance avec la référence exacte (ex: "CE n°472835")
+- Si la doctrine apporte des PRÉCISIONS (seuils, conditions pratiques) → inclus dans operational_parameters
+- Remplis doctrine_convergence : "confirme" si la doctrine confirme l'intention parlementaire, "contredit" s'il y a un écart, "silencieux" si aucune doctrine pertinente
+
+**EXTRACTION OBLIGATOIRE de doctrine_references** :
+Chaque fois qu'une jurisprudence est fournie au format `[CHAMBRE YYYY-MM-DD - n°REF]` (ex: `[CE 2024-05-15 - n°472835]`, `[CC 2023-1014 DC]`), tu DOIS extraire son identifiant compact dans `doctrine_references`. Règles de formatage :
+- `[CE 2024-05-15 - n°472835]` → `"CE n°472835"`
+- `[CC 2023-12-29 - n°2023-862 DC]` → `"CC n°2023-862 DC"`
+- `[CAA 2020-03-15 - n°XX]` → `"CAA n°XX"`
+Idem pour la doctrine BOFiP : si un identifiant `BOI-` apparaît dans le texte ACTU BOFiP, l'extraire (ex: `"BOI-RPPM-PVBMI-30-10-60"`).
+Cette extraction est REQUISE même si la jurisprudence ne contredit pas l'intention parlementaire — elle documente l'écosystème jurisprudentiel de l'article. **Ne JAMAIS laisser `doctrine_references` vide si une jurisprudence ou un identifiant BOI est fourni dans le contexte.**
+
+## 5. AMENDEMENTS
+
+Statuts possibles annotés dans les extraits : "Sort: adopté", "Sort: rejeté", "Sort: retiré", "Sort: tombé", "Sort: non soutenu". Toujours utiliser le sort exact.
+IMPORTANT: Ne jamais attribuer deux sorts différents au même amendement. Si un amendement est "rectifié" puis "adopté", le sort final est "adopté". Vérifier la cohérence entre points_vigilance et amendements_rejetes_detailles.
+Poids des auteurs : [gouvernement] et [rapporteur] > [commission] > [parlementaire].
+- Adopté → ne jamais mettre dans amendements_rejetes_detailles
+- Rejeté/retiré/tombé/non soutenu → analyser pourquoi, ce que ça révèle sur l'intention
+- Seuls les amendements modifiant directement {article_ref} ou invoqués dans les débats
+- Quand tu identifies un amendement rejeté/retiré/tombé pertinent :
+  1. D'ABORD remplis son entrée détaillée dans amendements_rejetes_detailles (objet complet)
+  2. PUIS ajoute un résumé d'une ligne dans points_vigilance
+- Évolution des débats : décrire si le texte a évolué (projet initial → version adoptée)
+
+## 6. CERTITUDE
+
+Remplir certitude_reasoning :
+- extraits_explicites : nombre d'extraits mentionnant explicitement {article_ref}
+- source_autoritative : rapporteur ou ministre cité (true/false)
+- intention_explicite : intention énoncée directement ou déduite (true/false)
+- coherence_chambres : AN et Sénat convergent (true/false)
+
+Règles : "élevé" si extraits >= 2 ET source autoritative. "moyen" si extraits >= 1 OU source autoritative OU modification technique sans débat de fond. "faible" si extraits insuffisants.
+
+## 7. INTENTION
+
+Structure (4-5 phrases maximum) :
+- 1 phrase : "L'intention du législateur est de [OBJECTIF PRINCIPAL]."
+- Puis "Le législateur souhaite :" suivi de 2-3 points (1 phrase courte chacun)
+- Ne pas dépasser 5 phrases au total
+
+Citer le POURQUOI (objectif, justification), pas le QUOI (description technique). Pas de paragraphe introductif.
+IMPORTANT : quand tu cites l'article de la loi, utilise EXACTEMENT le numéro indiqué dans "Article dans la loi" (ex: Art. 17), ne le devine pas.
+
+INTERDIT : ne qualifie JAMAIS de "modification technique" une modification qui porte sur :
+- des seuils, délais, taux, quotas ou conditions d'application
+- l'exit tax, le sursis/report d'imposition, les plus-values
+- les conditions de réinvestissement, le champ d'application d'un mécanisme fiscal
+- l'extension ou la restriction du champ des bénéficiaires
+"Modification technique" = UNIQUEMENT les changements de numérotation d'articles, corrections typographiques, recodifications à droit constant, ou mises à jour de références croisées sans changement de fond.
+Paramètres opérationnels : extraire TOUS les paramètres chiffrés du dispositif, en particulier :
+- Seuils (seuil de contrôle, seuil de réinvestissement, seuil de soulte)
+- Délais (délai de cession, délai de réinvestissement, délai de conservation)
+- Taux et quotas (taux de réinvestissement, quota d'investissement)
+- Conditions d'éligibilité chiffrées (taille d'entreprise, âge PME, participation minimale)
+Inclure les valeurs AVANT et APRÈS modification quand elles sont mentionnées dans les débats.
+Si la modification est une création, lister tous les paramètres structurels du dispositif créé.
+Si aucune valeur chiffrée → objet vide.
+
+## 8. EXEMPLE
+
+Extraits :
+- "[EXTRAIT-0] [Orateur: M. Dupont (rapporteur général) | AN | Commission | 2019-10-15] L'objectif est de porter le seuil de 50% à 60% pour concentrer l'investissement dans les PME."
+- "[EXTRAIT-1] [Orateur: Mme Martin (rapporteure) | Sénat | Séance publique | 2019-12-10] Le Sénat considère que ce relèvement est nécessaire pour orienter l'épargne vers l'économie réelle."
+- "[AMEND-0] Amendement N° 42 | Auteur: M. Bernard [parlementaire] | Sort: rejeté | Objet: Porter le seuil à 75%"
+
+```json
+{{
+  "sources": [
+    {{
+      "extrait_id": "EXTRAIT-0",
+      "passage_cle": "L'objectif est de porter le seuil de 50% à 60%"
+    }},
+    {{
+      "extrait_id": "EXTRAIT-1",
+      "passage_cle": "Le Sénat considère que ce relèvement est nécessaire"
+    }},
+    {{
+      "extrait_id": "AMEND-0",
+      "passage_cle": "Porter le seuil de réinvestissement à 75%"
+    }}
+  ],
+  "amendements_rejetes_detailles": [
+    {{
+      "numero": "42",
+      "auteur": "M. Bernard",
+      "sort_reel": "rejeté",
+      "objet": "Porter le seuil de réinvestissement à 75%",
+      "raison_rejet": "Le rapporteur a estimé que 75% serait excessif et découragerait les opérations d'apport-cession légitimes.",
+      "source_rejet": "rapporteur général",
+      "implication_intention": "Le rejet confirme que le législateur recherche un équilibre entre incitation et fluidité."
+    }}
+  ],
+  "evolution_debats": "Seuil porté de 55% à 60% en commission AN.",
+  "points_vigilance": [
+    "Amendement N° 42 (M. Bernard) rejeté: seuil de 75% jugé excessif - confirme la recherche d'équilibre"
+  ],
+  "operational_parameters": {{
+    "seuil_reinvestissement": "60% (contre 50% précédemment)"
+  }},
+  "certitude_reasoning": {{
+    "extraits_explicites": 2,
+    "source_autoritative": true,
+    "intention_explicite": true,
+    "coherence_chambres": true
+  }},
+  "niveau_certitude": "élevé",
+  "contexte_legislatif": "LF 2020 : renforcement du réinvestissement dans les PME.",
+  "doctrine_convergence": "confirme",
+  "doctrine_references": ["CE n°472835", "BOI-RPPM-PVBMI-30-10-60"],
+  "intention": "L'intention du législateur est de mieux orienter l'épargne vers l'économie réelle.\n\nLe législateur souhaite :\n- Porter le seuil de réinvestissement de 50% à 60%\n- Concentrer les investissements dans les PME opérationnelles"
+}}
+```
+
+Note sur l'exemple ci-dessus : si le contexte fournit `[CE 2024-05-15 - n°472835]` et un texte BOFiP référencé `BOI-RPPM-PVBMI-30-10-60`, alors `doctrine_references` DOIT contenir ces deux identifiants — peu importe que la décision confirme ou non l'intention parlementaire.
+
+## 9. SCHÉMA DE RÉFÉRENCE
+
+Ordre et valeurs par défaut :
+- sources: [] (array de {{extrait_id: "EXTRAIT-N" ou "AMEND-N", passage_cle: "10-15 premiers mots"}})
+- amendements_rejetes_detailles: [] (array de {{numero, auteur, sort_reel, objet, raison_rejet, source_rejet, implication_intention}})
+- evolution_debats: "" (string court, max 2 phrases)
+- points_vigilance: [] (array de strings - UNIQUEMENT amendements rejetés/retirés et risques identifiés. NE PAS y mettre des descriptions de seuils, délais ou taux qui doivent aller dans operational_parameters)
+- operational_parameters: {{}} (object, clés descriptives - seuils, délais, taux, conditions chiffrées)
+- certitude_reasoning: {{extraits_explicites: int, source_autoritative: bool, intention_explicite: bool, coherence_chambres: bool}}
+- niveau_certitude: "élevé" | "moyen" | "faible"
+- contexte_legislatif: string court (1-2 phrases, toujours rempli)
+- doctrine_convergence: "" (string: "confirme" | "contredit" | "silencieux" - uniquement si doctrine/jurisprudence fournie)
+- doctrine_references: [] (array de strings - références BOFiP/CE/CC citées, ex: ["BOI-RPPM-PVBMI-30-10-60", "CE n°414935"])
+- intention: string (vide "" UNIQUEMENT si sources est vide)
+
+RAPPEL CRITIQUE : amendements_rejetes_detailles et operational_parameters doivent TOUJOURS être remplis si des amendements ou des valeurs chiffrées sont présents dans les extraits, même quand niveau_certitude est "faible" et qu'aucune source parlementaire de fond n'est identifiée. Ces champs viennent du texte et des amendements, pas des débats.
+
+Si aucune source trouvée (sources vide) :
+```json
+{{"sources": [], "amendements_rejetes_detailles": [], "evolution_debats": "", "points_vigilance": [], "operational_parameters": {{}}, "certitude_reasoning": {{"extraits_explicites": 0, "source_autoritative": false, "intention_explicite": false, "coherence_chambres": false}}, "niveau_certitude": "faible", "contexte_legislatif": "Modification apportée par [loi]", "intention": ""}}
+```
+
+Réponds UNIQUEMENT avec le JSON."""
+
+# Step 1 prompt: filter chunks before extraction - identifies which chunks
+# actually discuss the target article vs noise from the same dossier
+CHUNK_FILTERING_SYSTEM = """Tu es un assistant spécialisé dans le tri d'extraits parlementaires français.
+
+Tu reçois des extraits de débats parlementaires numérotés. Ta tâche est de déterminer lesquels parlent RÉELLEMENT de l'article {article_ref} du {article_code} ({article_titre}).
+
+## Règles de pertinence
+
+Un extrait est PERTINENT s'il :
+- Mentionne explicitement "{article_ref}" ou son sujet direct ({article_keywords})
+- Contient une prise de position ou une explication sur le mécanisme de cet article
+- Discute un amendement portant sur cet article
+
+Un extrait est NON PERTINENT s'il :
+- Parle d'un autre sujet de la même loi (logement social, TVA, impôt sur le revenu, etc.) sans lien avec {article_ref}
+- Est du texte de loi pur ("est ainsi modifié", "il est inséré") sans explication
+- Est de la procédure pure ("La parole est à...", "Je mets aux voix")
+- Parle d'un article voisin ({article_ref} bis, ter) sans impact sur {article_ref}
+
+Réponds UNIQUEMENT avec un JSON : {{"relevant": [0, 2, 5], "rejected": [1, 3, 4]}}
+Les nombres sont les indices des extraits (commençant à 0)."""
+
+CHUNK_FILTERING_PROMPT = """## Extraits à trier pour {article_ref}
+
+{numbered_chunks}
+
+Quels extraits parlent réellement de {article_ref} ({article_titre}) ?
+Réponds avec {{"relevant": [...], "rejected": [...]}}"""
+
+# Prompt for extracting legislative intent - only variable content (context + data)
+# Instructions are in SYSTEM_PROMPT_LEGAL (cached by Anthropic)
+SECTION_EXTRACTION_PROMPT = """## Contexte de cette modification
 Loi de modification: {law_ref}
 Date de promulgation: {law_date}
 Article dans la loi: {article_in_law}
 Nature de la modification: {nature}
+Objet de la modification: {objet}
+Numéro de la loi au Journal Officiel: {law_numero}
 
 ## Mots-clés de l'article
 {article_keywords}
@@ -25,172 +272,20 @@ Nature de la modification: {nature}
 ## Exposé des motifs / Rapports parlementaires
 {expose_motifs}
 
-## Instructions
-Analyse ces extraits pour produire une section de rapport sur l'intention du législateur pour cette modification spécifique.
+{jurisprudence_section}
 
-### ATTENTION AUX CONFUSIONS FRÉQUENTES:
-- Cet article est l'article {article_ref} du {article_code} ({article_titre}).
-- NE PAS confondre avec "l'article {article_ref}" d'une loi de finances (numéro d'article dans le texte de loi, ex: "l'article 39 du projet de loi" ≠ "l'article 39 du CGI").
-- NE PAS confondre avec des articles voisins du {article_code} ({article_ref} bis, {article_ref} ter, {article_ref} decies, etc.).
-- Si un extrait parle EXCLUSIVEMENT d'un article voisin sans impact sur {article_ref} lui-même, IGNORE-LE.
-- Si la nature est "Création" et que l'article {article_ref} existait déjà avant cette loi, il s'agit de la création d'un ALINÉA, d'un PARAGRAPHE ou d'une EXCEPTION au sein de l'article, pas de l'article entier.
+IMPORTANT: Si un exposé des motifs du gouvernement ou un rapport parlementaire est fourni ci-dessus, le CITER en priorité dans tes sources. L'exposé des motifs est la source primaire de l'intention du législateur.
+Si une doctrine BOFiP (ACTU) est fournie, elle résume officiellement les changements apportés par la loi - utilise-la comme contexte complémentaire.
+Si une jurisprudence CE/CC est fournie, vérifie si le législateur réagit à une décision de justice (contentieux motivant la réforme). Si oui, mentionne-le dans l'intention et le contexte_legislatif.
 
-### RÈGLES CRITIQUES DE VALIDATION:
-1. CITE les passages qui mentionnent "{article_ref}" OU qui traitent du sujet de l'article ({article_titre}) dans le contexte de cette loi
-2. Si un extrait parle d'un AUTRE sujet (logement, TVA, etc.) sans lien avec le thème de {article_ref}, IGNORE-LE
-3. Les extraits qui traitent du fond de l'article (mots-clés ci-dessus) SANS le mentionner par numéro sont ACCEPTABLES — le débat parlementaire discute souvent du sujet sans citer le numéro d'article
-4. Vérifie que chaque citation est PERTINENTE pour cet article spécifique
-5. Si AUCUN extrait ne concerne le sujet de l'article {article_ref}, retourne:
-   - contexte_legislatif: "Modification apportée par {law_ref}"
-   - intention: ""
-   - sources_an: []
-   - sources_senat: []
-   - niveau_certitude: "faible"
-   - justification_certitude: "Aucun débat pertinent identifié pour cet article spécifique"
-   NE JAMAIS inventer d'intention à partir d'extraits qui parlent d'un AUTRE sujet.
+IMPORTANT: operational_parameters - extraire les paramètres chiffrés (seuils, délais, taux, quotas, conditions) depuis :
+1. L'objet de la modification ci-dessus (texte ajouté/supprimé contient souvent les valeurs)
+2. Les débats et amendements (parlementaires discutant des valeurs)
+3. Le texte actuel de l'article (system prompt) pour les paramètres structurels
+4. La doctrine BOFiP si elle précise des seuils ou conditions pratiques
+Ne JAMAIS laisser operational_parameters vide si des valeurs chiffrées apparaissent dans l'objet ou les extraits.
 
-### CITATIONS INTERDITES (rejeter automatiquement):
-- Phrases procédurales: "L'article est ainsi modifié", "La parole est à...", "Je mets aux voix"
-- Descriptions du vote: "L'amendement est adopté/rejeté", "Adopté", "Il en est ainsi décidé"
-- Lectures de texte sans explication: "L'article 150-0 B ter du CGI est ainsi modifié:"
-- Interventions sans contenu substantiel: remerciements, rappels au règlement, suspensions
-
-### CITATIONS REQUISES (critères obligatoires):
-- DOIT contenir une explication du POURQUOI (objectif, justification, raison d'être)
-- DOIT mentionner explicitement l'article {article_ref} OU un concept clé directement lié à cet article
-- DOIT apporter un éclairage sur l'intention du législateur, pas simplement décrire le dispositif
-- Préférer les interventions de: rapporteurs généraux, ministres, auteurs d'amendements
-
-### FORMAT DE L'INTENTION:
-Structure l'intention ainsi:
-- Commence par: "L'intention du législateur est de [OBJECTIF PRINCIPAL]."
-- Puis liste: "Le législateur souhaite :" suivi de 3-5 points précis
-
-### PARAMÈTRES OPÉRATIONNELS:
-- Identifie les paramètres quantitatifs SPÉCIFIQUES à CET article discutés dans les débats (seuils, délais, taux, plafonds, quotas, conditions chiffrées)
-- Utilise des clés descriptives propres à l'article (ex: "seuil_reinvestissement", "delai_cession", "taux_reduction", "plafond_deduction")
-- Si l'article ne comporte aucun paramètre quantitatif discuté, retourne un objet vide {{}}
-- Ne PAS inventer de paramètres génériques ou non mentionnés dans les débats
-
-### SOURCES PAR CHAMBRE:
-- Sépare les citations de l'Assemblée Nationale (AN) et du Sénat
-- Fournis 2-3 citations par chambre si disponibles
-- Si une chambre n'a pas de sources pertinentes, laisse le tableau vide
-
-### PONDÉRATION DES AUTEURS D'AMENDEMENTS:
-Les amendements sont annotés avec le rôle de leur auteur entre crochets [gouvernement], [rapporteur], [commission], [parlementaire].
-- Les amendements du **gouvernement** et du **rapporteur** sont les plus significatifs pour déterminer l'intention du législateur
-- Les amendements de **commission** reflètent un consensus institutionnel
-- Les amendements **parlementaires** individuels sont informatifs mais moins déterminants
-
-### AMENDEMENTS REJETÉS:
-Si des amendements rejetés sont présents dans les extraits, analyse pourquoi ils ont été rejetés et ce que cela révèle sur l'intention du législateur.
-Remplis le champ `amendements_rejetes_detailles` pour chaque amendement rejeté notable.
-
-### ATTENTION AU STATUT DES AMENDEMENTS:
-Chaque amendement dans les extraits est annoté avec son sort réel: "Sort: adopté", "Sort: rejeté", "Sort: retiré", "Sort: tombé", "Sort: non soutenu".
-- Un amendement marqué "*** ADOPTÉ ***" ou "Sort: adopté" ne doit JAMAIS apparaître dans `amendements_rejetes_detailles`
-- Un amendement "retiré" ou "tombé" n'est PAS un amendement "rejeté" — utilise le terme exact
-- Ne confonds PAS le sort d'un amendement avec la présence de la mesure dans le texte final:
-  - Un amendement peut être "rejeté" mais la mesure peut figurer dans la loi finale (reprise par un autre amendement ou en CMP)
-  - Un amendement peut être "adopté" dans une chambre mais supprimé en CMP
-- Dans `raison_rejet`, utilise le sort exact (rejeté/retiré/tombé/non soutenu), jamais "rejeté" si l'amendement a été adopté
-
-### FILTRAGE DES AMENDEMENTS HORS SUJET:
-N'inclure dans `amendements_rejetes_detailles` et `points_vigilance` QUE les amendements qui:
-- Modifient directement l'article {article_ref} du {article_code} ou une de ses subdivisions (alinéa, paragraphe, 1°, 1 bis, etc.)
-- OU sont explicitement invoqués dans les débats pour justifier ou contester la modification de l'article {article_ref}
-EXCLURE les amendements qui portent sur un autre article ou un autre sujet, même s'ils figurent dans la même séance parlementaire.
-Exemples d'amendements à EXCLURE: amendements sur l'audiovisuel public, les éoliennes, les formes sociétaires outre-mer, le dispositif Pinel — sauf s'ils modifient directement {article_ref}.
-
-### ÉVOLUTION DES DÉBATS:
-Si les extraits montrent une évolution (projet initial → version adoptée), décris-la
-
-### ÉVALUATION DU NIVEAU DE CERTITUDE:
-Avant de fixer le niveau, réponds à ces questions dans le JSON:
-1. extraits_explicites: Combien d'extraits mentionnent EXPLICITEMENT {article_ref} ? (nombre)
-2. source_autoritative: Un rapporteur ou ministre est-il cité ? (true/false)
-3. intention_explicite: L'intention est-elle ÉNONCÉE directement ou DÉDUITE ? (true/false)
-4. coherence_chambres: AN et Sénat convergent-ils ? (true/false)
-
-Règles:
-- "élevé" REQUIERT extraits_explicites >= 2 ET source_autoritative == true
-- "moyen" si extraits_explicites >= 1 OU source_autoritative == true
-- "faible" sinon
-
-## Exemples de réponse attendue
-
-### Exemple 1: Article 150-0 B ter — LF 2019
-Extrait de débat: "[Orateur: M. Giraud (rapporteur général) | AN | Commission | 2018-10-15]
-L'article 150-0 B ter encadre le report d'imposition lors de l'apport de titres. L'objectif est de porter le quota de réinvestissement de 50% à 60% et de le concentrer dans des PME opérationnelles."
-
-Réponse attendue:
-```json
-{{"contexte_legislatif": "La LF 2019 renforce le dispositif de l'apport-cession.", "intention": "L'intention du législateur est de renforcer l'obligation de réinvestissement dans l'économie réelle.\\n\\nLe législateur souhaite :\\n- Porter le quota de réinvestissement de 50% à 60%\\n- Concentrer le réinvestissement dans des PME opérationnelles", "operational_parameters": {{"quota_reinvestissement": "60% (contre 50% précédemment)"}}, "sources_an": [{{"citation": "L'article 150-0 B ter encadre le report d'imposition lors de l'apport de titres. L'objectif est de porter le quota de réinvestissement de 50% à 60%", "orateur": "M. Giraud", "fonction": "rapporteur général", "date": "2018-10-15"}}], "sources_senat": [], "evolution_debats": "", "amendements_rejetes_detailles": [], "points_vigilance": [], "certitude_reasoning": {{"extraits_explicites": 1, "source_autoritative": true, "intention_explicite": true, "coherence_chambres": false}}, "niveau_certitude": "moyen", "justification_certitude": "Un extrait de rapporteur mentionne explicitement l'article mais une seule chambre est représentée."}}
-```
-
-### Exemple 2: Article 787 B — LF 2019
-Extrait: "[Orateur: Mme de Montchalin (rapporteure) | AN | Séance publique | 2018-12-14]
-L'article 787 B relatif au Pacte Dutreil est un outil fondamental pour la transmission des entreprises familiales. Le gouvernement propose d'assouplir les conditions de conservation."
-
-Réponse attendue:
-```json
-{{"contexte_legislatif": "La LF 2019 assouplit le régime Dutreil de transmission d'entreprises.", "intention": "L'intention du législateur est de faciliter la transmission d'entreprises familiales via le Pacte Dutreil.\\n\\nLe législateur souhaite :\\n- Assouplir les conditions de conservation des titres\\n- Simplifier le dispositif pour le rendre plus attractif", "operational_parameters": {{}}, "sources_an": [{{"citation": "L'article 787 B relatif au Pacte Dutreil est un outil fondamental pour la transmission des entreprises familiales. Le gouvernement propose d'assouplir les conditions de conservation.", "orateur": "Mme de Montchalin", "fonction": "rapporteure", "date": "2018-12-14"}}], "sources_senat": [], "evolution_debats": "", "amendements_rejetes_detailles": [], "points_vigilance": [], "certitude_reasoning": {{"extraits_explicites": 1, "source_autoritative": true, "intention_explicite": true, "coherence_chambres": false}}, "niveau_certitude": "moyen", "justification_certitude": "Source autoritative avec mention explicite mais une seule chambre."}}
-```
-
-## Format de réponse (JSON strict)
-
-```json
-{{
-  "contexte_legislatif": "Description du contexte législatif (1-2 phrases)",
-  "intention": "L'intention du législateur est de [OBJECTIF PRINCIPAL].\\n\\nLe législateur souhaite :\\n- [Point 1]\\n- [Point 2]\\n- [Point 3]",
-  "operational_parameters": {{
-    "paramètre_clé_1": "valeur extraite des débats (ex: seuil, délai, taux, plafond...)",
-    "paramètre_clé_2": "valeur extraite des débats"
-  }},
-  "sources_an": [
-    {{
-      "citation": "Citation exacte de l'AN entre guillemets, max 250 caractères",
-      "orateur": "M./Mme Prénom Nom",
-      "fonction": "rapporteur général / ministre / député",
-      "date": "YYYY-MM-DD"
-    }}
-  ],
-  "sources_senat": [
-    {{
-      "citation": "Citation exacte du Sénat entre guillemets, max 250 caractères",
-      "orateur": "M./Mme Prénom Nom",
-      "fonction": "rapporteur général / ministre / sénateur",
-      "date": "YYYY-MM-DD"
-    }}
-  ],
-  "evolution_debats": "Description de l'évolution du texte pendant les débats (projet initial → version adoptée) ou vide si non applicable",
-  "amendements_rejetes_detailles": [
-    {{
-      "numero": "N° de l'amendement",
-      "auteur": "Auteur de l'amendement",
-      "sort_reel": "rejeté / retiré / tombé / non soutenu (reprendre le sort exact indiqué dans l'en-tête de l'extrait)",
-      "objet": "Objet de l'amendement (ce qu'il proposait)",
-      "raison_rejet": "Pourquoi il a été rejeté/retiré/tombé",
-      "source_rejet": "Qui a argumenté contre (rapporteur, gouvernement...)",
-      "implication_intention": "Ce que le rejet révèle sur l'intention du législateur"
-    }}
-  ],
-  "points_vigilance": [
-    "Amendement rejeté ou objection notable (si présent dans les extraits)"
-  ],
-  "certitude_reasoning": {{
-    "extraits_explicites": 0,
-    "source_autoritative": false,
-    "intention_explicite": false,
-    "coherence_chambres": false
-  }},
-  "niveau_certitude": "élevé ou moyen ou faible",
-  "justification_certitude": "Explication du niveau de certitude en 1-2 phrases"
-}}
-```
-
-Réponds UNIQUEMENT avec le JSON, sans texte avant ou après.
+Analyse ces extraits selon les instructions. Réponds UNIQUEMENT avec le JSON.
 """
 
 # Prompt for synthesizing the evolution of legislative intent across multiple modifications
@@ -267,7 +362,7 @@ IMPORTANT:
   ],
   "citations": [
     {{
-      "citation": "Citation pertinente max 250 caractères",
+      "citation": "Citation pertinente max 400 caractères",
       "orateur": "M./Mme Prénom Nom",
       "fonction": "fonction",
       "date": "YYYY-MM-DD",
@@ -309,7 +404,7 @@ Analyse ces extraits pour identifier les projets de modification en cours de dis
   ],
   "citations": [
     {{
-      "citation": "Citation exacte max 250 caractères",
+      "citation": "Citation exacte max 400 caractères",
       "orateur": "M./Mme Prénom Nom",
       "fonction": "fonction",
       "date": "YYYY-MM-DD",
@@ -344,8 +439,7 @@ Génère une section minimale indiquant l'absence de sources.
   "intention": "Les débats parlementaires relatifs à cette modification n'ont pas été identifiés dans la base de données. Une recherche complémentaire dans les archives parlementaires serait nécessaire.",
   "sources": [],
   "points_vigilance": [],
-  "niveau_certitude": "faible",
-  "justification_certitude": "Aucun débat parlementaire trouvé dans la base de données pour cette modification."
+  "niveau_certitude": "faible"
 }}
 ```
 
@@ -513,40 +607,31 @@ def _shorten_role(fonction: str) -> str:
     return fonction
 
 
-def format_debate_chunks_for_prompt(chunks: list, max_chars: int = 15000) -> str:
+def format_debate_chunks_for_prompt(
+    chunks: list, max_chars: int = 15000, numbered: bool = False,
+) -> str | tuple[str, dict[str, tuple]]:
     """Format debate chunks for inclusion in prompt.
 
-    Improvements:
-    - Deduplicates near-identical chunks (Jaccard > 0.6)
-    - Sorts by score descending (defensive)
-    - Groups by etape (commission first, then seance_publique)
-    - Adds etape and score to metadata headers
-    - Shortens verbose role descriptions
+    Groups by chamber (AN/Sénat) first, then by étape (commission/séance)
+    within each chamber. This makes both chambers structurally visible to the
+    LLM, improving balanced citation and reducing single-chamber bias retries.
+
+    When numbered=True, returns a tuple (text, mapping) where mapping is
+    {"EXTRAIT-0": (chunk, score), ...} for each formatted chunk.
     """
     if not chunks:
+        if numbered:
+            return "[Aucun débat parlementaire trouvé]", {}
         return "[Aucun débat parlementaire trouvé]"
 
     # Deduplicate and sort by score descending
     chunks = _deduplicate_chunks(chunks)
     chunks = sorted(chunks, key=lambda x: x[1], reverse=True)
 
-    # Group by etape
-    commission_chunks = []
-    seance_chunks = []
-    other_chunks = []
-    for chunk, score in chunks:
-        etape = (chunk.metadata.get("etape") or "").lower()
-        if "commission" in etape:
-            commission_chunks.append((chunk, score))
-        elif "seance" in etape or "séance" in etape:
-            seance_chunks.append((chunk, score))
-        else:
-            other_chunks.append((chunk, score))
+    chunk_mapping = {} if numbered else None
+    chunk_idx = 0
 
-    sections = []
-    current_chars = 0
-
-    def _format_chunk(chunk, score):
+    def _format_chunk(chunk, score, idx=None):
         metadata = chunk.metadata
         header_parts = []
         if metadata.get("orateur"):
@@ -555,53 +640,122 @@ def format_debate_chunks_for_prompt(chunks: list, max_chars: int = 15000) -> str
                 header_parts.append(f"Orateur: {metadata['orateur']} ({role})")
             else:
                 header_parts.append(f"Orateur: {metadata['orateur']}")
-        if metadata.get("chambre"):
-            header_parts.append(metadata["chambre"])
         etape = metadata.get("etape", "")
         if etape:
             header_parts.append(etape.replace("_", " ").title())
         if metadata.get("date"):
             header_parts.append(f"Date: {metadata['date']}")
-        header_parts.append(f"Score: {score:.2f}")
         header = " | ".join(header_parts)
-        return f"[{header}]\n{chunk.content}"
+        prefix = f"[EXTRAIT-{idx}] " if idx is not None else ""
+        return f"{prefix}[{header}]\n{chunk.content}"
 
-    for label, group in [
-        ("## Travaux en commission", commission_chunks),
-        ("## Séance publique", seance_chunks),
-        ("## Autres débats", other_chunks),
-    ]:
-        if not group:
-            continue
-        group_parts = []
-        for chunk, score in group:
-            chunk_text = _format_chunk(chunk, score)
-            if current_chars + len(chunk_text) + len(label) > max_chars:
-                break
-            group_parts.append(chunk_text)
-            current_chars += len(chunk_text) + 10
-        if group_parts:
-            sections.append(label + "\n\n" + "\n\n---\n\n".join(group_parts))
+    def _classify_etape(chunk):
+        etape = (chunk.metadata.get("etape") or "").lower()
+        if "commission" in etape:
+            return "commission"
+        if "seance" in etape or "séance" in etape:
+            return "seance"
+        return "other"
 
-    return "\n\n".join(sections) if sections else "[Aucun débat parlementaire trouvé]"
+    # Group by chamber first, then by étape
+    chambers: dict[str, dict[str, list]] = {}
+    for chunk, score in chunks:
+        chambre = chunk.metadata.get("chambre") or "Autre"
+        etape_key = _classify_etape(chunk)
+        chambers.setdefault(chambre, {"commission": [], "seance": [], "other": []})
+        chambers[chambre][etape_key].append((chunk, score))
+
+    # Normalize chamber names for display and ordering
+    _chamber_display = {
+        "an": "Assemblée nationale",
+        "senat": "Sénat",
+        "sénat": "Sénat",
+    }
+
+    def _display_name(raw: str) -> str:
+        return _chamber_display.get(raw.lower(), raw)
+
+    # Order: AN first, Sénat second, others last
+    chamber_order = []
+    for name in chambers:
+        nl = name.lower()
+        if nl in ("an", "assemblée nationale"):
+            chamber_order.insert(0, name)
+        elif nl in ("senat", "sénat"):
+            chamber_order.append(name)
+    for name in chambers:
+        if name not in chamber_order:
+            chamber_order.append(name)
+
+    etape_labels = {
+        "commission": "Travaux en commission",
+        "seance": "Séance publique",
+        "other": "Autres débats",
+    }
+
+    sections = []
+    current_chars = 0
+
+    for chambre_name in chamber_order:
+        etapes = chambers[chambre_name]
+        chamber_parts = []
+
+        for etape_key in ["commission", "seance", "other"]:
+            group = etapes.get(etape_key, [])
+            if not group:
+                continue
+            sub_parts = []
+            for chunk, score in group:
+                if numbered:
+                    chunk_text = _format_chunk(chunk, score, idx=chunk_idx)
+                    chunk_mapping[f"EXTRAIT-{chunk_idx}"] = (chunk, score)
+                    chunk_idx += 1
+                else:
+                    chunk_text = _format_chunk(chunk, score)
+                if current_chars + len(chunk_text) + 50 > max_chars:
+                    break
+                sub_parts.append(chunk_text)
+                current_chars += len(chunk_text) + 10
+            if sub_parts:
+                chamber_parts.append(
+                    f"### {etape_labels[etape_key]}\n\n"
+                    + "\n\n---\n\n".join(sub_parts)
+                )
+
+        if chamber_parts:
+            display = _display_name(chambre_name)
+            sections.append(
+                f"## {display}\n\n" + "\n\n".join(chamber_parts)
+            )
+
+    text = "\n\n".join(sections) if sections else "[Aucun débat parlementaire trouvé]"
+    if numbered:
+        return text, chunk_mapping
+    return text
 
 
 def format_amendment_chunks_for_prompt(
     chunks: list,
     max_chars: int = 5000,
     debate_chunks: list | None = None,
-) -> str:
+    numbered: bool = False,
+) -> str | tuple[str, dict[str, tuple]]:
     """Format amendment chunks for inclusion in prompt.
 
     Improvements:
     - Deduplicates near-identical chunks
     - Sorts: adopted first, rejected second, others last
-    - Marks adopted amendments with *** ADOPTÉ ***
+    - Sorts adopted amendments first
     - Allocates 70% of max_chars to adopted, 30% to rejected
     - Adds linked debate discussion when available
     - Adds score and role to headers
+
+    When numbered=True, returns a tuple (text, mapping) where mapping is
+    {"AMEND-0": (chunk, score), ...} for each formatted amendment.
     """
     if not chunks:
+        if numbered:
+            return "[Aucun amendement trouvé]", {}
         return "[Aucun amendement trouvé]"
 
     # Deduplicate
@@ -636,31 +790,29 @@ def format_amendment_chunks_for_prompt(
         for dchunk, dscore in debate_chunks:
             debate_lookup[dchunk.content[:100]] = dchunk.content
 
+    amendment_mapping = {} if numbered else None
+    amendment_idx = 0
+
     parts = []
     current_chars = 0
 
-    def _format_amendment(chunk, score, budget_remaining):
+    def _format_amendment(chunk, score, budget_remaining, idx=None):
         metadata = chunk.metadata
         header_parts = []
-
-        sort_val = (metadata.get("sort") or "").lower()
-        is_adopted = sort_val in ("adopte", "adopté")
-
-        if is_adopted:
-            header_parts.append("*** ADOPTÉ ***")
 
         if metadata.get("numero"):
             num = metadata["numero"].lstrip("N°").strip()
             header_parts.append(f"Amendement {num}")
         if metadata.get("auteur"):
-            role = classify_amendment_author(metadata["auteur"])
-            header_parts.append(f"Auteur: {metadata['auteur']} [{role}]")
+            auteur = metadata["auteur"]
+            role = classify_amendment_author(auteur)
+            header_parts.append(f"Auteur: {auteur} [{role}]")
         if metadata.get("sort"):
             header_parts.append(f"Sort: {metadata['sort']}")
-        header_parts.append(f"Score: {score:.2f}")
 
         header = " | ".join(header_parts)
-        text = f"[{header}]\n{chunk.content}"
+        prefix = f"[AMEND-{idx}] " if idx is not None else ""
+        text = f"{prefix}[{header}]\n{chunk.content}"
 
         # Look for linked debate discussion about this amendment
         if debate_chunks and metadata.get("numero"):
@@ -681,7 +833,12 @@ def format_amendment_chunks_for_prompt(
 
     # Format adopted amendments
     for chunk, score in adopted:
-        text = _format_amendment(chunk, score, adopted_budget - current_chars)
+        if numbered:
+            text = _format_amendment(chunk, score, adopted_budget - current_chars, idx=amendment_idx)
+            amendment_mapping[f"AMEND-{amendment_idx}"] = (chunk, score)
+            amendment_idx += 1
+        else:
+            text = _format_amendment(chunk, score, adopted_budget - current_chars)
         if current_chars + len(text) > adopted_budget:
             break
         parts.append(text)
@@ -690,10 +847,18 @@ def format_amendment_chunks_for_prompt(
     # Format other amendments
     other_start = current_chars
     for chunk, score in other:
-        text = _format_amendment(chunk, score, other_budget - (current_chars - other_start))
+        if numbered:
+            text = _format_amendment(chunk, score, other_budget - (current_chars - other_start), idx=amendment_idx)
+            amendment_mapping[f"AMEND-{amendment_idx}"] = (chunk, score)
+            amendment_idx += 1
+        else:
+            text = _format_amendment(chunk, score, other_budget - (current_chars - other_start))
         if current_chars + len(text) > max_chars:
             break
         parts.append(text)
         current_chars += len(text) + 10
 
-    return "\n\n---\n\n".join(parts)
+    text = "\n\n---\n\n".join(parts)
+    if numbered:
+        return text, amendment_mapping
+    return text

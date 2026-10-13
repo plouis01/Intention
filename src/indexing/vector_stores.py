@@ -118,7 +118,7 @@ class PgVectorStore(BaseVectorStore):
     def __init__(
         self,
         connection_string: str | None = None,
-        embedding_dim: int = 384,
+        embedding_dim: int = 768,
         table_name: str = "chunk_vectors",
     ):
         """
@@ -126,7 +126,7 @@ class PgVectorStore(BaseVectorStore):
 
         Args:
             connection_string: PostgreSQL connection string. If None, uses DATABASE_URL.
-            embedding_dim: Dimension of embedding vectors (default 384 for MiniLM)
+            embedding_dim: Dimension of embedding vectors (default 768 for text-embedding-004)
             table_name: Name of the table to use
         """
         try:
@@ -183,11 +183,12 @@ class PgVectorStore(BaseVectorStore):
                 CREATE INDEX IF NOT EXISTS idx_{self.table_name}_hash
                 ON {self.table_name} (content_hash)
             """)
-            # Create HNSW index for fast similarity search
+            # Create IVFFlat index for fast similarity search
             cur.execute(f"""
                 CREATE INDEX IF NOT EXISTS idx_{self.table_name}_embedding
                 ON {self.table_name}
-                USING hnsw (embedding vector_cosine_ops)
+                USING ivfflat (embedding vector_cosine_ops)
+                WITH (lists = 2048)
             """)
 
             self._conn.commit()
@@ -313,7 +314,7 @@ class PgVectorStore(BaseVectorStore):
             results = []
             for row in cur.fetchall():
                 chunk = Chunk(
-                    content=row[1],
+                    content=row[1] or "",
                     metadata=row[2] or {},
                     chunk_type=row[0],
                     source_id=row[3] or "",
@@ -365,7 +366,7 @@ class ChunkEmbeddingsPgVectorStore(BaseVectorStore):
     def __init__(
         self,
         connection_string: str | None = None,
-        embedding_dim: int = 384,
+        embedding_dim: int = 768,
     ):
         try:
             import psycopg2
@@ -432,7 +433,7 @@ class ChunkEmbeddingsPgVectorStore(BaseVectorStore):
         min_similarity: float = 0.5,
         chunk_type: str | None = None,
     ) -> list[tuple[Chunk, float]]:
-        """Search for similar chunks using pgvector HNSW index on embedding_vector."""
+        """Search for similar chunks using pgvector IVFFlat index on embedding_vector."""
         import json
         import numpy as np
 
@@ -454,7 +455,7 @@ class ChunkEmbeddingsPgVectorStore(BaseVectorStore):
             with conn.cursor() as cur:
                 # Configure IVFFlat search parameters (we're using IVFFlat, not HNSW)
                 try:
-                    cur.execute("SET ivfflat.probes = 40")
+                    cur.execute("SET ivfflat.probes = 50")
                 except Exception:
                     # Ignore if parameter doesn't exist
                     pass
@@ -465,7 +466,7 @@ class ChunkEmbeddingsPgVectorStore(BaseVectorStore):
                 # pgvector needs '[1,2,3]' format, not a Python list
                 vector_str = '[' + ','.join(str(x) for x in query_embedding) + ']'
 
-                # Use ORDER BY + LIMIT for HNSW/IVFFlat index, then post-filter by similarity
+                # Use ORDER BY + LIMIT for IVFFlat index, then post-filter by similarity
                 query_sql = f"""
                     SELECT chunk_type, content, chunk_metadata, source_id, position,
                            1 - (embedding_vector <=> %s::vector) as similarity
@@ -493,7 +494,7 @@ class ChunkEmbeddingsPgVectorStore(BaseVectorStore):
                         metadata = {}
 
                     chunk = Chunk(
-                        content=row[1],
+                        content=row[1] or "",
                         metadata=metadata,
                         chunk_type=row[0],
                         source_id=row[3] or "",
@@ -550,7 +551,7 @@ class ChunkEmbeddingsPgVectorStore(BaseVectorStore):
 
             with conn.cursor() as cur:
                 try:
-                    cur.execute("SET ivfflat.probes = 40")
+                    cur.execute("SET ivfflat.probes = 50")
                 except Exception:
                     pass
 
@@ -625,7 +626,7 @@ class ChunkEmbeddingsPgVectorStore(BaseVectorStore):
                     elif metadata is None:
                         metadata = {}
                     return Chunk(
-                        content=row[1],
+                        content=row[1] or "",
                         metadata=metadata,
                         chunk_type=row[0],
                         source_id=row[3] or "",
@@ -669,6 +670,450 @@ class ChunkEmbeddingsPgVectorStore(BaseVectorStore):
         finally:
             self._put_conn(conn)
 
+    def search_with_text_filter_combined(
+        self,
+        query_embedding: list[float],
+        text_filters: list[str],
+        chunk_types: list[str],
+        top_k: int = 10,
+        min_similarity: float = 0.3,
+        date_start: str | None = None,
+        date_end: str | None = None,
+    ) -> dict[str, list[tuple[Chunk, float]]]:
+        """Combined search for multiple chunk_types in fewer SQL round-trips.
+
+        Uses UNION ALL to fetch text-filtered + pure vector results for all
+        chunk_types in 2 SQL queries instead of 2*N.
+
+        Returns:
+            Dict mapping chunk_type → list of (Chunk, score).
+        """
+        import json
+        import numpy as np
+
+        if isinstance(query_embedding, np.ndarray):
+            query_embedding = query_embedding.tolist()
+
+        conn = self._get_conn()
+        try:
+            if not conn.autocommit:
+                try:
+                    conn.autocommit = True
+                except Exception:
+                    conn.commit()
+                    conn.autocommit = True
+
+            vector_str = "[" + ",".join(str(x) for x in query_embedding) + "]"
+
+            with conn.cursor() as cur:
+                try:
+                    cur.execute("SET ivfflat.probes = 50")
+                except Exception:
+                    pass
+
+                text_conditions = " OR ".join("content ILIKE %s" for _ in text_filters)
+                text_params = [f"%{t}%" for t in text_filters]
+
+                date_filter = ""
+                date_params = []
+                if date_start:
+                    date_filter += " AND chunk_metadata->>'date' >= %s"
+                    date_params.append(date_start)
+                if date_end:
+                    date_filter += " AND chunk_metadata->>'date' <= %s"
+                    date_params.append(date_end)
+
+                def _row_to_chunk(row):
+                    metadata = row[2]
+                    if isinstance(metadata, str):
+                        metadata = json.loads(metadata) if metadata else {}
+                    elif metadata is None:
+                        metadata = {}
+                    return Chunk(
+                        content=row[1] or "",
+                        metadata=metadata,
+                        chunk_type=row[0],
+                        source_id=row[3] or "",
+                        position=row[4] or 0,
+                    )
+
+                # Query 1: Text-filtered UNION ALL across chunk_types
+                union_parts = []
+                params1 = []
+                for ct in chunk_types:
+                    union_parts.append(f"""
+                        (SELECT chunk_type, content, chunk_metadata,
+                                source_id, position,
+                                1 - (embedding_vector <=> %s::vector) as sim
+                         FROM chunk_embeddings
+                         WHERE embedding_vector IS NOT NULL
+                           AND ({text_conditions})
+                           AND chunk_type = %s
+                           {date_filter}
+                         ORDER BY embedding_vector <=> %s::vector
+                         LIMIT %s)
+                    """)
+                    params1.extend([vector_str] + text_params + [ct] + date_params + [vector_str, top_k])
+                cur.execute(" UNION ALL ".join(union_parts), params1)
+                text_results = cur.fetchall()
+
+                # Query 2: Pure vector UNION ALL across chunk_types
+                union_parts2 = []
+                params2 = []
+                for ct in chunk_types:
+                    union_parts2.append(f"""
+                        (SELECT chunk_type, content, chunk_metadata,
+                                source_id, position,
+                                1 - (embedding_vector <=> %s::vector) as sim
+                         FROM chunk_embeddings
+                         WHERE embedding_vector IS NOT NULL
+                           AND 1 - (embedding_vector <=> %s::vector) >= %s
+                           AND chunk_type = %s
+                           {date_filter}
+                         ORDER BY embedding_vector <=> %s::vector
+                         LIMIT %s)
+                    """)
+                    params2.extend([vector_str, vector_str, min_similarity, ct] + date_params + [vector_str, top_k])
+                cur.execute(" UNION ALL ".join(union_parts2), params2)
+                pure_results = cur.fetchall()
+
+                # Split and merge per chunk_type (same logic as search_with_text_filter)
+                results: dict[str, list[tuple[Chunk, float]]] = {}
+                for ct in chunk_types:
+                    seen: set[tuple] = set()
+                    ct_text = [r for r in text_results if r[0] == ct]
+                    ct_pure = [r for r in pure_results if r[0] == ct]
+
+                    text_chunks = []
+                    for row in ct_text:
+                        key = (row[3], row[4])
+                        if key not in seen:
+                            seen.add(key)
+                            text_chunks.append((_row_to_chunk(row), float(row[5]) + 0.15))
+                    text_chunks.sort(key=lambda x: x[1], reverse=True)
+                    max_text_slots = top_k * 2 // 3
+
+                    merged = text_chunks[:max_text_slots]
+                    remaining = top_k - len(merged)
+
+                    vector_chunks = []
+                    for row in ct_pure:
+                        key = (row[3], row[4])
+                        if key not in seen:
+                            seen.add(key)
+                            vector_chunks.append((_row_to_chunk(row), float(row[5])))
+                    vector_chunks.sort(key=lambda x: x[1], reverse=True)
+                    merged.extend(vector_chunks[:max(remaining, 0)])
+
+                    results[ct] = merged
+
+                return results
+        except Exception:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+            raise
+        finally:
+            self._put_conn(conn)
+
+    def find_source_ids_by_text(
+        self,
+        text_filters: list[str],
+        chunk_type: str | None = None,
+        date_start: str | None = None,
+        date_end: str | None = None,
+    ) -> list[dict]:
+        """Find distinct source_ids of chunks matching text filters.
+
+        Used for debate-scoped search: first find which debates (source_ids)
+        mention the article, then search within those debates.
+
+        Returns:
+            List of dicts with keys: source_id, date, chambre
+        """
+        conn = self._get_conn()
+        try:
+            if not conn.autocommit:
+                try:
+                    conn.autocommit = True
+                except Exception:
+                    conn.commit()
+                    conn.autocommit = True
+
+            with conn.cursor() as cur:
+                text_conditions = " OR ".join("content ILIKE %s" for _ in text_filters)
+                text_params = [f"%{t}%" for t in text_filters]
+
+                type_filter = "AND chunk_type = %s" if chunk_type else ""
+                date_filter = ""
+                date_params = []
+                if date_start:
+                    date_filter += " AND chunk_metadata->>'date' >= %s"
+                    date_params.append(date_start)
+                if date_end:
+                    date_filter += " AND chunk_metadata->>'date' <= %s"
+                    date_params.append(date_end)
+
+                sql = f"""
+                    SELECT DISTINCT source_id,
+                           chunk_metadata->>'date' as dt,
+                           chunk_metadata->>'chambre' as chambre
+                    FROM chunk_embeddings
+                    WHERE ({text_conditions})
+                      {type_filter}
+                      {date_filter}
+                """
+                params = list(text_params)
+                if chunk_type:
+                    params.append(chunk_type)
+                params.extend(date_params)
+                cur.execute(sql, params)
+
+                return [
+                    {"source_id": row[0], "date": row[1], "chambre": row[2]}
+                    for row in cur.fetchall()
+                ]
+        except Exception:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+            raise
+        finally:
+            self._put_conn(conn)
+
+    def search_in_source_ids(
+        self,
+        query_embedding: list[float],
+        source_ids: list[str],
+        chunk_types: list[str],
+        top_k: int = 15,
+        min_similarity: float = 0.2,
+        date_start: str | None = None,
+        date_end: str | None = None,
+        article_ref: str | None = None,
+    ) -> dict[str, list[tuple[Chunk, float]]]:
+        """Vector search restricted to specific source_ids (debate-scoped).
+
+        Searches only within chunks from the given debates, ordered by
+        semantic similarity. When article_ref is provided, chunks mentioning
+        the article are boosted (fetched first via ILIKE, then filled with
+        pure vector results).
+
+        Returns:
+            Dict mapping chunk_type → list of (Chunk, score).
+        """
+        import json
+        import numpy as np
+
+        if not source_ids:
+            return {ct: [] for ct in chunk_types}
+
+        if isinstance(query_embedding, np.ndarray):
+            query_embedding = query_embedding.tolist()
+
+        conn = self._get_conn()
+        try:
+            if not conn.autocommit:
+                try:
+                    conn.autocommit = True
+                except Exception:
+                    conn.commit()
+                    conn.autocommit = True
+
+            vector_str = "[" + ",".join(str(x) for x in query_embedding) + "]"
+
+            with conn.cursor() as cur:
+                try:
+                    cur.execute("SET ivfflat.probes = 50")
+                except Exception:
+                    pass
+
+                date_filter = ""
+                date_params = []
+                if date_start:
+                    date_filter += " AND chunk_metadata->>'date' >= %s"
+                    date_params.append(date_start)
+                if date_end:
+                    date_filter += " AND chunk_metadata->>'date' <= %s"
+                    date_params.append(date_end)
+
+                # Build source_id IN clause
+                source_placeholders = ",".join(["%s"] * len(source_ids))
+
+                def _row_to_chunk(row):
+                    metadata = row[2]
+                    if isinstance(metadata, str):
+                        metadata = json.loads(metadata) if metadata else {}
+                    elif metadata is None:
+                        metadata = {}
+                    return Chunk(
+                        content=row[1] or "",
+                        metadata=metadata,
+                        chunk_type=row[0],
+                        source_id=row[3] or "",
+                        position=row[4] or 0,
+                    )
+
+                results: dict[str, list[tuple[Chunk, float]]] = {}
+                for ct in chunk_types:
+                    if article_ref:
+                        # Boosted search: prioritize chunks mentioning the article
+                        boost_k = min(20, top_k * 2 // 3)
+                        sql = f"""
+                            WITH boosted AS (
+                                SELECT chunk_type, content, chunk_metadata,
+                                       source_id, position,
+                                       1 - (embedding_vector <=> %s::vector) as sim
+                                FROM chunk_embeddings
+                                WHERE embedding_vector IS NOT NULL
+                                  AND source_id IN ({source_placeholders})
+                                  AND chunk_type = %s
+                                  AND content ILIKE %s
+                                  AND 1 - (embedding_vector <=> %s::vector) >= %s
+                                  {date_filter}
+                                ORDER BY embedding_vector <=> %s::vector
+                                LIMIT %s
+                            ),
+                            vector_fill AS (
+                                SELECT chunk_type, content, chunk_metadata,
+                                       source_id, position,
+                                       1 - (embedding_vector <=> %s::vector) as sim
+                                FROM chunk_embeddings
+                                WHERE embedding_vector IS NOT NULL
+                                  AND source_id IN ({source_placeholders})
+                                  AND chunk_type = %s
+                                  AND 1 - (embedding_vector <=> %s::vector) >= %s
+                                  {date_filter}
+                                ORDER BY embedding_vector <=> %s::vector
+                                LIMIT %s
+                            )
+                            SELECT * FROM boosted
+                            UNION ALL
+                            SELECT * FROM vector_fill
+                        """
+                        ilike_pattern = f"%{article_ref}%"
+                        params = (
+                            [vector_str] + list(source_ids) + [ct, ilike_pattern, vector_str, min_similarity]
+                            + date_params + [vector_str, boost_k]
+                            + [vector_str] + list(source_ids) + [ct, vector_str, min_similarity]
+                            + date_params + [vector_str, top_k]
+                        )
+                    else:
+                        sql = f"""
+                            SELECT chunk_type, content, chunk_metadata,
+                                   source_id, position,
+                                   1 - (embedding_vector <=> %s::vector) as sim
+                            FROM chunk_embeddings
+                            WHERE embedding_vector IS NOT NULL
+                              AND source_id IN ({source_placeholders})
+                              AND chunk_type = %s
+                              AND 1 - (embedding_vector <=> %s::vector) >= %s
+                              {date_filter}
+                            ORDER BY embedding_vector <=> %s::vector
+                            LIMIT %s
+                        """
+                        params = [vector_str] + list(source_ids) + [ct, vector_str, min_similarity] + date_params + [vector_str, top_k]
+
+                    cur.execute(sql, params)
+                    rows = cur.fetchall()
+
+                    if article_ref:
+                        # Deduplicate (boosted chunks may appear in vector_fill too)
+                        seen: set[str] = set()
+                        deduped: list[tuple[Chunk, float]] = []
+                        for row in rows:
+                            key = (row[1] or "")[:200]  # content prefix
+                            if key not in seen:
+                                seen.add(key)
+                                deduped.append((_row_to_chunk(row), float(row[5])))
+                        deduped.sort(key=lambda x: x[1], reverse=True)
+                        results[ct] = deduped[:top_k]
+                    else:
+                        results[ct] = [
+                            (_row_to_chunk(row), float(row[5]))
+                            for row in rows
+                        ]
+
+                return results
+        except Exception:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+            raise
+        finally:
+            self._put_conn(conn)
+
+    def search_by_text_in_source_ids(
+        self,
+        text_filter: str,
+        source_ids: list[str],
+        chunk_types: list[str] | None = None,
+        top_k: int = 10,
+    ) -> dict[str, list[tuple["Chunk", float]]]:
+        """ILIKE search within specific source_ids - bypasses vector similarity.
+
+        Returns chunks whose content mentions text_filter, grouped by chunk_type.
+        Used to guarantee that chunks explicitly mentioning an article are always
+        included, even when their vector similarity is below min_similarity.
+        """
+        import json as _json
+
+        if not source_ids or not text_filter:
+            return {}
+
+        conn = self._get_conn()
+        try:
+            with conn.cursor() as cur:
+                type_clause = ""
+                params: list = [f"%{text_filter}%"]
+                if chunk_types:
+                    placeholders = ",".join(["%s"] * len(chunk_types))
+                    type_clause = f"AND chunk_type IN ({placeholders})"
+                    params.extend(chunk_types)
+
+                sid_placeholders = ",".join(["%s"] * len(source_ids))
+                params.extend(source_ids)
+
+                cur.execute(
+                    f"""
+                    SELECT id, content, chunk_metadata, chunk_type, source_id, 0.50 as score
+                    FROM chunk_embeddings
+                    WHERE content ILIKE %s
+                      {type_clause}
+                      AND source_id IN ({sid_placeholders})
+                    ORDER BY id
+                    LIMIT %s
+                    """,
+                    params + [top_k],
+                )
+                rows = cur.fetchall()
+
+                results: dict[str, list[tuple[Chunk, float]]] = {}
+                for row in rows:
+                    ct = row[3]
+                    meta = row[2] if isinstance(row[2], dict) else _json.loads(row[2]) if row[2] else {}
+                    chunk = Chunk(
+                        content=row[1] or "",
+                        metadata=meta,
+                        chunk_type=ct,
+                        source_id=row[4] or "",
+                        position=0,
+                    )
+                    results.setdefault(ct, []).append((chunk, float(row[5])))
+
+                return results
+        except Exception:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+            raise
+        finally:
+            self._put_conn(conn)
+
     def text_only_search(
         self,
         text_filters: list[str],
@@ -677,7 +1122,7 @@ class ChunkEmbeddingsPgVectorStore(BaseVectorStore):
         date_start: str | None = None,
         date_end: str | None = None,
     ) -> list[tuple[Chunk, float]]:
-        """ILIKE-only search without vector similarity — used as fallback when BM25 is unavailable.
+        """ILIKE-only search without vector similarity - used as fallback when BM25 is unavailable.
 
         Returns chunks matching any text filter, ordered by date (most recent first).
         Scores are synthetic (1.0 for all results) since no ranking is available.
@@ -737,7 +1182,7 @@ class ChunkEmbeddingsPgVectorStore(BaseVectorStore):
                     elif metadata is None:
                         metadata = {}
                     chunk = Chunk(
-                        content=row[1],
+                        content=row[1] or "",
                         metadata=metadata,
                         chunk_type=row[0],
                         source_id=row[3] or "",
@@ -817,7 +1262,7 @@ class QdrantVectorStore(BaseVectorStore):
         url: str | None = None,
         api_key: str | None = None,
         collection_name: str = "chunks",
-        embedding_dim: int = 384,
+        embedding_dim: int = 768,
     ):
         """
         Initialize Qdrant store.
@@ -1040,7 +1485,7 @@ class QdrantVectorStore(BaseVectorStore):
 def create_vector_store(
     store_type: str | None = None,
     collection_name: str = "chunks",
-    embedding_dim: int = 384,
+    embedding_dim: int = 768,
     **kwargs,
 ) -> BaseVectorStore:
     """
@@ -1061,7 +1506,7 @@ def create_vector_store(
         store = create_vector_store()
 
         # Use pgvector on chunk_embeddings table (recommended for production)
-        store = create_vector_store("pgvector", embedding_dim=384)
+        store = create_vector_store("pgvector", embedding_dim=768)
 
         # Create Qdrant store with custom URL
         store = create_vector_store("qdrant", url="http://qdrant:6333")
@@ -1075,7 +1520,7 @@ def create_vector_store(
         return VectorStore()
 
     elif store_type == "pgvector":
-        logger.info("Using pgvector on chunk_embeddings table (HNSW search)")
+        logger.info("Using pgvector on chunk_embeddings table (IVFFlat search)")
         return ChunkEmbeddingsPgVectorStore(
             embedding_dim=embedding_dim,
             **kwargs,

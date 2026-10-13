@@ -4,8 +4,6 @@ from src.analysis.models import (
     ArticleAnalysisResult,
     CGIModificationSummary,
     ConsolidationPeriod,
-    ForwardLookingSection,
-    JurisprudenceEntry,
     LawAnalysisResult,
     LawModification,
     ModificationNature,
@@ -52,7 +50,7 @@ class MarkdownRenderer:
                 toc_num += 1
             elif isinstance(item, ConsolidationPeriod):
                 toc_lines.append(f"   - *{item.title}*")
-        toc_lines.append(f"\n[Synthèse](#synthèse) | [Jurisprudence](#jurisprudence) | [Méthodologie](#méthodologie)")
+        toc_lines.append(f"\n[Synthèse](#synthèse) | [Méthodologie](#méthodologie)")
         sections.append("\n".join(toc_lines))
 
         section_num = 1
@@ -66,18 +64,6 @@ class MarkdownRenderer:
         # Synthesis
         sections.append(self._render_synthese(result))
 
-        # Forward-looking (PLF discussions)
-        if result.forward_looking:
-            sections.append(self._render_forward_looking(result.forward_looking))
-
-        # Jurisprudence
-        if result.jurisprudence:
-            sections.append(self._render_jurisprudence(result.jurisprudence))
-
-        # Doctrine (BOFIP)
-        if result.bofip_url:
-            sections.append(self._render_doctrine(result))
-
         # Methodology
         sections.append(self._render_methodologie(result))
 
@@ -88,10 +74,15 @@ class MarkdownRenderer:
         lines = [
             f"# Analyse de l'article {result.article_ref} du {result.article_code}",
             "",
+        ]
+        if result.etat_actuel and result.etat_actuel.upper() == "ABROGE":
+            lines.append("> **[Article abrogé]** - Cet article n'est plus en vigueur.")
+            lines.append("")
+        lines.extend([
             f"**Objet**: {result.article_titre}",
             "",
             f"**Question posée**: {result.question}",
-        ]
+        ])
         return "\n".join(lines)
 
     def _render_historique(self, modifications: list[LawModification]) -> str:
@@ -223,7 +214,7 @@ class MarkdownRenderer:
             if source.chambre:
                 source_info.append(source.chambre)
             if source_info:
-                lines.append(f"> — {', '.join(source_info)}")
+                lines.append(f"> - {', '.join(source_info)}")
             lines.append("")
         return lines
 
@@ -271,20 +262,11 @@ class MarkdownRenderer:
         return "\n".join(lines)
 
     def _render_synthese(self, result: ArticleAnalysisResult) -> str:
-        """Render synthesis section with multi-column table separating seuil vs quota."""
+        """Render synthesis section with multi-column table."""
         lines = [
             "## Synthèse de l'évolution de l'intention législative",
             "",
         ]
-
-        # Objectif constant
-        if result.synthese_objectif:
-            lines.extend([
-                "### Objectif constant",
-                "",
-                result.synthese_objectif,
-                "",
-            ])
 
         # Evolution table with dynamic columns per article
         if result.synthese_evolution:
@@ -312,151 +294,6 @@ class MarkdownRenderer:
                     lines.append("| " + row.periode + " | " + " | ".join(values) + " |")
                 lines.append("")
 
-        # Preoccupations
-        if result.synthese_preoccupations:
-            lines.extend([
-                "### Préoccupations récurrentes du législateur",
-                "",
-            ])
-            for i, preoc in enumerate(result.synthese_preoccupations, 1):
-                lines.append(f"{i}. {preoc}")
-
-        return "\n".join(lines)
-
-    def _render_forward_looking(self, forward_looking: list[ForwardLookingSection]) -> str:
-        """Render forward-looking PLF discussions section."""
-        lines = [
-            "## Discussions PLF en cours (projets de modification)",
-            "",
-        ]
-
-        for section in forward_looking:
-            lines.extend([
-                f"### PLF {section.plf_year} ({section.status})",
-                "",
-            ])
-
-            # Propositions
-            if section.propositions:
-                lines.append("**Propositions de modification** :")
-                lines.append("")
-                for prop in section.propositions:
-                    lines.append(f"- {prop}")
-                lines.append("")
-
-            # Citations
-            if section.citations:
-                lines.append("**Citations des débats** :")
-                lines.append("")
-                lines.extend(self._render_sources(section.citations))
-
-            # Certitude
-            lines.extend([
-                f"*Niveau de certitude: {section.niveau_certitude.value}*",
-                "",
-            ])
-
-        return "\n".join(lines)
-
-    def _render_jurisprudence(self, jurisprudence: list[JurisprudenceEntry]) -> str:
-        """Render jurisprudence section with full Faits/Solution/Portée structure."""
-        lines = [
-            "## Jurisprudence",
-            "",
-        ]
-
-        # Group by jurisdiction type
-        ce_entries = [e for e in jurisprudence if e.juridiction == "CE"]
-        cc_entries = [e for e in jurisprudence if e.juridiction == "CC"]
-        cadf_entries = [e for e in jurisprudence if e.juridiction == "CADF"]
-        other_entries = [e for e in jurisprudence if e.juridiction not in ["CE", "CC", "CADF"]]
-
-        if ce_entries:
-            lines.append("### Conseil d'État")
-            lines.append("")
-            for entry in ce_entries:
-                lines.extend(self._render_jurisprudence_entry(entry))
-
-        if cc_entries:
-            lines.append("### Conseil constitutionnel")
-            lines.append("")
-            for entry in cc_entries:
-                lines.extend(self._render_jurisprudence_entry(entry))
-
-        if cadf_entries:
-            lines.append("### Comité de l'abus de droit fiscal (CADF)")
-            lines.append("")
-            for entry in cadf_entries:
-                lines.extend(self._render_jurisprudence_entry(entry))
-
-        if other_entries:
-            lines.append("### Autres décisions")
-            lines.append("")
-            for entry in other_entries:
-                lines.extend(self._render_jurisprudence_entry(entry))
-
-        return "\n".join(lines)
-
-    def _render_jurisprudence_entry(self, entry: JurisprudenceEntry) -> list[str]:
-        """Render a single jurisprudence entry with Faits/Solution/Portée structure."""
-        # Skip skeleton entries with no substantive content
-        if not entry.titre and not entry.solution and not entry.faits:
-            return []
-
-        lines = [
-            f"#### {entry.juridiction}, {entry.date}, {entry.reference}",
-            "",
-            f"**{entry.titre}**",
-            "",
-        ]
-
-        if entry.faits:
-            lines.extend([
-                "**Faits**:",
-                entry.faits,
-                "",
-            ])
-
-        if entry.solution:
-            lines.extend([
-                "**Solution**:",
-                entry.solution,
-                "",
-            ])
-
-        if entry.portee:
-            lines.extend([
-                "**Portée**:",
-                entry.portee,
-                "",
-            ])
-
-        # If no detailed fields, just show solution as summary
-        if not entry.faits and not entry.portee and entry.solution:
-            lines = [
-                f"#### {entry.juridiction}, {entry.date}, {entry.reference}",
-                "",
-                f"**{entry.titre}**",
-                "",
-                f"**Solution**: {entry.solution}",
-                "",
-            ]
-
-        return lines
-
-    def _render_doctrine(self, result: ArticleAnalysisResult) -> str:
-        """Render doctrine/BOFIP section."""
-        lines = [
-            "## Doctrine administrative (BOFIP)",
-            "",
-            f"**Référence**: [{result.bofip_url}]({result.bofip_url})",
-            "",
-        ]
-
-        if result.doctrine_bofip:
-            for item in result.doctrine_bofip:
-                lines.append(f"- {item}")
-
         return "\n".join(lines)
 
     def _render_methodologie(self, result: ArticleAnalysisResult) -> str:
@@ -475,50 +312,6 @@ class MarkdownRenderer:
             "",
             f"- [Légifrance - Article {result.article_ref}]({result.legifrance_url if result.legifrance_url else 'https://www.legifrance.gouv.fr/'})",
         ]
-
-        if result.bofip_url:
-            lines.append(f"- [BOFIP]({result.bofip_url})")
-
-        # Add parliamentary rapport references if available
-        if result.rapports_parlementaires:
-            lines.extend([
-                "",
-                "### Rapports parlementaires",
-                "",
-            ])
-            for rapport in result.rapports_parlementaires:
-                rapport_type = rapport.get("type", "")
-                numero = rapport.get("numero", "")
-                year = rapport.get("year", "")
-                title = rapport.get("title", "")
-                url = rapport.get("url", "")
-                rapporteur = rapport.get("rapporteur", "")
-
-                if url and numero:
-                    entry = f"- [{rapport_type} n° {numero} ({year})]({url})"
-                elif url:
-                    entry = f"- [{rapport_type} ({year})]({url})"
-                elif numero:
-                    entry = f"- {rapport_type} n° {numero} ({year})"
-                else:
-                    entry = f"- {rapport_type} ({year})"
-
-                if title:
-                    entry += f" - {title}"
-                if rapporteur:
-                    entry += f" (Rapporteur: {rapporteur})"
-
-                lines.append(entry)
-
-        # Add DILA sources if available
-        if result.dila_sources:
-            lines.extend([
-                "",
-                "### Sources DILA (archives parlementaires)",
-                "",
-            ])
-            for source in result.dila_sources:
-                lines.append(f"- {source}")
 
         # Add parliamentary debate sources if available
         if result.sources_parlementaires_an:

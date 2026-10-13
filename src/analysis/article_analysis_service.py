@@ -9,7 +9,7 @@ Checks cache before running to avoid redundant LLM calls.
 import hashlib
 import json
 import logging
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from sqlalchemy.exc import IntegrityError
@@ -38,7 +38,7 @@ def normalize_article_ref(article_ref: str) -> str:
 
 def _compute_current_hash(cgi_article: str) -> str:
     """Compute the current modifications hash for an article from the index file."""
-    index_path = _project_root / "data" / "article_modifications.json"
+    index_path = _project_root / "data" / "modifications_cgi_enriched.json"
     if not index_path.exists():
         return ""
     try:
@@ -65,12 +65,12 @@ def get_cached_analysis(cgi_article: str) -> dict | None:
                 return None
             if cache.expires_at:
                 expires = cache.expires_at.replace(tzinfo=None)
-                now = datetime.now(UTC).replace(tzinfo=None)
+                now = datetime.now(timezone.utc).replace(tzinfo=None)
                 if expires < now:
                     session.delete(cache)
                     session.commit()
                     return None
-            # Invalidate if article_modifications.json has changed since caching
+            # Invalidate if modifications_cgi_enriched.json has changed since caching
             current_hash = _compute_current_hash(cgi_article)
             if current_hash and cache.modifications_hash != current_hash:
                 session.delete(cache)
@@ -118,6 +118,7 @@ def _serialize_section(section, index: int) -> dict:
         "sources_senat": [_serialize_quoted_source(s) for s in section.sources_senat],
         "evolution_debats": section.evolution_debats,
         "points_vigilance": section.points_vigilance,
+        "amendements_rejetes_detailles": section.amendements_rejetes_detailles,
         "niveau_certitude": section.niveau_certitude.value,
         "certitude_justification": section.certitude_justification,
         "debates_analyzed": section.debates_analyzed,
@@ -141,40 +142,14 @@ def _result_to_dict(result: ArticleAnalysisResult, article_ref: str, question: s
     ]
 
     synthesis = {
-        "objectif": result.synthese_objectif,
         "evolution": [
             {"periode": row.periode, **row.parameters}
             for row in result.synthese_evolution
         ],
-        "preoccupations": result.synthese_preoccupations,
     }
 
-    forward_looking = [
-        {
-            "plf_year": fl.plf_year,
-            "status": fl.status,
-            "propositions": fl.propositions,
-            "citations": [_serialize_quoted_source(c) for c in fl.citations],
-            "niveau_certitude": fl.niveau_certitude.value,
-        }
-        for fl in result.forward_looking
-    ]
-
-    jurisprudence = [
-        {
-            "juridiction": j.juridiction,
-            "date": j.date,
-            "reference": j.reference,
-            "titre": j.titre,
-            "faits": j.faits,
-            "solution": j.solution,
-            "portee": j.portee,
-        }
-        for j in result.jurisprudence
-    ]
-
-    # Read raw modifications from article_modifications.json for hash/invalidation
-    index_path = _project_root / "data" / "article_modifications.json"
+    # Read raw modifications from modifications_cgi_enriched.json for hash/invalidation
+    index_path = _project_root / "data" / "modifications_cgi_enriched.json"
     raw_modifications = []
     if index_path.exists():
         with open(index_path, encoding="utf-8") as f:
@@ -203,12 +178,7 @@ def _result_to_dict(result: ArticleAnalysisResult, article_ref: str, question: s
         "sections": sections,
         "consolidation": consolidation,
         "synthesis": synthesis,
-        "forward_looking": forward_looking,
-        "jurisprudence": jurisprudence,
         "cross_references": result.cross_references,
-        "plf_lf_deltas": result.plf_lf_deltas,
-        "rapports_parlementaires": result.rapports_parlementaires,
-        "dila_sources": result.dila_sources,
         "sources_parlementaires_an": result.sources_parlementaires_an,
         "sources_parlementaires_senat": result.sources_parlementaires_senat,
         "metadata": {
@@ -251,7 +221,7 @@ def _save_to_cache(cgi_article: str, analysis: dict) -> None:
 
     settings = get_settings()
     llm_model = settings.groq_model if settings.llm_provider == "groq" else settings.claude_model
-    now = datetime.now(UTC).replace(tzinfo=None)
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
     expires = now + timedelta(days=30)
 
     with get_session() as session:
@@ -321,7 +291,7 @@ def analyze_article_for_api(
     """
     Run article analysis and return result as dict (same structure as stream cache).
 
-    Checks DB cache first — returns cached result if available and not expired.
+    Checks DB cache first - returns cached result if available and not expired.
     Otherwise runs full analysis via ArticleAnalyzer and persists to cache.
 
     Args:
@@ -333,8 +303,7 @@ def analyze_article_for_api(
 
     Returns:
         Analysis dict with keys: article_info, sections, consolidation, synthesis,
-        forward_looking, jurisprudence, cross_references, plf_lf_deltas,
-        rapports_parlementaires, dila_sources, sources_parlementaires_an/senat,
+        cross_references, sources_parlementaires_an/senat,
         metadata, invalidation, from_cache
     """
     article_ref_normalized = normalize_article_ref(article_ref)
@@ -367,7 +336,6 @@ def analyze_article_for_api(
     result = analyzer.analyze_article(
         article_ref=article_ref_normalized,
         question=question,
-        include_jurisprudence=True,
         max_modifications=max_modifications,
     )
 

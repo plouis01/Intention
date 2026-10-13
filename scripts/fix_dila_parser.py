@@ -107,7 +107,7 @@ def extract_interventions_improved(xml_path: Path) -> list:
             speaker_pattern = re.compile(
                 r"((?:M\.|Mme|Mlle)\s+[A-ZÉÈÊËÀÂÄÙÛÜÔÖÎÏÇ][a-zéèêëàâäùûüôöîïç\-']+(?:\s+[A-Za-zÉÈÊËÀÂÄÙÛÜÔÖÎÏÇéèêëàâäùûüôöîïç\-']+)*)"
                 r"(?:,\s*([^\.]+))?"
-                r"\.\s*[-–—]?\s*"
+                r"\.\s*[-–-]?\s*"
             )
 
             matches = list(speaker_pattern.finditer(all_text))

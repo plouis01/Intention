@@ -315,7 +315,7 @@ def get_indexed_articles() -> list[str]:
     Returns:
         List of article references
     """
-    index_path = Path("data/article_modifications.json")
+    index_path = Path("data/modifications_cgi_enriched.json")
     if not index_path.exists():
         return []
 

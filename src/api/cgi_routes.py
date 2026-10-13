@@ -5,7 +5,7 @@ Railway production deployment:
   2. Run scripts/migrate_to_pgvector_safe.sql (~2h30 for 1.6M chunks)
   3. Monitor: SELECT * FROM pg_stat_progress_create_index;
   4. Set env: VECTOR_STORE_PROVIDER=pgvector
-  5. Redeploy — config.py handles postgres:// → postgresql:// conversion
+  5. Redeploy - config.py handles postgres:// → postgresql:// conversion
   6. See docs/pgvector-next-steps.md for details
 """
 
@@ -14,12 +14,14 @@ import dataclasses
 import hashlib
 import json
 import logging
-from datetime import UTC, datetime, timedelta
+import os
+import re
+from datetime import date, datetime, timedelta, timezone
 from itertools import groupby
 from pathlib import Path
 from typing import AsyncGenerator
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from src.analysis.article_analyzer import ArticleAnalyzer
@@ -35,7 +37,8 @@ from src.api.schemas import (
 )
 from sqlalchemy.exc import IntegrityError
 
-from src.db.models import AnalysisCache, get_session
+from src.auth.dependencies import require_active_access, require_active_access_stream
+from src.db.models import AnalysisCache, User, get_session
 from src.utils.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -49,14 +52,14 @@ _article_index_mtime: float = 0.0
 
 
 def get_article_index() -> dict:
-    """Load and cache the article_modifications.json index, auto-reloading on file change."""
+    """Load and cache the modifications_cgi_enriched.json index, auto-reloading on file change."""
     global _article_index, _article_index_mtime
 
     if _article_index is not None and _article_index_mtime == 0.0:
-        # Set externally (e.g., by tests) — don't override
+        # Set externally (e.g., by tests) - don't override
         return _article_index
 
-    index_path = Path("data/article_modifications.json")
+    index_path = Path("data/modifications_cgi_enriched.json")
 
     if index_path.exists():
         current_mtime = index_path.stat().st_mtime
@@ -66,7 +69,7 @@ def get_article_index() -> dict:
             _article_index_mtime = current_mtime
             logger.info(f"Loaded {len(_article_index.get('articles', {}))} CGI articles from index")
     elif _article_index is None:
-        logger.warning("article_modifications.json not found")
+        logger.warning("modifications_cgi_enriched.json not found")
         _article_index = {"articles": {}}
 
     return _article_index
@@ -76,7 +79,7 @@ def normalize_article_ref(article_ref: str) -> str:
     """Normalize article reference to canonical form from the index.
 
     Applies underscore→space conversion and case-insensitive lookup.
-    Returns the canonical reference from article_modifications.json
+    Returns the canonical reference from modifications_cgi_enriched.json
     if found, otherwise the cleaned input.
     """
     cleaned = article_ref.replace("_", " ")
@@ -109,10 +112,10 @@ def _compute_current_hash(cgi_article: str) -> str:
 
 
 def is_analysis_stale(cgi_article: str) -> tuple[bool, str]:
-    """Check if cached analysis is stale vs current article_modifications.json.
+    """Check if cached analysis is stale vs current modifications_cgi_enriched.json.
 
     Returns:
-        (is_stale, current_hash) — True if stale or no cache exists.
+        (is_stale, current_hash) - True if stale or no cache exists.
     """
     current_hash = _compute_current_hash(cgi_article)
     if not current_hash:
@@ -146,13 +149,18 @@ def get_cached_analysis(cgi_article: str) -> dict | None:
             )
 
             if not cache:
+                logger.info(f"Cache MISS for {cgi_article}: no entry in DB")
                 return None
 
-            # Check expiration (compare as naive UTC — DB column has no timezone)
+            # Check expiration (compare as naive UTC - DB column has no timezone)
             if cache.expires_at:
                 expires = cache.expires_at.replace(tzinfo=None)
-                now = datetime.now(UTC).replace(tzinfo=None)
+                now = datetime.now(timezone.utc).replace(tzinfo=None)
                 if expires < now:
+                    logger.info(
+                        f"Cache EXPIRED for {cgi_article}: "
+                        f"expires_at={cache.expires_at}, now={now}"
+                    )
                     session.delete(cache)
                     session.commit()
                     return None
@@ -160,15 +168,22 @@ def get_cached_analysis(cgi_article: str) -> dict | None:
             # Check invalidation inline (avoid second DB query)
             current_hash = _compute_current_hash(cgi_article)
             if current_hash and cache.modifications_hash != current_hash:
+                logger.info(
+                    f"Cache STALE for {cgi_article}: "
+                    f"cached_hash={cache.modifications_hash[:16] if cache.modifications_hash else 'None'}... "
+                    f"current_hash={current_hash[:16]}... "
+                    f"cached_mod_count={cache.modification_count} "
+                    f"cached_last_mod={cache.last_modification_date}"
+                )
                 session.delete(cache)
                 session.commit()
-                logger.info(f"Stale cache for {cgi_article}, invalidated")
                 return None
 
+            logger.info(f"Cache HIT for {cgi_article} (hash={current_hash[:16]}...)")
             return cache.analysis_json
 
     except Exception as e:
-        logger.warning(f"Error getting cached analysis: {e}")
+        logger.warning(f"Cache ERROR for {cgi_article}: {e}")
         return None
 
 
@@ -184,6 +199,10 @@ def save_cached_analysis(
     ttl_days: int = 30,
 ) -> None:
     """Save consolidated analysis to cache (one entry per CGI article)."""
+    logger.info(
+        f"Cache SAVE for {cgi_article}: hash={modifications_hash[:16]}... "
+        f"mod_count={modification_count} last_mod={last_modification_date}"
+    )
     with get_session() as session:
         try:
             settings = get_settings()
@@ -195,7 +214,7 @@ def save_cached_analysis(
             )
 
             # Store as naive UTC (DB column has no timezone info)
-            now = datetime.now(UTC).replace(tzinfo=None)
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             expires = now + timedelta(days=ttl_days)
             llm_model = (
                 settings.groq_model
@@ -237,7 +256,7 @@ def save_cached_analysis(
                     session.commit()
                 except IntegrityError:
                     session.rollback()
-                    # Another request inserted concurrently — update instead
+                    # Another request inserted concurrently - update instead
                     existing = (
                         session.query(AnalysisCache)
                         .filter(AnalysisCache.cgi_article == cgi_article)
@@ -266,7 +285,7 @@ def save_cached_analysis(
     summary="List all CGI articles",
     description="Get a list of all CGI articles that have been modified by finance laws.",
 )
-async def list_cgi_articles(
+def list_cgi_articles(
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of results"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
     min_modifications: int = Query(0, ge=0, description="Minimum number of modifications"),
@@ -323,10 +342,10 @@ async def list_cgi_articles(
     summary="List cached article refs",
     description="Returns the list of CGI article references that have a valid (non-expired, non-stale) cached analysis.",
 )
-async def list_cached_refs() -> JSONResponse:
+def list_cached_refs() -> JSONResponse:
     """Return the set of CGI article refs with a valid cached analysis."""
     try:
-        now = datetime.now(UTC).replace(tzinfo=None)
+        now = datetime.now(timezone.utc).replace(tzinfo=None)
         with get_session() as session:
             rows = (
                 session.query(AnalysisCache.cgi_article, AnalysisCache.expires_at, AnalysisCache.modifications_hash)
@@ -360,13 +379,19 @@ async def list_cached_refs() -> JSONResponse:
 
 def _serialize_quoted_source(source) -> dict:
     """Serialize a QuotedSource dataclass to a JSON-serializable dict."""
-    return {
+    d = {
         "citation": source.citation,
         "orateur": source.orateur,
         "fonction": source.fonction,
         "date": source.date,
         "chambre": source.chambre,
+        "is_curated": source.is_curated,
     }
+    if getattr(source, "passage_cle", ""):
+        d["passage_cle"] = source.passage_cle
+    if getattr(source, "extrait_id", ""):
+        d["extrait_id"] = source.extrait_id
+    return d
 
 
 def _serialize_section(section, index: int) -> dict:
@@ -394,6 +419,8 @@ def _serialize_section(section, index: int) -> dict:
         "debates_analyzed": section.debates_analyzed,
         "amendments_analyzed": section.amendments_analyzed,
         "operational_params": section.operational_params.parameters if section.operational_params else None,
+        "doctrine_convergence": getattr(section, 'doctrine_convergence', ''),
+        "doctrine_references": getattr(section, 'doctrine_references', []),
     }
 
 
@@ -412,6 +439,32 @@ class _RunningAnalysis:
 # key: "{article_ref}::{question}::{max_modifications}" → ongoing analysis
 _running_analyses: dict[str, _RunningAnalysis] = {}
 
+# Bounds the number of concurrent DIFFERENT analyses. Identical analyses are
+# already deduplicated via _running_analyses fan-out. A request beyond the limit
+# queues at this semaphore instead of saturating the heavy DB pool / executor.
+#
+# Tunable via env var MAX_CONCURRENT_ANALYSES (default 2). Bump on Railway dashboard
+# without redeploy if metrics show headroom (CPU, RAM, no Anthropic 429s).
+_MAX_CONCURRENT_ANALYSES = max(1, int(os.getenv("MAX_CONCURRENT_ANALYSES", "2")))
+_ANALYSIS_SEMAPHORE = asyncio.Semaphore(_MAX_CONCURRENT_ANALYSES)
+logger.info(f"Analysis semaphore configured: max {_MAX_CONCURRENT_ANALYSES} concurrent analyses")
+
+
+def _broadcast_event(running: _RunningAnalysis, event: str) -> None:
+    """Append an event to the buffer and fan-out to live subscribers."""
+    running.buffer.append(event)
+    dead: list[asyncio.Queue] = []
+    for q in list(running.subscribers):
+        try:
+            q.put_nowait(event)
+        except asyncio.QueueFull:
+            dead.append(q)
+    for q in dead:
+        try:
+            running.subscribers.remove(q)
+        except ValueError:
+            pass
+
 
 async def _run_analysis_task(
     article_ref: str,
@@ -422,19 +475,14 @@ async def _run_analysis_task(
 ) -> None:
     """Background task: runs the analysis and fan-outs events. Lifecycle is independent of HTTP connections."""
     try:
-        async for event in _run_analysis(article_ref, question, max_modifications):
-            running.buffer.append(event)
-            dead: list[asyncio.Queue] = []
-            for q in list(running.subscribers):
-                try:
-                    q.put_nowait(event)
-                except asyncio.QueueFull:
-                    dead.append(q)
-            for q in dead:
-                try:
-                    running.subscribers.remove(q)
-                except ValueError:
-                    pass
+        if _ANALYSIS_SEMAPHORE.locked():
+            _broadcast_event(
+                running,
+                json.dumps({"type": "queued", "data": "Analyse en file d'attente..."}) + "\n",
+            )
+        async with _ANALYSIS_SEMAPHORE:
+            async for event in _run_analysis(article_ref, question, max_modifications):
+                _broadcast_event(running, event)
     finally:
         running.done = True
         for q in list(running.subscribers):
@@ -447,7 +495,7 @@ async def _run_analysis_task(
 
 async def _stream_from_running(running: _RunningAnalysis, request: Request | None = None) -> AsyncGenerator[str, None]:
     """HTTP generator: replays buffer then listens to queue. Disconnecting doesn't affect the analysis task."""
-    # If already done: replay full buffer and return — None sentinel already sent, no queue needed
+    # If already done: replay full buffer and return - None sentinel already sent, no queue needed
     if running.done:
         buffer_snapshot = list(running.buffer)
         logger.debug(f"[stream] done=True at entry, replaying {len(buffer_snapshot)} buffered events")
@@ -457,13 +505,13 @@ async def _stream_from_running(running: _RunningAnalysis, request: Request | Non
         return
 
     # Analysis still running: snapshot buffer + subscribe atomically
-    # (asyncio single-threaded — no await between snapshot and append)
+    # (asyncio single-threaded - no await between snapshot and append)
     q: asyncio.Queue = asyncio.Queue(maxsize=200)
     buffered = list(running.buffer)
     running.subscribers.append(q)
 
     # Re-check done AFTER subscribing: the task's finally block may have run between
-    # our initial done-check above and this append — if so, the None sentinel was
+    # our initial done-check above and this append - if so, the None sentinel was
     # dispatched before our queue was registered and will never arrive.
     # Fall back to full buffer replay and return without waiting on the queue.
     if running.done:
@@ -523,12 +571,7 @@ async def _run_analysis(
             "sections": [],
             "consolidation": [],
             "synthesis": None,
-            "forward_looking": [],
-            "jurisprudence": [],
             "cross_references": [],
-            "plf_lf_deltas": [],
-            "rapports_parlementaires": [],
-            "dila_sources": [],
             "sources_parlementaires_an": [],
             "sources_parlementaires_senat": [],
             "metadata": {},
@@ -545,16 +588,78 @@ async def _run_analysis(
             return
 
         modifications = article_info.modifications
+
+        # Era cutoff: an identifier can be (re-)created mid-history (e.g. CGI 973
+        # was abrogated and re-created as IFI by LF 2018 — n°2017-1837). Pre-Création
+        # entries refer to a DIFFERENT article reusing the same number; feeding
+        # them to the LLM produces structural false positives (5/8 sections of
+        # 973 were analysing the OLD article before this guard). The cutoff
+        # is no-op when no "Création" event exists in the history (articles
+        # with continuous lineage, e.g. 39 C since the 1960s) or when the
+        # "Création" is already the earliest entry (e.g. 150-0 B ter, 2012).
+        _creation_dates = [
+            m.date for m in modifications
+            if m.nature.value == "Création"
+        ]
+        if _creation_dates:
+            era_cutoff = max(_creation_dates)
+            _pre = [m for m in modifications if m.date < era_cutoff]
+            if _pre:
+                logger.warning(
+                    "[era_cutoff] %s: dropping %d pre-Création modifications "
+                    "(cutoff=%s). These refer to a prior article re-using the "
+                    "same identifier.", article_ref, len(_pre), era_cutoff,
+                )
+                modifications = [m for m in modifications if m.date >= era_cutoff]
+
         if max_modifications:
             modifications = modifications[:max_modifications]
 
-        # Group modifications by law_numero (single search per law)
-        # Sort first — groupby only groups consecutive elements
-        sorted_mods = sorted(modifications, key=lambda m: m.law_numero)
+        # Separate modifications into analyzable (LF/LFR/LFSS) vs skippable (DECRET etc.)
+        _NO_DEBATE_TYPES = {"DECRET", "ORDONNANCE", "ARRETE", "LOI_ORGANIQUE"}
+        _TECHNICAL_NATURES = {"Codification", "Transfert"}
+        analyzable_mods = []
+        skipped_mods = []
+        for m in modifications:
+            if m.law_type in _NO_DEBATE_TYPES or m.nature.value in _TECHNICAL_NATURES or m.law_type == "INCONNU":
+                skipped_mods.append(m)
+            else:
+                analyzable_mods.append(m)
+
+        # Sort by DATE (chronological), then group by law_numero
+        sorted_mods = sorted(analyzable_mods, key=lambda m: m.date)
         grouped_mods: list[list] = []
         for _key, group in groupby(sorted_mods, key=lambda m: m.law_numero):
             grouped_mods.append(list(group))
-        total_groups = len(grouped_mods)
+
+        # Merge groups that are temporally close (±60 days), same article_in_law,
+        # AND same law_type. LF + LFR are distinct parliamentary texts and must NOT
+        # be fused - only true duplicates (e.g., two LFSS entries for the same law).
+        merged_groups: list[list] = []
+        for group in grouped_mods:
+            if merged_groups:
+                prev = merged_groups[-1]
+                prev_date = prev[0].date
+                curr_date = group[0].date
+                if (abs((curr_date - prev_date).days) <= 60
+                        and prev[0].article_in_law == group[0].article_in_law
+                        and prev[0].law_type == group[0].law_type):
+                    merged_groups[-1] = prev + group
+                    continue
+            merged_groups.append(group)
+        grouped_mods = merged_groups
+
+        # Build chronological timeline: analyzable groups + skipped mods interleaved
+        # so the user sees a complete modification history (DECRET appear as lightweight sections)
+        timeline: list[tuple[str, list]] = []
+        for group in grouped_mods:
+            timeline.append(("analyze", group))
+        for m in skipped_mods:
+            timeline.append(("skip", [m]))
+        timeline.sort(key=lambda x: x[1][0].date)
+
+        total_sections = len(timeline)
+        total_analyzable = sum(1 for t, _ in timeline if t == "analyze")
 
         # Yield article info
         article_info_data = {
@@ -563,7 +668,7 @@ async def _run_analysis(
             "code": article_info.code,
             "question": question,
             "total_modifications": len(modifications),
-            "total_sections": total_groups,
+            "total_sections": total_sections,
             "modifications": [
                 {"date": m.date.isoformat(), "law_ref": m.law_ref, "nature": m.nature.value}
                 for m in modifications
@@ -572,56 +677,167 @@ async def _run_analysis(
         yield json.dumps({"type": "article_info", "data": article_info_data}) + "\n"
         collected["article_info"] = article_info_data
 
-        # Ensure search service is loaded (can take 1-2 min on cold start — send keepalive pings)
-        yield json.dumps({"type": "status", "data": "Loading search service..."}) + "\n"
-        _task = asyncio.create_task(asyncio.to_thread(analyzer._ensure_search_service))
-        while not _task.done():
-            try:
-                await asyncio.wait_for(asyncio.shield(_task), timeout=30.0)
-            except asyncio.TimeoutError:
-                yield json.dumps({"type": "ping"}) + "\n"
-        _task.result()
-
-        # Analyze each modification group
+        # Process timeline
         sections = []
         total_debates = 0
         total_interventions = 0
-        used_curated_citations: set[str] = set()
+        token_idx = 0
+        used_citation_keys: set[tuple[str, str, str]] = set()
+        seen_amendment_numeros: set[str] = set()
+        _roman_re = re.compile(r'^[IVX]+-\s*', re.IGNORECASE)
+        debate_chunks_by_law: dict[str, list] = {}
+        analyze_idx = 0
 
-        for i, mod_group in enumerate(grouped_mods):
+        for i, (action, mod_group) in enumerate(timeline):
             primary_mod = mod_group[0]
+
+            # Lightweight section for DECRET/ORDONNANCE - no LLM call, just metadata
+            if action == "skip":
+                objet_text = (primary_mod.objet or "").strip()[:500]
+                skip_data = {
+                    "index": i,
+                    "modification": {
+                        "date": primary_mod.date.isoformat(),
+                        "law_numero": primary_mod.law_numero,
+                        "law_type": primary_mod.law_type,
+                        "law_year": primary_mod.law_year,
+                        "article_in_law": primary_mod.article_in_law,
+                        "nature": primary_mod.nature.value,
+                        "law_ref": primary_mod.law_ref,
+                    },
+                    "contexte": "",
+                    "intention": f"{primary_mod.law_type} - pas de débat parlementaire."
+                                + (f" {objet_text}" if objet_text else ""),
+                    "sources_an": [],
+                    "sources_senat": [],
+                    "evolution_debats": "",
+                    "points_vigilance": [],
+                    "niveau_certitude": "faible",
+                    "certitude_justification": f"{primary_mod.law_type} sans débat parlementaire",
+                    "debates_analyzed": 0,
+                    "amendments_analyzed": 0,
+                    "operational_params": None,
+                    "skipped": True,
+                }
+                yield json.dumps({"type": "section", "data": skip_data}) + "\n"
+                collected["sections"].append(skip_data)
+                continue
+
+            analyze_idx += 1
             yield json.dumps({
                 "type": "status",
-                "data": f"Analyzing {primary_mod.short_ref} ({i + 1}/{total_groups})...",
+                "data": f"Analyzing {primary_mod.short_ref} ({analyze_idx}/{total_analyzable})...",
             }) + "\n"
 
             try:
+                # Build all modification dates for cross-contamination prevention
+                all_mod_dates = [(m.date, m.law_type) for m in modifications]
                 _task = asyncio.create_task(
-                    asyncio.to_thread(analyzer._analyze_modification, article_info, primary_mod)
+                    asyncio.to_thread(analyzer._analyze_modification, article_info, primary_mod, all_mod_dates)
                 )
                 while not _task.done():
                     try:
                         await asyncio.wait_for(asyncio.shield(_task), timeout=30.0)
                     except asyncio.TimeoutError:
                         yield json.dumps({"type": "ping"}) + "\n"
-                section, debates_count, interventions_count = _task.result()
+                section, debates_count, interventions_count, raw_debate_chunks = _task.result()
 
-                # Augment with curated quotes (same as sync path)
-                section = await asyncio.to_thread(
-                    analyzer._augment_with_curated_quotes,
-                    article_info.reference, primary_mod, section,
-                    article_keywords=article_info.keywords,
-                    used_curated_citations=used_curated_citations,
-                )
+                # Collect raw debate chunks for cross-law detection (avoids re-searching)
+                law_key = f"{primary_mod.law_type}_{primary_mod.law_year}"
+                debate_chunks_by_law[law_key] = raw_debate_chunks
+
+                # Cross-section dedup: remove citations already used in previous sections
+                # Include date so that different interventions by the same speaker
+                # on different dates (= different law modifications) are kept.
+                def _citation_key(src):
+                    return (src.orateur.lower(), src.citation[:80].lower(), src.date or "")
+
+                section.sources_an = [
+                    s for s in section.sources_an if _citation_key(s) not in used_citation_keys
+                ]
+                section.sources_senat = [
+                    s for s in section.sources_senat if _citation_key(s) not in used_citation_keys
+                ]
+                for s in section.sources_an + section.sources_senat:
+                    used_citation_keys.add(_citation_key(s))
+
+                # Cross-period filter: remove citations whose date is closer to another modification
+                if all_mod_dates:
+                    def _citation_belongs_to_current(citation_date_str):
+                        try:
+                            cit_date = date.fromisoformat(citation_date_str[:10]) if citation_date_str else None
+                        except (ValueError, TypeError):
+                            return True
+                        if not cit_date:
+                            return True
+                        current_dist = abs((primary_mod.date - cit_date).days)
+                        for mod_dt, _ in all_mod_dates:
+                            if mod_dt == primary_mod.date:
+                                continue
+                            if abs((mod_dt - cit_date).days) < current_dist:
+                                return False
+                        return True
+
+                    section.sources_an = [s for s in section.sources_an if _citation_belongs_to_current(s.date)]
+                    section.sources_senat = [s for s in section.sources_senat if _citation_belongs_to_current(s.date)]
+
+                # Recalculate certitude after cross-section/cross-period filtering
+                from src.analysis.models import CertitudeLevel
+                actual_src = len(section.sources_an) + len(section.sources_senat)
+                actual_ch = (1 if section.sources_an else 0) + (1 if section.sources_senat else 0)
+                if not section.sources_an and not section.sources_senat:
+                    section.niveau_certitude = CertitudeLevel.FAIBLE
+                elif section.niveau_certitude == CertitudeLevel.ELEVE:
+                    if actual_src < 2 or actual_ch < 2:
+                        section.niveau_certitude = CertitudeLevel.MOYEN
+                # Downgrade MOYEN → FAIBLE if only 1 source from 1 chamber
+                if section.niveau_certitude == CertitudeLevel.MOYEN:
+                    if actual_src <= 1 and actual_ch <= 1:
+                        section.niveau_certitude = CertitudeLevel.FAIBLE
 
                 # Merge all articles from the group into the section
                 if len(mod_group) > 1:
-                    all_articles = ", ".join(m.article_in_law for m in mod_group)
+                    all_articles = ", ".join(dict.fromkeys(m.article_in_law for m in mod_group))
                     section.modification = dataclasses.replace(
                         primary_mod, article_in_law=all_articles
                     )
 
+                # P10: Clear params for minor modifications
+                objet = (section.modification.objet or "").lower()
+                _substantive = {"ajout", "suppression", "remplacement", "création", "modification du"}
+                is_minor = "modification mineure" in objet
+                is_forme = objet == "modification mineure (mise en forme)"
+                if (is_minor or is_forme) and not any(v in objet for v in _substantive):
+                    section.operational_params = None
+
+                # Cross-section dedup: amendements_rejetes_detailles
+                unique_amends = []
+                for amend in section.amendements_rejetes_detailles:
+                    num = amend.get('numero', '')
+                    num_norm = _roman_re.sub('', num).strip() if num else ''
+                    if num_norm and num_norm not in seen_amendment_numeros:
+                        seen_amendment_numeros.add(num_norm)
+                        unique_amends.append(amend)
+                section.amendements_rejetes_detailles = unique_amends
+
+                # Cross-section dedup: points_vigilance by amendment number
+                unique_pv = []
+                for pv in section.points_vigilance:
+                    m = re.search(r'N°\s*([IVX]*-?\s*\d+)', pv)
+                    if m:
+                        num = _roman_re.sub('', m.group(1)).strip()
+                        if num in seen_amendment_numeros:
+                            continue
+                        seen_amendment_numeros.add(num)
+                    unique_pv.append(pv)
+                section.points_vigilance = unique_pv
+
                 section_data = _serialize_section(section, i)
+                # Attach per-section token usage
+                from src.analysis.models import TokenTracker
+                section_calls = analyzer.token_tracker.calls[token_idx:]
+                token_idx = len(analyzer.token_tracker.calls)
+                section_data["token_usage"] = TokenTracker.summarize_calls(section_calls)
                 yield json.dumps({"type": "section", "data": section_data}) + "\n"
                 collected["sections"].append(section_data)
 
@@ -640,19 +856,58 @@ async def _run_analysis(
                     },
                 }) + "\n"
 
-        # Consolidation periods
-        yield json.dumps({"type": "status", "data": "Detecting consolidation periods..."}) + "\n"
+        # --- Post-section steps: run all in parallel ---
+        yield json.dumps({"type": "status", "data": "Finalizing analysis..."}) + "\n"
 
-        _task = asyncio.create_task(
+        # Build cross-law data structures (no network, just dict building)
+        cross_analyzer = CrossLawAnalyzer()
+        settings = get_settings()
+        sections_by_law: dict[str, dict] = {}
+        for section in sections:
+            mod = section.modification
+            law_key = f"{mod.law_type}_{mod.law_year}"
+            sections_by_law[law_key] = {
+                "law_type": mod.law_type,
+                "law_year": mod.law_year,
+                "law_numero": mod.law_numero,
+            }
+
+        # Launch all independent post-section tasks in parallel
+        task_consolidation = asyncio.create_task(
             asyncio.to_thread(analyzer._detect_consolidation_periods, article_info, modifications)
         )
-        while not _task.done():
-            try:
-                await asyncio.wait_for(asyncio.shield(_task), timeout=30.0)
-            except asyncio.TimeoutError:
+        task_synthesis = asyncio.create_task(
+            asyncio.to_thread(analyzer._build_synthesis, sections)
+        )
+        task_parl_sources = asyncio.create_task(
+            asyncio.to_thread(analyzer._build_parliamentary_sources, sections)
+        )
+        task_cross_law = asyncio.create_task(
+            asyncio.to_thread(
+                cross_analyzer.detect_all,
+                sections_by_law, debate_chunks_by_law,
+                article_ref,
+                settings.cross_ref_min_score,
+                settings.cross_ref_enable_llm,
+            )
+        ) if sections_by_law and debate_chunks_by_law else None
+
+        # Wait for all with keepalive pings
+        all_tasks = [t for t in [
+            task_consolidation, task_synthesis,
+            task_parl_sources, task_cross_law,
+        ] if t is not None]
+        pending = set(all_tasks)
+        while pending:
+            done, pending = await asyncio.wait(pending, timeout=30.0, return_when=asyncio.FIRST_COMPLETED)
+            if not done:
                 yield json.dumps({"type": "ping"}) + "\n"
+
+        # Yield results in consistent order
+
+        # Consolidation
         try:
-            consolidation_periods = _task.result()
+            consolidation_periods = task_consolidation.result()
         except Exception as consolidation_err:
             logger.exception("Error detecting consolidation periods")
             yield json.dumps({"type": "error", "data": f"Consolidation detection failed: {consolidation_err}"}) + "\n"
@@ -670,101 +925,23 @@ async def _run_analysis(
             collected["consolidation"].append(cp_data)
 
         # Synthesis
-        yield json.dumps({"type": "status", "data": "Building synthesis..."}) + "\n"
-
-        _task = asyncio.create_task(asyncio.to_thread(analyzer._build_synthesis, article_info, sections))
-        while not _task.done():
-            try:
-                await asyncio.wait_for(asyncio.shield(_task), timeout=30.0)
-            except asyncio.TimeoutError:
-                yield json.dumps({"type": "ping"}) + "\n"
         try:
-            synthese = _task.result()
+            synthese = task_synthesis.result()
         except Exception as synthesis_err:
             logger.exception("Error building synthesis")
             yield json.dumps({"type": "error", "data": f"Synthesis failed: {synthesis_err}"}) + "\n"
-            synthese = {"objectif": "", "evolution": [], "preoccupations": []}
+            synthese = {"evolution": []}
         synthesis_data = {
-            "objectif": synthese.get("objectif", ""),
             "evolution": [
                 {"periode": r.periode, **r.parameters}
                 for r in synthese.get("evolution", [])
             ],
-            "preoccupations": synthese.get("preoccupations", []),
         }
         yield json.dumps({"type": "synthesis", "data": synthesis_data}) + "\n"
         collected["synthesis"] = synthesis_data
 
-        # Forward-looking
-        _task = asyncio.create_task(asyncio.to_thread(analyzer._get_forward_looking, article_info))
-        while not _task.done():
-            try:
-                await asyncio.wait_for(asyncio.shield(_task), timeout=30.0)
-            except asyncio.TimeoutError:
-                yield json.dumps({"type": "ping"}) + "\n"
-        forward_looking = _task.result()
-        if forward_looking:
-            fl_data = [
-                {
-                    "plf_year": fl.plf_year,
-                    "status": fl.status,
-                    "propositions": fl.propositions,
-                    "citations": [_serialize_quoted_source(c) for c in fl.citations],
-                    "niveau_certitude": fl.niveau_certitude.value,
-                }
-                for fl in forward_looking
-            ]
-            yield json.dumps({"type": "forward_looking", "data": fl_data}) + "\n"
-            collected["forward_looking"] = fl_data
-
-        # Jurisprudence
-        _task = asyncio.create_task(asyncio.to_thread(analyzer.article_index.get_jurisprudence, article_ref))
-        while not _task.done():
-            try:
-                await asyncio.wait_for(asyncio.shield(_task), timeout=30.0)
-            except asyncio.TimeoutError:
-                yield json.dumps({"type": "ping"}) + "\n"
-        jurisprudence = _task.result()
-        if jurisprudence:
-            juris_data = [
-                {
-                    "juridiction": j.juridiction,
-                    "date": j.date,
-                    "reference": j.reference,
-                    "titre": j.titre,
-                    "faits": j.faits,
-                    "solution": j.solution,
-                    "portee": j.portee,
-                }
-                for j in jurisprudence
-            ]
-            yield json.dumps({"type": "jurisprudence", "data": juris_data}) + "\n"
-            collected["jurisprudence"] = juris_data
-
-        # Methodology references (rapports parlementaires + DILA sources)
-        yield json.dumps({"type": "status", "data": "Gathering methodology references..."}) + "\n"
-        _task = asyncio.create_task(asyncio.to_thread(analyzer._get_methodology_references, article_info))
-        while not _task.done():
-            try:
-                await asyncio.wait_for(asyncio.shield(_task), timeout=30.0)
-            except asyncio.TimeoutError:
-                yield json.dumps({"type": "ping"}) + "\n"
-        rapports, dila_sources = _task.result()
-        collected["rapports_parlementaires"] = rapports
-        collected["dila_sources"] = dila_sources
-        if rapports:
-            yield json.dumps({"type": "rapports_parlementaires", "data": rapports}) + "\n"
-        if dila_sources:
-            yield json.dumps({"type": "dila_sources", "data": dila_sources}) + "\n"
-
-        # Parliamentary sources (AN + Sénat)
-        _task = asyncio.create_task(asyncio.to_thread(analyzer._build_parliamentary_sources, sections))
-        while not _task.done():
-            try:
-                await asyncio.wait_for(asyncio.shield(_task), timeout=30.0)
-            except asyncio.TimeoutError:
-                yield json.dumps({"type": "ping"}) + "\n"
-        an_sources, senat_sources = _task.result()
+        # Parliamentary sources
+        an_sources, senat_sources = task_parl_sources.result()
         collected["sources_parlementaires_an"] = an_sources
         collected["sources_parlementaires_senat"] = senat_sources
         if an_sources or senat_sources:
@@ -773,83 +950,37 @@ async def _run_analysis(
                 "data": {"an": an_sources, "senat": senat_sources},
             }) + "\n"
 
-        # Cross-law references detection
-        yield json.dumps({"type": "status", "data": "Detecting cross-law references..."}) + "\n"
+        # Cross-law references
         cross_references = []
         try:
-            cross_analyzer = CrossLawAnalyzer()
-            sections_by_law: dict[str, dict] = {}
-            debate_chunks_by_law: dict[str, list] = {}
-
-            for section in sections:
-                mod = section.modification
-                law_key = f"{mod.law_type}_{mod.law_year}"
-                sections_by_law[law_key] = {
-                    "law_type": mod.law_type,
-                    "law_year": mod.law_year,
-                    "law_numero": mod.law_numero,
+            raw_refs = task_cross_law.result() if task_cross_law else []
+            cross_references = [
+                {
+                    "source_law": f"{cr.source_law_type} {cr.source_law_year}",
+                    "target_law": cr.target_law_ref,
+                    "citation": cr.citation,
+                    "ref_type": cr.ref_type.value,
+                    "confidence": round(cr.confidence, 3),
                 }
-                # Re-search to get chunks for cross-law detection
-                if analyzer.search_service:
-                    if mod.law_type in ("LF", "LFSS"):
-                        ds = mod.date - timedelta(days=450)
-                    else:
-                        ds = mod.date - timedelta(days=180)
-                    de = mod.date + timedelta(days=30)
-                    try:
-                        sr = analyzer.search_service.search_article_modification(
-                            article_ref=article_info.reference,
-                            article_keywords=article_info.keywords,
-                            law_type=mod.law_type,
-                            law_year=mod.law_year,
-                            date_start=ds, date_end=de,
-                            top_k=10, min_relevant=1,
-                            article_in_law=mod.article_in_law,
-                        )
-                        debate_chunks_by_law[law_key] = sr.get("debates", [])
-                    except Exception as search_err:
-                        logger.debug(f"Cross-law search failed for {law_key}: {search_err}")
-
-            if sections_by_law and debate_chunks_by_law:
-                _task = asyncio.create_task(
-                    asyncio.to_thread(
-                        cross_analyzer.detect_cross_references,
-                        sections_by_law, debate_chunks_by_law,
-                    )
-                )
-                while not _task.done():
-                    try:
-                        await asyncio.wait_for(asyncio.shield(_task), timeout=30.0)
-                    except asyncio.TimeoutError:
-                        yield json.dumps({"type": "ping"}) + "\n"
-                raw_refs = _task.result()
-                cross_references = [
-                    {
-                        "source_law": f"{cr.source_law_type} {cr.source_law_year}",
-                        "target_law": cr.target_law_ref,
-                        "citation": cr.citation,
-                    }
-                    for cr in raw_refs
-                ]
+                for cr in raw_refs
+            ]
         except Exception as e:
             logger.warning(f"Cross-law detection failed unexpectedly: {e}")
-
         collected["cross_references"] = cross_references
         if cross_references:
             yield json.dumps({"type": "cross_references", "data": cross_references}) + "\n"
 
-        # PLF-LF delta analysis
-        yield json.dumps({"type": "status", "data": "Computing PLF-LF deltas..."}) + "\n"
-        _task = asyncio.create_task(asyncio.to_thread(analyzer._compute_plf_lf_delta, article_info, sections))
-        while not _task.done():
-            try:
-                await asyncio.wait_for(asyncio.shield(_task), timeout=30.0)
-            except asyncio.TimeoutError:
-                yield json.dumps({"type": "ping"}) + "\n"
-        plf_lf_deltas = _task.result()
-        collected["plf_lf_deltas"] = plf_lf_deltas
-        if plf_lf_deltas:
-            yield json.dumps({"type": "plf_lf_deltas", "data": plf_lf_deltas}) + "\n"
+        # Jurisprudence from DB (verified, not LLM-generated)
+        jurisprudence_data = []
+        try:
+            jurisprudence_data = await asyncio.to_thread(
+                analyzer._fetch_jurisprudence_from_db, article_ref
+            )
+        except Exception as e:
+            logger.warning(f"Jurisprudence fetch failed: {e}")
+        collected["jurisprudence"] = jurisprudence_data
+        if jurisprudence_data:
+            yield json.dumps({"type": "jurisprudence", "data": jurisprudence_data}) + "\n"
 
         # Compute metadata and invalidation data
         settings = get_settings()
@@ -857,7 +988,7 @@ async def _run_analysis(
             "total_sections": len(sections),
             "total_debates_searched": total_debates,
             "total_interventions_found": total_interventions,
-            "generated_date": datetime.now(UTC).strftime("%Y-%m-%d"),
+            "generated_date": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
             "llm_model": settings.groq_model if settings.llm_provider == "groq" else settings.claude_model,
             "embedding_model": settings.local_embedding_model,
         }
@@ -913,7 +1044,13 @@ async def _run_analysis(
             logger.error(f"Failed to persist analysis cache: {cache_err}")
             collected["metadata"]["cached"] = False
 
-        # Done — final yield
+        # Emit token usage summary
+        token_summary = analyzer.token_tracker.to_dict()
+        yield json.dumps({"type": "token_usage", "data": token_summary}) + "\n"
+        collected["metadata"]["token_usage"] = token_summary
+        collected["metadata"]["estimated_cost_usd"] = analyzer.token_tracker.estimated_cost_usd()
+
+        # Done - final yield
         yield json.dumps({"type": "done", "data": collected["metadata"]}) + "\n"
 
     except Exception as e:
@@ -943,6 +1080,7 @@ async def trigger_article_analysis(
     question: str | None = Query(None, description="Custom question (default: standard legislative intent question)"),
     max_modifications: int | None = Query(None, description="Limit number of modifications to analyze"),
     force: bool = Query(False, description="Force re-analysis even if cache exists"),
+    _user: User = Depends(require_active_access),
 ):
     """Launch article analysis in background or return cached result immediately."""
     import uuid
@@ -1007,7 +1145,7 @@ async def get_analysis_status(article_ref: str):
     job = _analysis_jobs.get(article_ref_normalized)
 
     if not job:
-        # No active job — check if cache exists
+        # No active job - check if cache exists
         cached = await asyncio.to_thread(get_cached_analysis, article_ref_normalized)
         if cached:
             return JSONResponse({"status": "done", "article_ref": article_ref_normalized, "from_cache": True})
@@ -1051,7 +1189,7 @@ async def get_article_analysis(article_ref: str):
     summary="Clear cached analysis",
     description="Clear cached analysis for a specific CGI article.",
 )
-async def clear_cache(article_ref: str):
+def clear_cache(article_ref: str):
     """Clear cached analysis for a CGI article."""
     article_ref_normalized = normalize_article_ref(article_ref)
     with get_session() as session:
@@ -1086,14 +1224,6 @@ def _build_cache_events(cached: dict) -> list[str]:
         events.append(json.dumps({"type": "consolidation", "data": consol}) + "\n")
     if cached.get("synthesis"):
         events.append(json.dumps({"type": "synthesis", "data": cached["synthesis"]}) + "\n")
-    if cached.get("forward_looking"):
-        events.append(json.dumps({"type": "forward_looking", "data": cached["forward_looking"]}) + "\n")
-    if cached.get("jurisprudence"):
-        events.append(json.dumps({"type": "jurisprudence", "data": cached["jurisprudence"]}) + "\n")
-    if cached.get("rapports_parlementaires"):
-        events.append(json.dumps({"type": "rapports_parlementaires", "data": cached["rapports_parlementaires"]}) + "\n")
-    if cached.get("dila_sources"):
-        events.append(json.dumps({"type": "dila_sources", "data": cached["dila_sources"]}) + "\n")
     if cached.get("sources_parlementaires_an") or cached.get("sources_parlementaires_senat"):
         events.append(json.dumps({
             "type": "sources_parlementaires",
@@ -1104,8 +1234,8 @@ def _build_cache_events(cached: dict) -> list[str]:
         }) + "\n")
     if cached.get("cross_references"):
         events.append(json.dumps({"type": "cross_references", "data": cached["cross_references"]}) + "\n")
-    if cached.get("plf_lf_deltas"):
-        events.append(json.dumps({"type": "plf_lf_deltas", "data": cached["plf_lf_deltas"]}) + "\n")
+    if cached.get("jurisprudence"):
+        events.append(json.dumps({"type": "jurisprudence", "data": cached["jurisprudence"]}) + "\n")
     meta = {**cached.get("metadata", {}), "from_cache": True}
     events.append(json.dumps({"type": "done", "data": meta}) + "\n")
     return events
@@ -1117,8 +1247,7 @@ def _build_cache_events(cached: dict) -> list[str]:
     description="Stream comprehensive article analysis with progressive results. "
                 "Each line is a JSON object (NDJSON format) with 'type' and 'data' fields. "
                 "Types: status, article_info, section, consolidation, synthesis, "
-                "forward_looking, jurisprudence, rapports_parlementaires, dila_sources, "
-                "sources_parlementaires, cross_references, plf_lf_deltas, done, error.",
+                "sources_parlementaires, cross_references, done, error.",
 )
 async def stream_article_analysis(
     request: Request,
@@ -1126,6 +1255,7 @@ async def stream_article_analysis(
     question: str | None = Query(None, description="Custom question (default: standard legislative intent question)"),
     max_modifications: int | None = Query(None, ge=1, le=50, description="Max modifications to analyze"),
     force_refresh: bool = Query(False, description="Bypass cache and force re-analysis"),
+    _user: User = Depends(require_active_access_stream),
 ):
     """Stream comprehensive article analysis for a CGI article."""
     # Normalize via centralized function first
@@ -1149,7 +1279,7 @@ async def stream_article_analysis(
     if not question:
         question = f"Pourquoi le législateur a-t-il créé et modifié l'article {article_ref_normalized} ?"
 
-    # Check if an identical analysis is already running — do this BEFORE the cache
+    # Check if an identical analysis is already running - do this BEFORE the cache
     # check (which does an await) to close the race window where concurrent requests
     # all miss the key and each start their own analysis.
     analysis_key = f"{article_ref_normalized}::{question}::{max_modifications}"
@@ -1173,7 +1303,7 @@ async def stream_article_analysis(
             headers=_stream_headers,
         )
 
-    # Check cache BEFORE reserving the key — cache hits return instantly without
+    # Check cache BEFORE reserving the key - cache hits return instantly without
     # touching the fan-out dict, so no subscriber race is possible.
     # Timeout prevents blocking when the thread pool is saturated by analysis work.
     if not force_refresh:
@@ -1185,6 +1315,15 @@ async def stream_article_analysis(
         except asyncio.TimeoutError:
             logger.warning(f"Cache check timed out for {article_ref_normalized}, falling through to fan-out path")
             cached = None
+            # Re-check if another request started an analysis during the timeout
+            if analysis_key in _running_analyses:
+                existing = _running_analyses[analysis_key]
+                logger.info(f"Subscribing to analysis started during cache timeout for {article_ref_normalized}")
+                return StreamingResponse(
+                    _stream_from_running(existing, request),
+                    media_type="application/x-ndjson",
+                    headers=_stream_headers,
+                )
         if cached:
             logger.info(f"Cache hit for {article_ref_normalized}")
             cache_events = _build_cache_events(cached)
@@ -1195,9 +1334,9 @@ async def stream_article_analysis(
 
             return StreamingResponse(stream_from_cache(), media_type="application/x-ndjson", headers=_stream_headers)
 
-    # No cache — reserve the key to prevent duplicate analyses, then launch task.
+    # No cache - reserve the key to prevent duplicate analyses, then launch task.
     # Between the cache check above and this setdefault, another request may have
-    # reserved the key — setdefault handles that atomically.
+    # reserved the key - setdefault handles that atomically.
     new_running = _RunningAnalysis()
     running = _running_analyses.setdefault(analysis_key, new_running)
     if running is not new_running:
@@ -1208,7 +1347,7 @@ async def stream_article_analysis(
             headers=_stream_headers,
         )
 
-    # No cache, key reserved — launch new analysis task
+    # No cache, key reserved - launch new analysis task
     logger.info(f"Launching new analysis for {article_ref_normalized}")
     asyncio.create_task(
         _run_analysis_task(article_ref_normalized, question, max_modifications, new_running, analysis_key)
@@ -1233,7 +1372,7 @@ async def stream_article_analysis(
     summary="Get CGI article details",
     description="Get detailed information about a CGI article including its modification history.",
 )
-async def get_cgi_article(article_ref: str):
+def get_cgi_article(article_ref: str):
     """Get detailed CGI article information."""
     try:
         index = get_article_index()
@@ -1275,7 +1414,7 @@ async def get_cgi_article(article_ref: str):
             titre=data.get("titre", ""),
             code=data.get("code", "CGI"),
             legifrance_url=data.get("legifrance_url", ""),
-            bofip_url=data.get("bofip_url", ""),
+            etat_actuel=data.get("etat_actuel", ""),
             keywords=data.get("keywords", []),
             modifications=modifications,
         )

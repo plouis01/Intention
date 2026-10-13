@@ -7,7 +7,6 @@ from pathlib import Path
 
 from src.analysis.models import (
     ArticleInfo,
-    JurisprudenceEntry,
     LawModification,
     ModificationNature,
 )
@@ -15,7 +14,7 @@ from src.analysis.models import (
 logger = logging.getLogger(__name__)
 
 # Default path to the article modifications index
-DEFAULT_INDEX_PATH = Path(__file__).parent.parent.parent / "data" / "article_modifications.json"
+DEFAULT_INDEX_PATH = Path(__file__).parent.parent.parent / "data" / "modifications_cgi_enriched.json"
 
 
 class ArticleIndex:
@@ -79,16 +78,29 @@ class ArticleIndex:
         """Parse article data into ArticleInfo object."""
         modifications = []
         for mod in data.get("modifications", []):
+            # Skip modifications with no date (INCONNU historical entries)
+            mod_date_str = mod.get("date", "")
+            if not mod_date_str:
+                continue
+            try:
+                mod_date = datetime.strptime(mod_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                logger.warning(f"Invalid date '{mod_date_str}' for {ref}, skipping")
+                continue
             modifications.append(
                 LawModification(
-                    date=datetime.strptime(mod["date"], "%Y-%m-%d").date(),
-                    law_numero=mod["law_numero"],
-                    law_type=mod["law_type"],
-                    law_year=mod["law_year"],
-                    article_in_law=mod["article_in_law"],
+                    date=mod_date,
+                    law_numero=mod.get("law_numero", ""),
+                    law_type=mod.get("law_type", "INCONNU"),
+                    law_year=mod.get("law_year") or 0,
+                    article_in_law=mod.get("article_in_law") or "",
                     nature=ModificationNature(mod["nature"]),
                     legifrance_url=mod.get("legifrance_url", ""),
                     law_title=mod.get("law_title", ""),
+                    objet=mod.get("objet", ""),
+                    date_debut_vigueur=mod.get("date_debut_vigueur", ""),
+                    date_fin_vigueur=mod.get("date_fin_vigueur", ""),
+                    nor=mod.get("nor", ""),
                 )
             )
 
@@ -99,73 +111,13 @@ class ArticleIndex:
             keywords=data.get("keywords", []),
             modifications=modifications,
             legifrance_url=data.get("legifrance_url", ""),
-            bofip_url=data.get("bofip_url", ""),
+            etat_actuel=data.get("etat_actuel", ""),
+            texte_actuel=data.get("texte_actuel", ""),
+            nota=data.get("nota", ""),
+            hierarchie=data.get("hierarchie", []),
+            article_ids=data.get("article_ids", []),
+            references_croisees=data.get("references_croisees", []),
         )
-
-    def get_jurisprudence(self, article_ref: str) -> list[JurisprudenceEntry]:
-        """Get jurisprudence entries for an article."""
-        articles = self._data.get("articles", {})
-        key = self._resolve_ref(article_ref)
-        data = articles.get(key, {}) if key else {}
-
-        entries = []
-        for j in data.get("jurisprudence", []):
-            entries.append(
-                JurisprudenceEntry(
-                    juridiction=j.get("juridiction", ""),
-                    date=j.get("date", ""),
-                    reference=j.get("reference", ""),
-                    titre=j.get("titre", ""),
-                    faits=j.get("faits", ""),
-                    solution=j.get("solution", ""),
-                    portee=j.get("portee", ""),
-                )
-            )
-
-        return entries
-
-    def get_synthese(self, article_ref: str) -> dict:
-        """Get synthesis data for an article."""
-        articles = self._data.get("articles", {})
-        key = self._resolve_ref(article_ref)
-        data = articles.get(key, {}) if key else {}
-        return data.get("synthese", {})
-
-    def get_synthese_evolution(self, article_ref: str) -> list[dict]:
-        """Get predefined synthesis evolution data for an article."""
-        articles = self._data.get("articles", {})
-        key = self._resolve_ref(article_ref)
-        data = articles.get(key, {}) if key else {}
-        return data.get("synthese_evolution", [])
-
-    def get_curated_quotes(self, article_ref: str, year: str) -> list[dict]:
-        """Get curated quotes for a specific modification year."""
-        articles = self._data.get("articles", {})
-        key = self._resolve_ref(article_ref)
-        data = articles.get(key, {}) if key else {}
-        curated = data.get("curated_quotes", {})
-        return curated.get(year, [])
-
-    def get_forward_looking(self, article_ref: str) -> list[dict]:
-        """Get forward-looking PLF discussion data."""
-        articles = self._data.get("articles", {})
-        key = self._resolve_ref(article_ref)
-        data = articles.get(key, {}) if key else {}
-        return data.get("forward_looking", [])
-
-    def get_rapports_parlementaires(self, article_ref: str) -> list[dict]:
-        """Get parliamentary report references."""
-        articles = self._data.get("articles", {})
-        key = self._resolve_ref(article_ref)
-        data = articles.get(key, {}) if key else {}
-        return data.get("rapports_parlementaires", [])
-
-    def get_dila_sources(self, article_ref: str) -> list[str]:
-        """Get DILA source references."""
-        articles = self._data.get("articles", {})
-        key = self._resolve_ref(article_ref)
-        data = articles.get(key, {}) if key else {}
-        return data.get("dila_sources", [])
 
     def list_articles(self) -> list[str]:
         """List all article references in the index."""

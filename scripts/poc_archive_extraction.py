@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 # Sample PDFs across different legislatures / decades
 AN_SAMPLES = [
-    # (legislature, session, pdf_number) — from different eras
+    # (legislature, session, pdf_number) - from different eras
     (1, "1958-1959-extraordinaire1", "001"),  # 1958
     (3, "1967-1968-ordinaire1", "001"),       # 1967
     (5, "1973-1974-ordinaire1", "001"),       # 1973
@@ -38,7 +38,7 @@ AN_SAMPLES = [
     (11, "2001-2002-ordinaire1", "001"),      # 2001
 ]
 
-# Sénat samples: (year, month) — we'll grab the first PDF from each
+# Sénat samples: (year, month) - we'll grab the first PDF from each
 SENAT_SAMPLE_MONTHS = [
     (1959, 1),   # 1960s
     (1970, 10),  # 1970s
@@ -185,7 +185,7 @@ def write_parse_report_md(
     avg_interventions = total_interventions / len(successful) if successful else 0
 
     lines = []
-    lines.append("# POC Archive Extraction — Parse Results\n")
+    lines.append("# POC Archive Extraction - Parse Results\n")
 
     # Summary table
     lines.append("## Summary\n")
@@ -203,7 +203,7 @@ def write_parse_report_md(
     lines.append("## Debates\n")
     for pdf_path, debat in results:
         if debat is None:
-            lines.append(f"### {pdf_path.name} — SKIPPED\n")
+            lines.append(f"### {pdf_path.name} - SKIPPED\n")
             lines.append("No date found or insufficient text.\n")
             continue
 

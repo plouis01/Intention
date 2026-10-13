@@ -50,7 +50,7 @@ def compute_debate_windows(laws: list[dict]) -> list[dict]:
             start = datetime(annee - 1, 10, 1)
             end = datetime(annee - 1, 12, 15)
         elif law_type == "LFR":
-            # LFR debates: variable — 30 to 90 days before promulgation
+            # LFR debates: variable - 30 to 90 days before promulgation
             end = date_promulgation
             start = date_promulgation - timedelta(days=90)
         else:

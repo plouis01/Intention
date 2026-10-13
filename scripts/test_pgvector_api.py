@@ -24,7 +24,7 @@ from src.indexing.vector_stores import create_vector_store
 
 # Créer le store
 print("🔌 Connexion à PostgreSQL...")
-store = create_vector_store(store_type="pgvector", embedding_dim=384)
+store = create_vector_store(store_type="pgvector", embedding_dim=768)
 
 # Vérifier le count
 print("📊 Comptage des chunks...")

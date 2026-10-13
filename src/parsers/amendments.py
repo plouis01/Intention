@@ -11,6 +11,106 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+# Patterns indicating a function/role after a comma (not a co-author)
+_FUNCTION_STARTS = (
+    "rapporteur", "au nom", "pour avis", "ministre", "secrétaire",
+    "président", "commissaire", "garde", "membre de", "à titre",
+)
+
+# Title prefixes that indicate a co-author
+_TITLE_RE = re.compile(r"^(?:M\.|Mme|MM\.|Mlle|Mmes)\s", re.IGNORECASE)
+
+
+def normalize_amendment_author(raw: str | None) -> str | None:
+    """Normalize amendment author to first author only.
+
+    Handles:
+    - Multi-author comma lists: "M. Dupont, M. Martin, ..." → "M. Dupont"
+    - Name + function: "M. Hamel, rapporteur au nom de..." → "M. Hamel, rapporteur au nom de..."
+    - Gouvernement variants: "le Gouvernement" → "Gouvernement"
+    - MM. plural: "MM. Dupont, Martin, ..." → "M. Dupont"
+    - Mixed: "M. Jacob, rapporteur ... et M. Poignant" → "M. Jacob, rapporteur ..."
+    - "et les membres du groupe ..." → stripped
+    """
+    if not raw or not isinstance(raw, str):
+        return None
+
+    raw = raw.strip()
+    # Strip leading commas/punctuation (dirty data: ", M. Demilly")
+    raw = raw.lstrip(",;. ").strip()
+    if not raw:
+        return None
+
+    # Normalize Gouvernement
+    if re.match(r"^(?:le\s+)?gouvernement\b", raw, re.IGNORECASE):
+        return "Gouvernement"
+
+    # Strip trailing junk like " --------"
+    raw = re.sub(r"\s*-{3,}\s*$", "", raw)
+
+    # Handle "avec l'accord du Gouvernement" suffix
+    raw = re.sub(r"\s+avec l'accord du Gouvernement\s*$", "", raw, flags=re.IGNORECASE)
+
+    # Handle MM. plural prefix → extract first author name
+    mm_match = re.match(r"^MM\.\s+(.+)", raw)
+    if mm_match:
+        rest = mm_match.group(1)
+        # First name is before the first comma
+        first_name = rest.split(",")[0].strip()
+        return f"M. {first_name}"
+
+    # Handle Mmes plural prefix
+    mmes_match = re.match(r"^Mmes\s+(.+)", raw)
+    if mmes_match:
+        rest = mmes_match.group(1)
+        first_name = rest.split(",")[0].strip()
+        return f"Mme {first_name}"
+
+    # Strip "et les membres du groupe ..." / "et les commissaires ..." suffix
+    raw = re.sub(r"\s+et les (?:membres|commissaires)\b.*$", "", raw, flags=re.IGNORECASE)
+
+    # Split on comma
+    parts = raw.split(",")
+    if len(parts) <= 1:
+        # No comma - check for "et M./Mme" co-author
+        et_match = re.search(r"\s+et\s+(?:M\.|Mme|MM\.)\s", raw)
+        if et_match:
+            return raw[: et_match.start()].strip()
+        return raw.strip()
+
+    # Check if second segment is a function (rapporteur, au nom de, etc.)
+    # or a co-author (starts with M., Mme, etc.)
+    second = parts[1].strip()
+    second_lower = second.lower()
+
+    is_function = any(second_lower.startswith(f) for f in _FUNCTION_STARTS)
+    is_coauthor = bool(_TITLE_RE.match(second))
+
+    if is_function and not is_coauthor:
+        # "M. Hamel, rapporteur au nom de la commission des affaires économiques et M. Poignant"
+        # → keep name + function, strip co-authors after function
+        name_and_func = ",".join(parts[:2]).strip()
+        # Remove trailing "et M./Mme..." co-author after function
+        et_match = re.search(r"\s+et\s+(?:M\.|Mme|MM\.)\s", name_and_func)
+        if et_match:
+            name_and_func = name_and_func[: et_match.start()].strip()
+        # Remove bare co-author title in the function part (without "et")
+        # e.g. "saisie pour avis M. Muzeau" or "économiques MM. Charié"
+        if "," not in name_and_func:
+            return name_and_func
+        comma_pos = name_and_func.index(",")
+        func_part = name_and_func[comma_pos + 1:]
+        bare_title = re.search(r"\s+(?:M\.|Mme|MM\.|Mmes|Mlle)\s+[A-ZÀ-Ú]", func_part)
+        if bare_title:
+            name_and_func = (name_and_func[: comma_pos + 1] + func_part[: bare_title.start()]).strip()
+        return name_and_func
+    elif is_coauthor:
+        # "M. Dupont, M. Martin, Mme Durand" → first author only
+        return parts[0].strip()
+    else:
+        # Ambiguous - keep first segment
+        return parts[0].strip()
+
 
 @dataclass
 class ParsedAmendement:
@@ -112,7 +212,7 @@ def parse_an_amendement(data: dict[str, Any]) -> ParsedAmendement:
     """
     amend = data.get("amendement", data)
 
-    # Extract sort (outcome) — lives inside cycleDeVie in modern AN JSON
+    # Extract sort (outcome) - lives inside cycleDeVie in modern AN JSON
     cycle = amend.get("cycleDeVie", {}) or {}
     sort_data = cycle.get("sort", amend.get("sort", {}))
     if isinstance(sort_data, dict):
@@ -145,6 +245,7 @@ def parse_an_amendement(data: dict[str, Any]) -> ParsedAmendement:
     # Ensure auteur is a string or None (handle nil dicts)
     if auteur is not None and not isinstance(auteur, str):
         auteur = None
+    auteur = normalize_amendment_author(auteur)
 
     # Extract content
     corps = amend.get("corps", {})
@@ -183,7 +284,7 @@ def parse_an_amendement(data: dict[str, Any]) -> ParsedAmendement:
     if not article_ref and contenu:
         article_ref = extract_article_from_text(contenu)
 
-    # Parse date — lives inside cycleDeVie in modern AN JSON
+    # Parse date - lives inside cycleDeVie in modern AN JSON
     date_str = cycle.get("dateDepot") or amend.get("dateDepot")
     if isinstance(date_str, dict):
         date_str = None  # nil placeholder
@@ -255,7 +356,7 @@ def parse_senat_amendement(data: dict[str, Any]) -> ParsedAmendement:
 
     return ParsedAmendement(
         numero=data.get("numero") or data.get("num") or data.get("numeroAmendement") or "?",
-        auteur=data.get("auteur") or data.get("signataire") or data.get("auteurAmendement"),
+        auteur=normalize_amendment_author(data.get("auteur") or data.get("signataire") or data.get("auteurAmendement")),
         objet=objet,
         contenu=data.get("dispositif") or data.get("contenu") or data.get("texteAmendement"),
         expose_motifs=data.get("expose") or data.get("motifs") or objet,

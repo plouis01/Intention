@@ -19,18 +19,18 @@ from pathlib import Path
 DATA_FILE = Path(__file__).parent.parent / "data" / "article_modifications.json"
 
 # =============================================================================
-# TITRE MAPPING — Batch 1: First 200 articles
+# TITRE MAPPING - Batch 1: First 200 articles
 # =============================================================================
 # Conventions:
 # - French, concise (5-15 words)
 # - Focus on the article's primary purpose
 # - Local tax articles: include tax abbreviation (TFPB, TH, CFE, CVAE, IFER, TEOM)
 # - Non-CGI articles: prefix with [CODE_NAME]
-# - No "Article X du CGI" — redundant with the ref
+# - No "Article X du CGI" - redundant with the ref
 # =============================================================================
 
 TITRE_MAP = {
-    # === IR — Impôt sur le revenu ===
+    # === IR - Impôt sur le revenu ===
     "4 B": "Domicile fiscal en France",
     "6": "Imposition commune des époux et des personnes à charge",
     "6 D": "Dispositions transitoires relatives à l'imposition des époux",
@@ -52,9 +52,9 @@ TITRE_MAP = {
     "49 D": "Dispositions transitoires relatives aux sociétés de personnes",
     "83 D": "Dispositions transitoires relatives aux frais professionnels",
     "93": "Détermination des bénéfices imposables des professions non commerciales (BNC)",
-    "111-7": "Revenus réputés distribués — prêts aux associés",
+    "111-7": "Revenus réputés distribués - prêts aux associés",
     "114": "Déduction des intérêts de comptes courants d'associés",
-    "130-1": "Revenus de capitaux mobiliers — base imposable",
+    "130-1": "Revenus de capitaux mobiliers - base imposable",
     "141-1": "Abattement sur les dividendes perçus par les personnes physiques",
     "146 D": "Dispositions transitoires relatives aux revenus de capitaux mobiliers",
     "150 U": "Plus-values immobilières des particuliers",
@@ -72,20 +72,20 @@ TITRE_MAP = {
     "199 U": "Réduction d'impôt pour investissement locatif social (Scellier)",
     "204 H": "Acompte contemporain de prélèvement à la source (taux par défaut)",
 
-    # === IS — Impôt sur les sociétés ===
-    "214-160": "Régime fiscal des sociétés mères — quote-part de frais et charges",
+    # === IS - Impôt sur les sociétés ===
+    "214-160": "Régime fiscal des sociétés mères - quote-part de frais et charges",
     "217 U": "Amortissement exceptionnel pour investissements productifs",
     "220 Q": "Crédit d'impôt pour dépenses de production cinématographique",
     "220 S": "Crédit d'impôt pour dépenses de production de spectacles vivants",
     "223 A bis": "Intégration fiscale horizontale entre sociétés sœurs",
-    "224-1": "Taxe d'apprentissage — assiette et taux",
-    "225-115": "Taxe sur les salaires — assiette et barème",
+    "224-1": "Taxe d'apprentissage - assiette et taux",
+    "225-115": "Taxe sur les salaires - assiette et barème",
     "233-16": "Obligation de documentation des prix de transfert",
     "241-3": "Acomptes d'impôt sur les sociétés",
     "244 Q": "Crédit d'impôt recherche collaborative",
-    "266-2": "Contribution sociale de solidarité des sociétés (C3S) — assiette",
+    "266-2": "Contribution sociale de solidarité des sociétés (C3S) - assiette",
 
-    # === TVA — Taxe sur la valeur ajoutée ===
+    # === TVA - Taxe sur la valeur ajoutée ===
     "256": "Opérations imposables à la TVA",
     "256 B": "Livraisons de biens à soi-même imposables à la TVA",
     "256 D": "Prestations de services à soi-même imposables",
@@ -93,18 +93,18 @@ TITRE_MAP = {
     "256 L": "TVA sur les bons à usage unique et à usages multiples",
     "256 O": "TVA sur les services fournis par voie électronique",
     "258": "Lieu de livraison des biens pour la TVA",
-    "258 A": "Lieu des livraisons avec transport — TVA intracommunautaire",
+    "258 A": "Lieu des livraisons avec transport - TVA intracommunautaire",
     "258 B": "Lieu des acquisitions intracommunautaires",
-    "259 D": "Lieu des prestations de services — dérogations particulières",
+    "259 D": "Lieu des prestations de services - dérogations particulières",
     "269": "Fait générateur et exigibilité de la TVA",
     "271": "Droit à déduction de la TVA",
     "271 D": "Dispositions transitoires relatives au droit à déduction de TVA",
     "275": "Achats en franchise de TVA (exportateurs)",
     "287": "Obligations déclaratives en matière de TVA",
-    "289": "Facturation — mentions obligatoires",
+    "289": "Facturation - mentions obligatoires",
     "289-0": "Règles de facturation applicables aux opérations intracommunautaires",
     "289-0 E": "Facturation électronique obligatoire",
-    "289 E": "Factures dématérialisées — conditions d'authenticité",
+    "289 E": "Factures dématérialisées - conditions d'authenticité",
     "291": "Exonérations de TVA à l'importation",
     "298 S": "TVA applicable aux opérations sur l'or",
 
@@ -112,7 +112,7 @@ TITRE_MAP = {
     "746": "Droits de partage",
     "723-1": "Droit de mutation sur cessions de parts de SCI",
     "752-1": "Présomption de propriété pour les droits de succession",
-    "790 G": "Donation avec réserve d'usufruit — abattements spécifiques",
+    "790 G": "Donation avec réserve d'usufruit - abattements spécifiques",
     "794": "Exonérations de droits de mutation à titre gratuit",
     "800": "Obligations déclaratives en matière de succession",
     "885-0 V bis": "Réduction d'ISF pour investissement dans les PME",
@@ -133,7 +133,7 @@ TITRE_MAP = {
 
     # === Pénalités et recouvrement ===
     "1635-0 Q": "Droit fixe de procédure (contribution pour l'aide juridique)",
-    "1671 A": "Retenue à la source — obligations de versement",
+    "1671 A": "Retenue à la source - obligations de versement",
     "1691 B": "Solidarité de paiement entre époux pour l'impôt sur le revenu",
     "1729 B": "Majoration pour manquement délibéré en matière de prix de transfert",
     "1736 D": "Amende pour défaut de déclaration de comptes à l'étranger (dispositions transitoires)",
@@ -142,7 +142,7 @@ TITRE_MAP = {
 
     # === Taxe foncière sur les propriétés bâties (TFPB) ===
     "1379": "Répartition de la taxe foncière entre les collectivités",
-    "1379 E": "Répartition de la TFPB — dispositions transitoires",
+    "1379 E": "Répartition de la TFPB - dispositions transitoires",
     "1382": "Exonérations permanentes de taxe foncière sur les propriétés bâties",
     "1382 C bis": "Exonération de TFPB pour les installations de méthanisation agricole",
     "1382 E": "Exonération de TFPB pour les bâtiments ruraux affectés à usage agricole",
@@ -167,13 +167,13 @@ TITRE_MAP = {
     # === Taxe d'habitation (TH) ===
     "1406": "Obligations déclaratives des propriétaires pour la taxe d'habitation",
     "1407": "Champ d'application de la taxe d'habitation",
-    "1407 E": "Taxe d'habitation — dispositions transitoires liées à la réforme",
-    "1407 T": "Taxe d'habitation — dispositions transitoires",
+    "1407 E": "Taxe d'habitation - dispositions transitoires liées à la réforme",
+    "1407 T": "Taxe d'habitation - dispositions transitoires",
     "1408": "Personnes imposables à la taxe d'habitation",
     "1409,1411 et 1649": "Base d'imposition de la taxe d'habitation et commissions communales",
     "1411": "Abattements applicables à la base de la taxe d'habitation",
-    "1411 D": "Abattements TH — dispositions transitoires",
-    "1411 E": "Abattements TH — dispositions transitoires liées à la suppression",
+    "1411 D": "Abattements TH - dispositions transitoires",
+    "1411 E": "Abattements TH - dispositions transitoires liées à la suppression",
     "1413": "Plafonnement de la taxe d'habitation en fonction du revenu",
     "1414": "Exonérations de taxe d'habitation",
     "1414 B": "Plafonnement de la TH en fonction du revenu (mécanisme antérieur)",
@@ -181,39 +181,39 @@ TITRE_MAP = {
     "1414 D": "Dégrèvement de TH pour les contribuables de condition modeste",
     "1414 E": "Suppression de la taxe d'habitation sur les résidences principales",
     "1417": "Conditions de revenus pour les exonérations et dégrèvements d'impôts locaux",
-    "1417 D": "Conditions de revenus — dispositions transitoires",
-    "1417 E": "Conditions de revenus — dispositions transitoires liées à la réforme",
+    "1417 D": "Conditions de revenus - dispositions transitoires",
+    "1417 E": "Conditions de revenus - dispositions transitoires liées à la réforme",
 
-    # === CFE — Cotisation foncière des entreprises ===
+    # === CFE - Cotisation foncière des entreprises ===
     "1458": "Exonérations de cotisation foncière des entreprises",
     "1464 F": "Exonération de CFE pour les entreprises en ZRD (zones de restructuration de la défense)",
     "1464 G": "Exonération de CFE pour les jeunes entreprises innovantes",
     "1466 A": "Exonération de CFE dans les zones franches urbaines",
     "1466 F": "Exonération de CFE dans les bassins d'emploi à redynamiser",
     "1468": "Base minimum de cotisation foncière des entreprises",
-    "1468 D": "Base minimum de CFE — dispositions transitoires",
+    "1468 D": "Base minimum de CFE - dispositions transitoires",
 
     # === Valeurs locatives et évaluation ===
     "1494": "Evaluation de la valeur locative des propriétés bâties",
     "1496 et 1497": "Evaluation par comparaison de la valeur locative des locaux d'habitation et professionnels",
     "1497": "Evaluation de la valeur locative des locaux professionnels",
-    "1498 A": "Evaluation de la valeur locative des locaux professionnels — secteurs d'évaluation",
-    "1499-00 A": "Evaluation de la valeur locative des établissements industriels — méthode comptable",
+    "1498 A": "Evaluation de la valeur locative des locaux professionnels - secteurs d'évaluation",
+    "1499-00 A": "Evaluation de la valeur locative des établissements industriels - méthode comptable",
     "1502": "Commission départementale des valeurs locatives",
     "1504": "Sous-commissions communales des impôts directs",
-    "1507": "Commission communale des impôts directs — rôle pour les locaux professionnels",
+    "1507": "Commission communale des impôts directs - rôle pour les locaux professionnels",
     "1518 A quinquies": "Mise à jour annuelle des valeurs locatives des locaux professionnels",
     "1518 A sexies": "Coefficient de neutralisation pour la révision des valeurs locatives",
-    "1518 E": "Mise à jour des valeurs locatives — dispositions transitoires",
-    "1518 T": "Valeurs locatives — dispositions transitoires de la révision",
+    "1518 E": "Mise à jour des valeurs locatives - dispositions transitoires",
+    "1518 T": "Valeurs locatives - dispositions transitoires de la révision",
 
     # === Taux, répartition et frais d'assiette ===
     "1522": "Taxe d'enlèvement des ordures ménagères (TEOM)",
-    "1522 E": "TEOM — dispositions transitoires",
+    "1522 E": "TEOM - dispositions transitoires",
     "1530 B": "Taxe pour la gestion des milieux aquatiques et prévention des inondations (GEMAPI)",
-    "1586 A": "CVAE — champ d'application et assujettissement",
-    "1586 N": "CVAE — détermination de la valeur ajoutée",
-    "1586 T": "CVAE — dispositions transitoires",
+    "1586 A": "CVAE - champ d'application et assujettissement",
+    "1586 N": "CVAE - détermination de la valeur ajoutée",
+    "1586 T": "CVAE - dispositions transitoires",
     "1609 B": "Taxe spéciale d'équipement au profit de l'Île-de-France",
     "1609 G": "Taxe spéciale d'équipement au profit d'autres établissements publics fonciers",
     "1609 Q": "Taxe additionnelle sur les droits de mutation au profit de l'Île-de-France",
@@ -225,33 +225,33 @@ TITRE_MAP = {
     "1638-0 B": "Intégration fiscale progressive lors de fusions d'EPCI",
     "1638 Q": "Harmonisation des taux lors de fusions d'EPCI (dispositions transitoires)",
     "1639 A bis": "Délibérations des collectivités en matière de fiscalité directe locale",
-    "1639 A ter": "Délibérations des collectivités — exonérations facultatives",
-    "1639 A quater": "Délibérations des collectivités — abattements de taxe d'habitation",
+    "1639 A ter": "Délibérations des collectivités - exonérations facultatives",
+    "1639 A quater": "Délibérations des collectivités - abattements de taxe d'habitation",
     "1640": "Compensation des pertes de recettes des collectivités",
-    "1640 S": "Compensation des pertes de recettes — dispositions transitoires",
+    "1640 S": "Compensation des pertes de recettes - dispositions transitoires",
     "1641": "Frais d'assiette et de recouvrement des impôts locaux",
-    "1641 E": "Frais d'assiette — dispositions transitoires",
+    "1641 E": "Frais d'assiette - dispositions transitoires",
     "1645": None,  # placeholder - not in first 200
     "1647": "Plafonnement de la contribution économique territoriale (CET)",
     "1650": "Commission communale des impôts directs",
     "1650 B": "Commission intercommunale des impôts directs",
     "1650 C": "Commission départementale des impôts directs",
-    "1655 S": "Groupements de collectivités — dispositions fiscales particulières",
+    "1655 S": "Groupements de collectivités - dispositions fiscales particulières",
     "1656": "Dispositions communes aux impôts directs locaux",
-    "1656 B": "Dispositions communes aux impôts directs locaux — dispositions transitoires",
+    "1656 B": "Dispositions communes aux impôts directs locaux - dispositions transitoires",
 
-    # === IFER — Imposition forfaitaire sur les entreprises de réseaux ===
+    # === IFER - Imposition forfaitaire sur les entreprises de réseaux ===
     "1519 C": "IFER sur les installations de production d'électricité d'origine nucléaire ou thermique",
     "1519 F": "IFER sur les installations de production d'électricité d'origine photovoltaïque ou hydraulique",
     "1519 H": "IFER sur les antennes relais de téléphonie mobile",
     "1519 İ": "IFER sur les transformateurs électriques",
 
     # === Non-CGI articles ===
-    # CGCT — Code général des collectivités territoriales
-    "2333-41": "[CGCT] Taxe de séjour — tarifs et modalités de recouvrement",
+    # CGCT - Code général des collectivités territoriales
+    "2333-41": "[CGCT] Taxe de séjour - tarifs et modalités de recouvrement",
     "2333-34": "[CGCT] Taxe locale sur la publicité extérieure",
 
-    # CIBS — Code des impositions sur les biens et services
+    # CIBS - Code des impositions sur les biens et services
     "4430-1": "[CIBS] Contribution sur les boissons sucrées",
     "4431-1": "[CIBS] Contribution sur les boissons édulcorées",
     "4432-5": "[CIBS] Tarifs de la contribution sur les boissons sucrées et édulcorées",
@@ -289,13 +289,13 @@ def apply_titres(data, dry_run=False):
     for ref, titre in sorted(TITRE_MAP.items()):
         if ref not in articles:
             stats["missing"] += 1
-            changes.append(f"  MISSING  {ref!r} — not found in article_modifications.json")
+            changes.append(f"  MISSING  {ref!r} - not found in article_modifications.json")
             continue
 
         existing = articles[ref].get("titre", "")
         if existing:
             stats["skipped_existing"] += 1
-            changes.append(f"  SKIP     {ref!r} — already has titre: {existing!r}")
+            changes.append(f"  SKIP     {ref!r} - already has titre: {existing!r}")
             continue
 
         stats["set"] += 1
@@ -368,7 +368,7 @@ def main():
         # Verify
         verify_coverage(data)
     elif args.dry_run:
-        print(f"\nDry run — no changes written.")
+        print(f"\nDry run - no changes written.")
 
 
 if __name__ == "__main__":

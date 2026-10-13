@@ -3,6 +3,7 @@
 ## Project Goal
 
 Web application where users (French tax lawyers) can:
+
 1. Ask questions about legislative intent behind CGI tax law articles.
 2. Get per-article analysis with quotes from parliamentary debates (AN + Sénat).
 3. See the full modification history of each CGI article across 35 finance laws (2012-2025).
@@ -109,30 +110,35 @@ COLLECT → IMPORT → LINK → FIX → EMBED → INDEX → VALIDATE
 ## What's Working
 
 ### Data Collection
+
 - Collectors for Légifrance (OAuth), AN, Sénat, DILA archives
 - 35 finance laws (2012-2025), 760K+ interventions, 69K+ amendments
 - Sources externes: rapports, jurisprudence, BOFiP
 
 ### Analysis Pipeline
+
 - Multi-stage per-modification analysis: hybrid search → LLM extraction → curated quote augmentation
 - Cross-section dedup for curated quotes
 - Consolidation period detection, synthesis, forward-looking sections
 - Exposé des motifs pulled from `sources_externes` table
 
 ### Search
+
 - Hybrid: semantic (cosine similarity) + keyword (BM25 / ILIKE fallback)
 - Tiered keyword filtering to reduce false positives on legal terms
 - Legal term expansion (`legal_term_expansions.json`)
 - pgvector ILIKE fallback when BM25 index unavailable
 
 ### API
-- Streaming NDJSON endpoint (`/cgi/{ref}/analysis/stream`) — primary user-facing
+
+- Streaming NDJSON endpoint (`/cgi/{ref}/analysis/stream`) - primary user-facing
 - Cached analysis with hash-based invalidation and TTL
 - Auto-reload of `article_modifications.json` on file change
 - Thread-safe service initialization, session management
 - Embedding dimension validation at startup (fail-fast on mismatch)
 
 ### LLM Integration
+
 - GroqClientPool: multi-key rotation, cooldown, exponential backoff
 - Anthropic fallback (with placeholder key detection)
 - 90s timeout on all LLM calls
@@ -142,34 +148,35 @@ COLLECT → IMPORT → LINK → FIX → EMBED → INDEX → VALIDATE
 
 **Overall grade: C (5.5/10)**
 
-| Metric | Value |
-|--------|-------|
-| Total articles | 4,403 |
-| Articles with curated quotes | 2,562 (58.2%) |
-| Total curated quotes | 6,015 |
-| Articles with 5+ mods and zero quotes | **111** (critical gap) |
-| Year gaps (articles with quotes but missing years) | 89.2% |
-| Quote sources | 74.7% legacy (no source field), 23.1% `topic_search`, 2.0% `direct` |
-| Source-verified quotes | 8.4% |
-| Synthese/synthese_evolution coverage | 100% |
-| Jurisprudence coverage | 3.2% (139 articles) |
-| Forward-looking coverage | 7.3% (323 articles) |
+| Metric                                             | Value                                                               |
+| -------------------------------------------------- | ------------------------------------------------------------------- |
+| Total articles                                     | 4,403                                                               |
+| Articles with curated quotes                       | 2,562 (58.2%)                                                       |
+| Total curated quotes                               | 6,015                                                               |
+| Articles with 5+ mods and zero quotes              | **111** (critical gap)                                              |
+| Year gaps (articles with quotes but missing years) | 89.2%                                                               |
+| Quote sources                                      | 74.7% legacy (no source field), 23.1% `topic_search`, 2.0% `direct` |
+| Source-verified quotes                             | 8.4%                                                                |
+| Synthese/synthese_evolution coverage               | 100%                                                                |
+| Jurisprudence coverage                             | 3.2% (139 articles)                                                 |
+| Forward-looking coverage                           | 7.3% (323 articles)                                                 |
 
 ### Key article coverage
 
-| Article | Domain | Mods | Quotes | Year coverage | Grade |
-|---------|--------|------|--------|---------------|-------|
-| 150-0 B ter | Apport-cession | 13 | 9 | 4/8 | A- |
-| 39 | BIC profit | 67 | 29 | 16/24 | B+ |
-| 209 | IS base | 34 | 23 | 10/16 | B |
-| 244 quater B | CIR | 39 | 23 | 12/20 | B |
-| 219 | IS rates | 31 | 16 | 8/14 | B- |
-| 197 | IR brackets | 48 | 5 | 5/24 | D |
-| 1 | IR principles | 51 | 3 | 3/24 | D- |
-| 5 | Non-residents | 42 | 1 | 1/22 | F |
-| 40 | Capital gains | 40 | 2 | 1/22 | F |
+| Article      | Domain         | Mods | Quotes | Year coverage | Grade |
+| ------------ | -------------- | ---- | ------ | ------------- | ----- |
+| 150-0 B ter  | Apport-cession | 13   | 9      | 4/8           | A-    |
+| 39           | BIC profit     | 67   | 29     | 16/24         | B+    |
+| 209          | IS base        | 34   | 23     | 10/16         | B     |
+| 244 quater B | CIR            | 39   | 23     | 12/20         | B     |
+| 219          | IS rates       | 31   | 16     | 8/14          | B-    |
+| 197          | IR brackets    | 48   | 5      | 5/24          | D     |
+| 1            | IR principles  | 51   | 3      | 3/24          | D-    |
+| 5            | Non-residents  | 42   | 1      | 1/22          | F     |
+| 40           | Capital gains  | 40   | 2      | 1/22          | F     |
 
 ### Data hygiene issues
+
 - `chambre` casing inconsistency: `SENAT` (2,118) vs `Senat` (1,065)
 - 407 quotes with empty `fonction` field
 - 12 quotes with `rapporteurM` concatenation artifact
@@ -177,19 +184,20 @@ COLLECT → IMPORT → LINK → FIX → EMBED → INDEX → VALIDATE
 
 ## Current API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/cgi` | GET | List all CGI articles (paginated, searchable) |
-| `/cgi/{ref}` | GET | Article detail + modification history |
-| `/cgi/{ref}/analysis/stream` | GET | Streaming NDJSON analysis (primary endpoint) |
-| `/cgi/{ref}/analysis` | GET | Cached analysis (JSON) |
-| `/cgi/{ref}/cache` | DELETE | Invalidate cached analysis |
-| `/analysis/laws` | GET | List 35 finance laws |
-| `/health` | GET | Service status, DB, embedding counts |
+| Endpoint                     | Method | Description                                   |
+| ---------------------------- | ------ | --------------------------------------------- |
+| `/cgi`                       | GET    | List all CGI articles (paginated, searchable) |
+| `/cgi/{ref}`                 | GET    | Article detail + modification history         |
+| `/cgi/{ref}/analysis/stream` | GET    | Streaming NDJSON analysis (primary endpoint)  |
+| `/cgi/{ref}/analysis`        | GET    | Cached analysis (JSON)                        |
+| `/cgi/{ref}/cache`           | DELETE | Invalidate cached analysis                    |
+| `/analysis/laws`             | GET    | List 35 finance laws                          |
+| `/health`                    | GET    | Service status, DB, embedding counts          |
 
 ## Database Schema (actual)
 
 ### `analysis_cache` (implemented)
+
 ```sql
 CREATE TABLE analysis_cache (
     id SERIAL PRIMARY KEY,
@@ -209,6 +217,7 @@ CREATE TABLE analysis_cache (
 ```
 
 ### `chunk_embeddings` (pgvector production)
+
 ```sql
 CREATE TABLE chunk_embeddings (
     id SERIAL PRIMARY KEY,
@@ -226,38 +235,41 @@ CREATE INDEX ON chunk_embeddings USING hnsw (embedding vector_cosine_ops);
 
 ## Recent Bug Fixes (this session)
 
-| ID | Fix | File |
-|----|-----|------|
-| B1 | Curated quote augmentation in streaming endpoint | `cgi_routes.py` |
-| B2+B3 | Embedding dimension validation at startup | `main.py` |
-| B4 | pgvector ILIKE fallback for keyword_search | `search.py` |
-| B5 | Placeholder Anthropic API key detection | `groq_pool.py` |
-| B6 | Race condition in `save_cached_analysis` (IntegrityError) | `cgi_routes.py` |
-| B7 | Thread-safe `get_search_service` (double-checked locking) | `routes.py` |
-| B8 | Session leak in health check | `routes.py` |
-| Q1 | 90s timeout on LLM calls | `article_analyzer.py` |
-| Q2 | Cross-section curated quote dedup in streaming | `cgi_routes.py` |
-| Q3 | Auto-reload article index on file change | `cgi_routes.py` |
-| Q4 | SQL-level filtering in `_fetch_expose_motifs` | `article_analyzer.py` |
-| M1 | Skip retry on permanent LLM errors (403) | `article_analyzer.py` |
-| M2 | UTC timezone for `generated_date` | `article_analyzer.py` |
-| M3 | Log embedding errors in health check | `routes.py` |
-| — | Case-insensitive lookups in ArticleIndex | `article_index.py` |
+| ID    | Fix                                                       | File                  |
+| ----- | --------------------------------------------------------- | --------------------- |
+| B1    | Curated quote augmentation in streaming endpoint          | `cgi_routes.py`       |
+| B2+B3 | Embedding dimension validation at startup                 | `main.py`             |
+| B4    | pgvector ILIKE fallback for keyword_search                | `search.py`           |
+| B5    | Placeholder Anthropic API key detection                   | `groq_pool.py`        |
+| B6    | Race condition in `save_cached_analysis` (IntegrityError) | `cgi_routes.py`       |
+| B7    | Thread-safe `get_search_service` (double-checked locking) | `routes.py`           |
+| B8    | Session leak in health check                              | `routes.py`           |
+| Q1    | 90s timeout on LLM calls                                  | `article_analyzer.py` |
+| Q2    | Cross-section curated quote dedup in streaming            | `cgi_routes.py`       |
+| Q3    | Auto-reload article index on file change                  | `cgi_routes.py`       |
+| Q4    | SQL-level filtering in `_fetch_expose_motifs`             | `article_analyzer.py` |
+| M1    | Skip retry on permanent LLM errors (403)                  | `article_analyzer.py` |
+| M2    | UTC timezone for `generated_date`                         | `article_analyzer.py` |
+| M3    | Log embedding errors in health check                      | `routes.py`           |
+| -     | Case-insensitive lookups in ArticleIndex                  | `article_index.py`    |
 
 ## Remaining Gaps
 
 ### Priority 1: Data Quality
-- **Fill 111 zero-quote articles with 5+ mods** — these produce empty analyses
-- **Fill year gaps on top 30 articles** — articles 5, 40, 1, 197 are near-empty
-- **Clean data hygiene issues** — chambre casing, empty fonctions, HTML entities
+
+- **Fill 111 zero-quote articles with 5+ mods** - these produce empty analyses
+- **Fill year gaps on top 30 articles** - articles 5, 40, 1, 197 are near-empty
+- **Clean data hygiene issues** - chambre casing, empty fonctions, HTML entities
 
 ### Priority 2: Production Hardening
+
 - Rate limiting middleware (per-IP for anonymous, higher for authenticated)
 - Request logging and monitoring
 - Error tracking (Sentry or equivalent)
 - Authentication for write endpoints (cache invalidation)
 
 ### Priority 3: Features
+
 - User feedback table (`user_feedback` with rating + comment)
 - Batch pre-generation of analyses for top articles
 - Webhook or scheduled job to re-analyze when `article_modifications.json` changes

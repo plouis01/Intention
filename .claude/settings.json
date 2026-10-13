@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:answers.opencv.org)"
+      "WebFetch(domain:answers.opencv.org)",
+      "Bash(DATABASE_URL=\"postgresql://localhost/legislateur_local\" python scripts/sync_embeddings.py --analyze)"
     ]
   }
 }

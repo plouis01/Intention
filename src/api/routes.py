@@ -91,7 +91,7 @@ def get_search_service() -> SearchService:
 
 
 @router.get("/health", response_model=HealthResponse, tags=["health"])
-async def health_check():
+def health_check():
     """Check API health and service status."""
     settings = get_settings()
 
@@ -135,7 +135,7 @@ async def health_check():
     summary="List available laws for analysis",
     description="Get a list of all finance laws available for analysis.",
 )
-async def list_available_laws():
+def list_available_laws():
     """List all available finance laws from the reference file."""
     try:
         from src.analysis.law_analyzer import list_available_laws as get_laws

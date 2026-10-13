@@ -11,8 +11,8 @@ import json
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
-SOURCE = PROJECT_ROOT / "data" / "article_modifications.json"
-DEFAULT_OUTPUT = PROJECT_ROOT.parent / "legal-interface" / "src" / "data" / "article-refs.json"
+SOURCE = PROJECT_ROOT / "data" / "modifications_cgi_enriched.json"
+DEFAULT_OUTPUT = PROJECT_ROOT.parent.parent / "legal-interface" / "src" / "data" / "article-refs.json"
 
 
 def main():

@@ -185,7 +185,7 @@ class CGIExtractor:
     #     1635 (only 1635 bis/sexies/etc.), 1679 (only 1679 septies),
     #     1681 (only 1681 ter/sexies), 1691 (only 1691 ter)
     #
-    # The suffixed variants ARE in the index — no data is missing.
+    # The suffixed variants ARE in the index - no data is missing.
     # This will need to be checked when coverage is enlarged to the 1950's
     KNOWN_CGI_ARTICLES = {
         # IR - Impôt sur le revenu (basics)
@@ -259,7 +259,7 @@ class CGIExtractor:
         ref = " ".join(ref.split())
 
         # Normalize dashes (en-dash, em-dash -> hyphen)
-        ref = ref.replace("–", "-").replace("—", "-")
+        ref = ref.replace("–", "-").replace("-", "-")
 
         # Normalize spacing around hyphens in article numbers
         # "150 - 0" -> "150-0", but keep "terdecies-0" as is
@@ -535,7 +535,7 @@ class CGIExtractor:
         matches = []
 
         # Build list pattern: "articles X, Y, Z et W" or "articles X, Y, Z"
-        # Note: do NOT use re.IGNORECASE — it would make [A-Z]{1,2} match
+        # Note: do NOT use re.IGNORECASE - it would make [A-Z]{1,2} match
         # "et" and "du", consuming list separators
         nc = self._NC
         list_pattern = re.compile(
@@ -588,7 +588,7 @@ class CGIExtractor:
         for ref in refs:
             pos = ref.match_start
 
-            # Rule 1: Guillemet rule — count « and » before match position
+            # Rule 1: Guillemet rule - count « and » before match position
             text_before = text[:pos]
             opens = text_before.count("«")
             closes = text_before.count("»")
@@ -609,7 +609,7 @@ class CGIExtractor:
                 ref.reference_type = "cross_reference"
                 continue
 
-            # Rule 3: Chapeau/primary target — modification verb attached
+            # Rule 3: Chapeau/primary target - modification verb attached
             # Look in a window after the match for modification verbs
             after_start = ref.match_end
             after_window = text[after_start:after_start + 80].lower()
@@ -626,7 +626,7 @@ class CGIExtractor:
                     ref.reference_type = "direct"
                     break
 
-            # Rule 4: Default — keep as "direct" (conservative)
+            # Rule 4: Default - keep as "direct" (conservative)
 
         return refs
 

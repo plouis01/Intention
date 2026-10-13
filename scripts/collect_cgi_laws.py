@@ -220,7 +220,7 @@ def collect_all_article_ids(client: LegifranceCodeClient,
             visited.add(sct_id)
             try:
                 child_toc = client.get_code_toc(text_id, sct_id=sct_id)
-                # Don't collect new empty leaves — only extract articles
+                # Don't collect new empty leaves - only extract articles
                 _walk(child_toc, collect_leaves=False)
             except httpx.HTTPStatusError:
                 pass
@@ -408,7 +408,7 @@ def _load_finance_law_types() -> dict[str, tuple[str, int]]:
             if num and typ:
                 lookup[num] = (typ, annee)
 
-    # 2. Historical LF (loi de finances initiale) — from 1959 to 2011
+    # 2. Historical LF (loi de finances initiale) - from 1959 to 2011
     # format: (numero, annee_budgetaire)
     historical_lf = [
         ("58-1374", 1959), ("59-1454", 1960), ("59-1472", 1960),
@@ -436,7 +436,7 @@ def _load_finance_law_types() -> dict[str, tuple[str, int]]:
         if num not in lookup:
             lookup[num] = ("LF", annee)
 
-    # 3. Historical LFR (loi de finances rectificative) — major ones
+    # 3. Historical LFR (loi de finances rectificative) - major ones
     historical_lfr = [
         ("82-540", 1982), ("85-1404", 1985), ("86-824", 1986),
         ("88-1193", 1988), ("91-1323", 1991), ("92-1476", 1992),
@@ -460,7 +460,7 @@ def _load_finance_law_types() -> dict[str, tuple[str, int]]:
         if num not in lookup:
             lookup[num] = ("LFR", annee)
 
-    # 4. Historical LFSS (loi de financement de la sécurité sociale) — from 1996
+    # 4. Historical LFSS (loi de financement de la sécurité sociale) - from 1996
     historical_lfss = [
         ("96-1160", 1997), ("97-1164", 1998), ("98-1194", 1999),
         ("99-1140", 2000), ("2000-1257", 2001), ("2001-1246", 2002),
@@ -517,7 +517,7 @@ def deduplicate_laws(raw_laws: list[dict]) -> list[dict]:
         if m:
             year = int(m.group(1))
         else:
-            # Old format: YY-NNN — derive year from date_promulgation
+            # Old format: YY-NNN - derive year from date_promulgation
             dp = law.get("date_promulgation", "")
             if dp and len(dp) >= 4:
                 year = int(dp[:4])

@@ -263,7 +263,7 @@ def _bulk_insert_embeddings(session, chunks: list, embeddings: list, existing_ha
                 (chunk_type, content, content_hash, chunk_metadata, source_id, position,
                  embedding_vector, embedding_model, embedding_dim, created_at)
                 VALUES %s
-                ON CONFLICT (content_hash) DO NOTHING
+                ON CONFLICT (content_hash, source_id) DO NOTHING
                 """,
                 data,
                 template="(%s, %s, %s, %s, %s, %s, %s::vector, %s, %s, %s)"
@@ -306,6 +306,8 @@ def _generate_embeddings_to_database(batch_size: int = 500, min_date: str | None
     settings = get_settings()
     if settings.embedding_provider == "openai":
         embedding_model = settings.embedding_model
+    elif settings.embedding_provider == "vertex":
+        embedding_model = settings.vertex_embedding_model
     else:
         embedding_model = settings.local_embedding_model
 
@@ -353,7 +355,7 @@ def _generate_embeddings_to_database(batch_size: int = 500, min_date: str | None
     offset = 0
 
     while offset < total_interventions:
-        # Fresh session per page — no long-lived cursors
+        # Fresh session per page - no long-lived cursors
         page_session = get_session()
         try:
             q = (

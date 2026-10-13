@@ -56,7 +56,7 @@ def main():
 
     store = create_vector_store(
         settings.vector_store_provider,
-        embedding_dim=384,
+        embedding_dim=768,
     )
 
     print("✓ Services initialized")

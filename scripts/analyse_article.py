@@ -115,7 +115,6 @@ def analyze_article(
         result = analyzer.analyze_article(
             article_ref=article_ref,
             question=question,
-            include_jurisprudence=True,
             max_modifications=max_modifications,
         )
     except Exception as e:
@@ -142,7 +141,7 @@ def analyze_article(
     print(f"\nStatistics:")
     print(f"  Modifications analyzed: {len(result.sections)}")
     print(f"  Debates searched: {result.total_debates_searched}")
-    print(f"  Jurisprudence entries: {len(result.jurisprudence)}")
+    print(f"  Interventions found: {result.total_interventions_found}")
 
     return True
 

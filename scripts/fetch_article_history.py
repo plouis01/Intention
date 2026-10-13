@@ -445,10 +445,13 @@ class LegifranceCGIClient:
                 law_info["title"] = lien.get("titre", "")
                 law_info["url"] = f"https://www.legifrance.gouv.fr/jorf/id/{source}" if source else ""
 
-                # Look for article number
-                art_match = re.search(r"art(?:icle)?\.?\s*(\d+)", titre, re.IGNORECASE)
-                if art_match:
-                    law_info["article"] = f"Art. {art_match.group(1)}"
+                # Use the ground-truth articleNum from the lien (mirrors
+                # backfill_missing_modifications.build_modification_entry).
+                # Regex on titre captured the wrong number on multi-article
+                # titles and dropped suffixes like "Art. 39 C" → "Art. 39".
+                article_num = lien.get("articleNum") or ""
+                if article_num:
+                    law_info["article"] = f"Art. {article_num}"
 
                 break
 

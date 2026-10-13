@@ -63,8 +63,8 @@ Analyse les extraits des débats parlementaires et amendements pour déterminer 
 [Résumé en 3-5 phrases]
 
 ### SOURCES PRINCIPALES
-- Citation: "[citation exacte]" — Source: [nom de l'orateur], [date], [chambre AN/Sénat]
-- Citation: "[citation exacte]" — Source: [nom de l'orateur], [date], [chambre AN/Sénat]
+- Citation: "[citation exacte]" - Source: [nom de l'orateur], [date], [chambre AN/Sénat]
+- Citation: "[citation exacte]" - Source: [nom de l'orateur], [date], [chambre AN/Sénat]
 [...]
 
 ### POINTS DE VIGILANCE
@@ -295,7 +295,7 @@ class IntentExtractor:
 
     def _parse_source_line(self, line: str) -> dict | None:
         """Parse a source citation line."""
-        # Expected format: Citation: "[quote]" — Source: [name], [date], [chambre]
+        # Expected format: Citation: "[quote]" - Source: [name], [date], [chambre]
         try:
             if "Citation:" in line and "Source:" in line:
                 citation_part, source_part = line.split("Source:", 1)
@@ -340,7 +340,7 @@ def format_intent_result_markdown(result: IntentResult) -> str:
         source_info = ", ".join(filter(None, [orateur, date, chambre]))
         lines.append(f'> "{citation}"')
         if source_info:
-            lines.append(f"> — {source_info}")
+            lines.append(f"> - {source_info}")
         lines.append("")
 
     if result.points_vigilance:

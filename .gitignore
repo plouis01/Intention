@@ -11,6 +11,9 @@ data/processed/
 data/embeddings_cache/
 data/embeddings/
 data/*.dump
+data/benchmark_*.json
+data/analysis_*.json
+data/benchmarks/
 *.log
 *.db
 TODO.md
@@ -27,6 +30,7 @@ data/article_modifications_auto.json
 data/samples_amendements
 data/legislateur.db-journal
 data/cache/*.json
+data/batch1_clean.csv
 
 
 # IDE
@@ -48,6 +52,7 @@ htmlcov/
 _bmad/
 _bmad-output/
 .claude/commands/
+.claude/skills
 
 .DS_Store
 /rapports
@@ -55,3 +60,4 @@ _bmad-output/
 # Migration scripts (one-shot tooling)
 .env.migration
 .env.sample
+.env.live

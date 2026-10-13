@@ -26,7 +26,7 @@ USER_AGENT = "IntentionLegislateur/1.0 (legal research; +https://github.com/plou
 # Finance law text numbers for legislature 13 (AN text reference numbers).
 # Each entry: (text_number, label, law_type)
 # Numbers verified against the NosDéputés.fr API.
-# Some texts return 500 (server-side issue) — the collector retries and skips gracefully.
+# Some texts return 500 (server-side issue) - the collector retries and skips gracefully.
 FINANCE_LAW_TEXTS = [
     # PLF (Projets de Loi de Finances)
     (189, "PLF 2008", "LF"),
@@ -209,7 +209,7 @@ def _fetch_with_retry(
                 )
                 time.sleep(wait)
             elif status == 500:
-                # Server-side error — log and skip (some texts consistently 500)
+                # Server-side error - log and skip (some texts consistently 500)
                 logger.warning(
                     f"  [{label}] Server error 500 (attempt {attempt}/{MAX_RETRIES})"
                 )

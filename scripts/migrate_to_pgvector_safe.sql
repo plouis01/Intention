@@ -60,7 +60,7 @@ BEGIN
 END $$;
 
 
--- Step 4: Pre-flight check — verify all embeddings are 384-dimensional
+-- Step 4: Pre-flight check - verify all embeddings are 384-dimensional
 -- ============================================================================
 DO $$
 DECLARE

@@ -28,7 +28,7 @@ def main():
             return c.execute(text(sql), params or {}).fetchall()
 
         print("=" * 60)
-        print("ÉTAT DE LA BASE PG — analyse complète")
+        print("ÉTAT DE LA BASE PG - analyse complète")
         print("=" * 60)
 
         # 1. Lois
@@ -73,7 +73,7 @@ def main():
         print(f"  Orphelins: {orphan_deb}")
         print(f"  Sans contenu_integral: {no_ci:,} ({pct(no_ci, total_deb)})")
 
-        # Débats par loi — les plus faibles
+        # Débats par loi - les plus faibles
         print(f"\n  Couverture par loi (15 plus faibles):")
         rows = qall("""
             SELECT * FROM (

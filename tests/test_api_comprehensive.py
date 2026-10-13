@@ -84,7 +84,7 @@ def mock_cgi_index():
                 "titre": "Apport-cession - Report d'imposition des plus-values",
                 "code": "CGI",
                 "legifrance_url": "https://example.com/150-0-b-ter",
-                "bofip_url": "https://example.com/bofip",
+                "etat_actuel": "VIGUEUR",
                 "keywords": ["apport-cession", "report", "plus-values"],
                 "modifications": [
                     {
@@ -268,7 +268,7 @@ def test_compute_modifications_hash_sensitivity():
 
 def test_get_analysis_stale_cache_returns_404(client, mock_cgi_index):
     """GET /cgi/{ref}/analysis returns 404 when cache has mismatched hash."""
-    # Return analysis with wrong hash — should be invalidated
+    # Return analysis with wrong hash - should be invalidated
     def mock_stale_query(cgi_article):
         return None  # Simulates invalidation returning None
 

@@ -73,7 +73,7 @@ def backfill(dry_run: bool = False, limit: int = 0):
                 if limit and processed >= limit:
                     break
 
-            # Single UPDATE with FROM VALUES — one round-trip
+            # Single UPDATE with FROM VALUES - one round-trip
             if not dry_run and values_parts:
                 values_sql = ", ".join(values_parts)
                 conn.execute(
@@ -92,7 +92,7 @@ def backfill(dry_run: bool = False, limit: int = 0):
             pct = 100 * processed / total_null
             print(
                 f"  {processed}/{total_null} ({pct:.1f}%) "
-                f"— {updated_with_articles} with articles "
+                f"- {updated_with_articles} with articles "
                 f"[{rate:.0f}/s]"
             )
 

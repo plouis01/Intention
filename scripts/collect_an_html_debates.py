@@ -33,7 +33,7 @@ def run_download(args):
     from src.collectors.an_html_debates import SESSIONS, ANHtmlCollector
 
     output_dir = Path(args.output_dir) if args.output_dir else DEFAULT_OUTPUT_DIR
-    legislatures = [args.leg] if args.leg else [12, 13]
+    legislatures = [args.leg] if args.leg else sorted(SESSIONS.keys())
 
     with ANHtmlCollector(output_dir) as collector:
         for leg in legislatures:
@@ -152,7 +152,7 @@ def main():
     parser.add_argument("--download", action="store_true", help="Download raw HTML files")
     parser.add_argument("--parse", action="store_true", help="Parse downloaded HTML (stats only)")
     parser.add_argument("--import-db", action="store_true", help="Parse + import into database")
-    parser.add_argument("--leg", type=int, choices=[12, 13], help="Filter by legislature")
+    parser.add_argument("--leg", type=int, choices=[12, 13, 14], help="Filter by legislature")
     parser.add_argument("--session", type=str, help="Filter by session name")
     parser.add_argument(
         "--output-dir", type=str, help="Output directory (default: data/raw/an_html)"

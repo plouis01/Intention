@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Fill missing curated_quotes from CGI mention index + generate jurisprudence.
-No external LLM required — uses keyword filtering for quotes and
+No external LLM required - uses keyword filtering for quotes and
 pre-built jurisprudence data.
 """
 import json

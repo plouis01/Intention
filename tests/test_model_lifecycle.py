@@ -18,7 +18,7 @@ class TestModelLifecycleCleanup:
         with TestClient(app):
             # App is running, models may be loaded
             pass
-        # After context exit, shutdown has run — no crash = cleanup worked
+        # After context exit, shutdown has run - no crash = cleanup worked
 
     def test_embedding_service_lazy_loads(self):
         """EmbeddingService should not load model until first use."""

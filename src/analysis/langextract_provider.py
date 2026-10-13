@@ -149,7 +149,7 @@ class LangExtractProvider:
         # LangExtract returns AnnotatedDocument(s) with .extractions list
         # Each extraction has .extraction_class and .extraction_text
         if isinstance(lx_result, list):
-            # Multiple documents — collect all extractions
+            # Multiple documents - collect all extractions
             all_extractions = []
             for doc in lx_result:
                 all_extractions.extend(getattr(doc, "extractions", []) or [])
@@ -199,7 +199,7 @@ class LangExtractProvider:
             elif category == "vigilance":
                 points_vigilance.append(text)
 
-        # Grounded citations can't be hallucinated — high confidence by default
+        # Grounded citations can't be hallucinated - high confidence by default
         niveau = CertitudeLevel.ELEVE if (sources_an or sources_senat) else CertitudeLevel.MOYEN
 
         return SectionAnalysis(
@@ -212,7 +212,7 @@ class LangExtractProvider:
             points_vigilance=points_vigilance,
             niveau_certitude=niveau,
             certitude_justification=(
-                "Citations extraites avec ancrage source (LangExtract) — "
+                "Citations extraites avec ancrage source (LangExtract) - "
                 "positions exactes vérifiées dans le texte d'origine."
             ),
         )

@@ -39,7 +39,7 @@ JO_HEADER_PATTERNS = [
     # Page numbers (standalone number lines)
     r"^\s*\d{1,5}\s*$",
     # Session headers
-    r"^[-–—]\s*\d+\s*[-–—]\s*$",
+    r"^[-–-]\s*\d+\s*[-–-]\s*$",
     r"^\d+e\s+SÉANCE\s+DU.*$",
     r"^\d+re\s+SÉANCE\s+DU.*$",
     r"^SÉANCE\s+DU\s+.*$",
@@ -53,7 +53,7 @@ _JO_HEADER_RE = re.compile(
 )
 
 # ALL-CAPS speaker name pattern: M. DUPONT, Mme MARTIN, M. CHABAN-DELMAS
-# NOTE: Does NOT match role-only forms like "M. LE PRÉSIDENT" — those are handled separately
+# NOTE: Does NOT match role-only forms like "M. LE PRÉSIDENT" - those are handled separately
 _ALLCAPS_NAME_RE = re.compile(
     r"(M(?:me|lle)?\.?\s+)"  # Title: M., Mme, Mlle
     r"([A-ZÀ-Ý]{2,}(?:[-\s][A-ZÀ-Ý]{2,})*)"  # ALL-CAPS name parts (with hyphens)
@@ -70,27 +70,27 @@ _DATE_PATTERN = re.compile(
 )
 
 # Speaker pattern (works after ALL-CAPS normalization)
-# Matches at line start: "M. Dupont." "M. Chaban-Delmas —" "Mme Martin :"
+# Matches at line start: "M. Dupont." "M. Chaban-Delmas -" "Mme Martin :"
 # Uses \n (line boundary) because PyMuPDF produces single \n between lines,
 # never \n\n. The line-start requirement filters out inline references like
 # "la parole est à M. Dupont" which appear mid-line.
 #
 # Two forms are matched:
 # 1. Named speakers: "M. Dupont.", "Mme Martin," etc.
-# 2. Role-based: "M. le président." — appears ~60x per PDF and is the
+# 2. Role-based: "M. le président." - appears ~60x per PDF and is the
 #    standard form for the presiding officer in Journal Officiel format.
 _SPEAKER_PATTERN = re.compile(
     r"(?:^|\n)"
     r"("
     # Named speakers: "M. Dupont.", "Mme Chaban-Delmas,", etc.
     r"M(?:me|lle)?\.?\s+[A-ZÀ-Ý][a-zà-ÿ]+(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*(?:\s+[A-ZÀ-Ý][a-zà-ÿ]+(?:-[A-ZÀ-Ý][a-zà-ÿ]+)*)*"
-    r")\s*[:\.\-–—,]"
+    r")\s*[:\.\-–-,]"
     r"|(?:^|\n)("
     # Role-based: "M. le président.", "M. le ministre de l'économie.", "M. le secrétaire d'État."
     # Allows optional qualifying text (e.g., "de l'économie et des finances") after the role word.
     r"M(?:me)?\.?\s+l[ea]\s+(?:président(?:e)?|ministre|secrétaire\s+d'[ÉEée]tat)"
     r"(?:\s+[a-zà-ÿA-ZÀ-Ý'',()\-\s]+?)?"  # optional qualifier like "de l'économie et des finances"
-    r")\s*[\.\:–—]"
+    r")\s*[\.\:–-]"
 )
 
 # Speaker intro pattern for function detection (the text between speaker name and first sentence)
@@ -249,7 +249,7 @@ def detect_archive_speaker_function(speaker_intro: str, orateur: str) -> str:
     Unlike detect_speaker_function() which scans full content (causing false positives),
     this only examines the speaker name and the intro text describing their role.
 
-    Vocative forms like "Monsieur le ministre, je voudrais..." are NOT role indicators —
+    Vocative forms like "Monsieur le ministre, je voudrais..." are NOT role indicators -
     they mean the speaker is ADDRESSING the minister, not that they ARE the minister.
 
     Args:
@@ -368,5 +368,5 @@ def parse_archive_debate(
         url_source=url_source,
         reference=reference,
         interventions=interventions,
-        contenu_integral="",  # Empty — archive PDFs are too large to store full text
+        contenu_integral="",  # Empty - archive PDFs are too large to store full text
     )

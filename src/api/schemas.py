@@ -83,7 +83,7 @@ class CGIArticleDetail(BaseModel):
     titre: str = Field(default="", description="Article title/description")
     code: str = Field(default="CGI", description="Code (always CGI)")
     legifrance_url: str = Field(default="", description="Légifrance URL")
-    bofip_url: str = Field(default="", description="BOFiP URL")
+    etat_actuel: str = Field(default="", description="Current state (VIGUEUR, ABROGE, etc.)")
     keywords: list[str] = Field(default_factory=list, description="Search keywords")
     modifications: list[CGIModification] = Field(default_factory=list, description="Modification history")
 

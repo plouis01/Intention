@@ -4,13 +4,13 @@
 After SQLite → PostgreSQL migration audit, 3,075 Sénat amendments have ALL of:
   objet IS NULL, expose_motifs IS NULL, contenu IS NULL, sort IS NULL
 
-These are empty shells from AMELI bulk import — wrong dossier matches with zero
+These are empty shells from AMELI bulk import - wrong dossier matches with zero
 useful data. They were never embedded or indexed.
 
 This script:
 1. Counts fully-empty amendments by chambre
 2. Deletes Sénat ones (mis-linked AMELI stubs)
-3. Logs AN ones (kept — they have reference_externe for traceability)
+3. Logs AN ones (kept - they have reference_externe for traceability)
 4. Reports counts
 """
 
