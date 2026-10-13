@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Clean cgi_index quotes and enrich missing quotes for key/high-mod articles.
 
-Step 1:  Clean cgi_index quotes — re-extract from DB when possible, remove noise
-Step 1b: Clean topic_search noise — remove off-topic quotes using titre keywords
+Step 1:  Clean cgi_index quotes - re-extract from DB when possible, remove noise
+Step 1b: Clean topic_search noise - remove off-topic quotes using titre keywords
 Step 2:  Fill year gaps on 35 key CGI articles (strategies: ref, keyword, titre-phrase)
 Step 2b: Rescue critical no-quote articles (10+ mods, 0 quotes) via phrase search
 Step 3:  Fill 63 articles with 6+ mods using titre-based topic search
@@ -294,7 +294,7 @@ def extract_topic_keywords(art_data: dict) -> list[str]:
 def extract_titre_keywords_and_phrases(art_data: dict) -> tuple[set[str], list[str]]:
     """Extract keywords (6+ chars) and multi-word phrases from titre only.
 
-    Lighter/more precise than extract_topic_keywords — focused on titre
+    Lighter/more precise than extract_topic_keywords - focused on titre
     for relevance scoring of topic_search quotes.
     """
     titre = art_data.get("titre", "").lower()
@@ -460,7 +460,7 @@ def search_interventions_by_keywords(
         if is_proc:
             continue
 
-        # Extract best passage — require keywords IN the extracted passage too
+        # Extract best passage - require keywords IN the extracted passage too
         quote_text = _extract_keyword_passage(contenu, keywords)
         if not quote_text or len(quote_text) < 60:
             continue
@@ -727,7 +727,7 @@ def step1_clean_cgi_quotes(articles: dict, conn: sqlite3.Connection,
 # ═══════════════════════════════════════════════════════════════════════════
 
 def step1b_clean_topic_search_quotes(articles: dict, stats: dict, verbose: bool) -> None:
-    """Clean topic_search quotes — remove off-topic noise using titre keywords."""
+    """Clean topic_search quotes - remove off-topic noise using titre keywords."""
     logger.info("Step 1b: Cleaning topic_search noise")
 
     total_topic = 0
@@ -743,7 +743,7 @@ def step1b_clean_topic_search_quotes(articles: dict, stats: dict, verbose: bool)
         # Get titre-specific keywords and phrases for this article
         titre_kw, titre_phrases = extract_titre_keywords_and_phrases(art)
         if not titre_kw and not titre_phrases:
-            # No titre keywords — keep all quotes (can't evaluate relevance)
+            # No titre keywords - keep all quotes (can't evaluate relevance)
             continue
 
         ref_lower = ref.lower()
@@ -1128,7 +1128,7 @@ def step2b_rescue_critical_no_quote_articles(articles: dict, conn: sqlite3.Conne
         debate_ids = article_debate_ids.get(ref, set())
         if not debate_ids:
             if verbose:
-                logger.info(f"  {ref}: no DILA debates — skipped")
+                logger.info(f"  {ref}: no DILA debates - skipped")
             continue
 
         mod_years = get_mod_years(art)
@@ -1138,7 +1138,7 @@ def step2b_rescue_critical_no_quote_articles(articles: dict, conn: sqlite3.Conne
         phrases = extract_distinctive_phrases(art)
         if not phrases:
             if verbose:
-                logger.info(f"  {ref}: no distinctive phrases — skipped")
+                logger.info(f"  {ref}: no distinctive phrases - skipped")
             continue
 
         found = _rescue_by_phrases(conn, debate_ids, ref, phrases, mod_years, existing_flat,
@@ -1237,7 +1237,7 @@ def _rescue_by_phrases(
         date = str(row["date"])[:10]
         contenu_lower = contenu.lower()
 
-        # Reject other legal codes but don't require CGI mention — these articles
+        # Reject other legal codes but don't require CGI mention - these articles
         # are specifically ones missed by ref-based search, discussed by topic name
         if OTHER_CODES.search(contenu):
             continue
@@ -1246,7 +1246,7 @@ def _rescue_by_phrases(
         if any(p in contenu_lower[:200] for p in PROCEDURAL_PATTERNS):
             continue
 
-        # Normalize line wraps for better passage extraction — parliamentary text
+        # Normalize line wraps for better passage extraction - parliamentary text
         # has hard line breaks within sentences that truncate keyword passages
         contenu_norm = re.sub(r"(?<!\n)\n(?!\n)", " ", contenu)
 
@@ -1258,7 +1258,7 @@ def _rescue_by_phrases(
             if not quote_text or len(quote_text) < 60:
                 continue
 
-        # Verify passage has phrase/keyword relevance — for rescue, a single
+        # Verify passage has phrase/keyword relevance - for rescue, a single
         # distinctive multi-word phrase match is sufficient since we have multiple
         # other quality filters and these articles have 0 quotes
         quote_lower = quote_text.lower()
@@ -1328,7 +1328,7 @@ def step3_fill_high_mod_articles(articles: dict, conn: sqlite3.Connection,
         debate_ids = article_debate_ids.get(ref, set())
         if not debate_ids:
             if verbose:
-                logger.info(f"  {ref}: no DILA debates — skipped")
+                logger.info(f"  {ref}: no DILA debates - skipped")
             continue
 
         ambiguity = classify_ref_ambiguity(ref)
@@ -1337,7 +1337,7 @@ def step3_fill_high_mod_articles(articles: dict, conn: sqlite3.Connection,
 
         if len(keywords) < 2:
             if verbose:
-                logger.info(f"  {ref}: insufficient keywords — skipped")
+                logger.info(f"  {ref}: insufficient keywords - skipped")
             continue
 
         existing_flat = []
@@ -1568,7 +1568,7 @@ def build_semantic_keywords(art_data: dict) -> set[str]:
             if w not in GENERIC_KEYWORDS:
                 words.add(w)
         # Also extract short standalone words (3-5 chars) from keywords field
-        # e.g. "isf", "pme", "cir", "tgap" — distinctive fiscal abbreviations
+        # e.g. "isf", "pme", "cir", "tgap" - distinctive fiscal abbreviations
         # too short for the 6-char threshold but highly specific as keywords.
         # Only whole words (bounded by spaces/punctuation/start/end), not fragments.
         for w in re.findall(r"(?:^|[\s'''\-/])([a-zàâäéèêëïîôùûüÿç]{3,5})(?:[\s'''\-/]|$)", kw_clean):
@@ -1687,7 +1687,7 @@ def step5_clean_offtopic_key_articles(articles: dict, stats: dict, verbose: bool
 
         sem_kw = build_semantic_keywords(art)
         if not sem_kw:
-            # No semantic keywords — can't evaluate relevance, keep all
+            # No semantic keywords - can't evaluate relevance, keep all
             continue
 
         titre_phrases = _build_titre_phrases_for_autokeep(art)
@@ -1823,7 +1823,7 @@ def step6_fill_from_amendments(articles: dict, conn: sqlite3.Connection,
         phrases = extract_distinctive_phrases(art)
         if not phrases:
             if verbose:
-                logger.info(f"  {ref}: no distinctive phrases — skipped")
+                logger.info(f"  {ref}: no distinctive phrases - skipped")
             continue
 
         # Build SQL query for topic phrases in expose_motifs
@@ -2031,7 +2031,7 @@ def main():
     if not args.dry_run:
         _save(index_data, "final")
     else:
-        logger.info("DRY RUN — not saving")
+        logger.info("DRY RUN - not saving")
 
     # ── After stats ──────────────────────────────────────────────────────
     after_with = sum(1 for a in articles.values() if has_quotes(a))

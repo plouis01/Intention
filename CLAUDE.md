@@ -99,7 +99,7 @@ PISTE_CLIENT_SECRET=xxx
 PISTE_SANDBOX=true           # false for production API
 
 # Database
-DATABASE_URL=sqlite:///data/legislateur.db
+DATABASE_URL=postgresql://localhost/intention_backup
 
 # Embedding provider: "local" (free) or "openai"
 EMBEDDING_PROVIDER=local

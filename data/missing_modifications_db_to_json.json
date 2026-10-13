@@ -1,0 +1,485 @@
+{
+  "metadata": {
+    "generated_at": "2026-05-19",
+    "version": "v5_with_documentation",
+    "scope": "Analyse exhaustive de 4380 articles CGI contre 27098 articles de loi en DB intention_backup",
+    "method_summary": "Patterns regex sur articles.contenu_texte, amendements, débats → 47 candidats bruts → filtrage par 4 critères de fiabilité : (1) modification textuelle réelle vs règle parallèle, (2) article actuel vs ancien article réutilisé sous même numéro, (3) cohérence avec convention Légifrance (création de nouvelle LEGIARTI version), (4) inspection contextuelle complète",
+    "reliability_criteria": [
+      "Critère 1 : verbe de modification explicite (ainsi modifié/rédigé/complété/abrogé/remplacé/porté/fixé/ramené)",
+      "Critère 2 : sujet grammatical = l'article CGI ou un élément structurel de l'article (Le N° de l'article X est...)",
+      "Critère 3 : pas dans une liste d'allocation de revenus/taxes (cas typique TSCA, droits tabacs)",
+      "Critère 4 : pas dans une modification d'un autre code (CGCT, LPF, CCH, sécurité sociale) avec simple référence CGI",
+      "Critère 5 : article CGI actuel doit être en vie à la date de la modification (pas d'ancien article réutilisé)",
+      "Critère 6 : test via article_version_id Légifrance - une vraie modification crée une nouvelle version LEGIARTI"
+    ],
+    "stats": {
+      "candidats_bruts_extraits": 47,
+      "confirmees_apres_filtrage_rigoureux": 17,
+      "rejetees_regles_paralleles": 9,
+      "rejetees_anciens_articles": 7,
+      "articles_absents_du_json": 6
+    },
+    "documentation_coverage": {
+      "EXCELLENT (>30 amendements)": 14,
+      "PARTIEL (débats sans amendements)": 2,
+      "AUCUN": 1
+    }
+  },
+  "confirmed_missing_modifications": [
+    {
+      "cgi_article": "1001",
+      "loi_numero": "78-1239",
+      "loi_type": "LF",
+      "loi_annee": 1979,
+      "law_article": "5",
+      "evidence_text": "Le taux de 8,75 p. 100 prévu au 6° de l'article 1001 du code général des impôts est porté à 9 p. 100",
+      "nature": "Modification (changement de taux)",
+      "legifrance_evidence": "JSON earliest 1980-12-31 - modification antérieure non trackée",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 253,
+        "amendements": 667,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "1001",
+      "loi_numero": "2009-1673",
+      "loi_type": "LF",
+      "loi_annee": 2010,
+      "law_article": "77",
+      "evidence_text": "L'article 1001 du code général des impôts est complété par un alinéa ainsi rédigé : « A compter des impositions établies au titre de l'année 2011, le produit de la taxe est affecté aux départements. »",
+      "nature": "Modification (ajout d'alinéa)",
+      "legifrance_evidence": "Version 2010-05-08 existe (attribuée à ORDONNANCE 2010-462) - possible co-modification merger",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 413,
+        "amendements": 5723,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "151 octies",
+      "loi_numero": "88-15",
+      "loi_type": "LOI",
+      "loi_annee": 1988,
+      "law_article": "46",
+      "evidence_text": "Pour les apports réalisés à compter du 1er janvier 1988, l'agrément prévu à l'article 151 octies du code général des impôts est supprimé",
+      "nature": "Modification (suppression d'agrément)",
+      "legifrance_evidence": "Version 1988-01-06 trouvée avec attribution INCONNU - probablement cette loi",
+      "parliamentary_documentation": {
+        "dossiers": 0,
+        "debats": 0,
+        "amendements": 0,
+        "quality": "AUCUN",
+        "note": "Pas de dossier en DB - documentation textuelle uniquement"
+      }
+    },
+    {
+      "cgi_article": "154",
+      "loi_numero": "78-1239",
+      "loi_type": "LF",
+      "loi_annee": 1979,
+      "law_article": "8",
+      "evidence_text": "la limite dans laquelle le salaire du conjoint... peut être déduit du bénéfice imposable en application de l'article 154 du code général des impôts est portée à 13 500 F",
+      "nature": "Modification (changement de plafond à 13 500 F)",
+      "legifrance_evidence": "JSON earliest 1980-12-31 LF 80-1094 mentionne explicitement 'La limite de 13.500 F' → 1979 modification précède",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 253,
+        "amendements": 667,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "197",
+      "loi_numero": "2007-1822",
+      "loi_type": "LF",
+      "loi_annee": 2008,
+      "law_article": "2",
+      "evidence_text": "I.- Le I de l'article 197 du code général des impôts est ainsi modifié : 1° Le 1 est ainsi rédigé : 1. L'impôt est calculé en appliquant à la fraction de chaque part de revenu qui excède 5 687 le taux de : ― 5,50 % pour la fraction supérieure à 5 687 € et inférieure ou égale à 11 344 €...",
+      "nature": "Modification (refonte complète du barème IR)",
+      "legifrance_evidence": "Version 2008-12-29 LF 2008-1425 nearby - possible co-modification ou réécriture postérieure",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 335,
+        "amendements": 3107,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "199 decies",
+      "loi_numero": "89-935",
+      "loi_type": "LF",
+      "loi_annee": 1990,
+      "law_article": "113",
+      "evidence_text": "Les dispositions du paragraphe I de l'article 199 nonies et du paragraphe I de l'article 199 decies du code général des impôts sont prorogées jusqu'au 31 décembre 1992",
+      "nature": "Modification (prorogation)",
+      "legifrance_evidence": "JSON creation 1985-01-01, modification 1990 post-création",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 353,
+        "amendements": 782,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "199 nonies",
+      "loi_numero": "89-935",
+      "loi_type": "LF",
+      "loi_annee": 1990,
+      "law_article": "113",
+      "evidence_text": "Les dispositions du paragraphe I de l'article 199 nonies et du paragraphe I de l'article 199 decies du code général des impôts sont prorogées jusqu'au 31 décembre 1992",
+      "nature": "Modification (prorogation)",
+      "legifrance_evidence": "Idem 199 decies - même provision prorogées les deux articles",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 353,
+        "amendements": 782,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "1649-0 A",
+      "loi_numero": "2005-1720",
+      "loi_type": "LFR",
+      "loi_annee": 2005,
+      "law_article": "29",
+      "evidence_text": "Le a du 4 de l'article 1649-0 A du code général des impôts est complété par les mots : « majorés du montant de l'abattement mentionné à l'article 150-0 D bis du même code »",
+      "nature": "Modification (complément textuel ciblé)",
+      "legifrance_evidence": "Article créé 2005-12-31 par LF 2005-1719, LFR 2005-1720 a même date - co-modification probable",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 15,
+        "amendements": 0,
+        "quality": "PARTIEL",
+        "note": "Débats présents mais pas amendements"
+      }
+    },
+    {
+      "cgi_article": "1840 G bis",
+      "loi_numero": "2005-1720",
+      "loi_type": "LFR",
+      "loi_annee": 2005,
+      "law_article": "71",
+      "evidence_text": "III. - L'article 1840 G bis du même code est ainsi modifié : 1° Dans le II, la référence : « au b du 2° » est remplacée par les références : « aux b du 2° et 7° »...",
+      "nature": "Modification (refonte de références)",
+      "legifrance_evidence": "JSON earliest 1999, article vivant en 2005",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 15,
+        "amendements": 0,
+        "quality": "PARTIEL"
+      }
+    },
+    {
+      "cgi_article": "212",
+      "loi_numero": "76-1232",
+      "loi_type": "LF",
+      "loi_annee": 1977,
+      "law_article": "10",
+      "evidence_text": "Pour la détermination des résultats des exercices ouverts à compter du 1er janvier 1977, la limite prévue au 1° de l'article 212 du code général des impôts est portée à une fois et demie le montant du capital social",
+      "nature": "Modification (changement de limite)",
+      "legifrance_evidence": "JSON creation 1950, next mod 1983 - gap 1977 non tracké par Légifrance",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 221,
+        "amendements": 488,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "302 D bis",
+      "loi_numero": "2021-1900",
+      "loi_type": "LF",
+      "loi_annee": 2022,
+      "law_article": "169",
+      "evidence_text": "Le II de l'article 302 D bis du code général des impôts est complété par un j ainsi rédigé : « j) Pour les besoins de la production des compléments alimentaires... »",
+      "nature": "Modification (ajout d'un j)",
+      "legifrance_evidence": "Versions 2021-01-01 et 2023-01-01 attribuées à LF 2019-1479 - LF 2021-1900 art 169 manque",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 156,
+        "amendements": 44124,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "39",
+      "loi_numero": "93-1352",
+      "loi_type": "LF",
+      "loi_annee": 1994,
+      "law_article": "18",
+      "evidence_text": "La limite de 65 000 F prévue au 4 de l'article 39 du code général des impôts est portée à 75 000 F pour les véhicules dont la première mise en circulation est intervenue à compter du 1er novembre 1993",
+      "nature": "Modification (changement de limite à 75 000 F)",
+      "legifrance_evidence": "Versions 1993-08-18 LF 92-1376 et LFR 92-1476 nearby - LF 93-1352 manque",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 370,
+        "amendements": 1155,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "585 A",
+      "loi_numero": "78-1239",
+      "loi_type": "LF",
+      "loi_annee": 1979,
+      "law_article": "26",
+      "evidence_text": "Le tarif du droit de fabrication sur les allumettes prévu au premier alinéa de l'article 585 A du code général des impôts est fixé ainsi qu'il suit : Allumettes en bois naturel conditionnées en boîtes à coulisse et tiroirs...",
+      "nature": "Modification (fixation tarifs allumettes)",
+      "legifrance_evidence": "Version 1979-07-01 LF 81-1160 nearby - cette version pourrait inclure LF 78-1239",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 253,
+        "amendements": 667,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "74 B",
+      "loi_numero": "83-1179",
+      "loi_type": "LF",
+      "loi_annee": 1984,
+      "law_article": "87",
+      "evidence_text": "I - La réduction de bénéfice prévue par l'article 74 B du code général des impôts est reconduite, sous les mêmes conditions, en faveur des exploitants agricoles établis avant le 31 décembre 1988",
+      "nature": "Modification (reconduction jusqu'au 31/12/1988)",
+      "legifrance_evidence": "JSON earliest 1976, réécriture 1982 - gap 1984 reconduction",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 392,
+        "amendements": 2258,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "83",
+      "loi_numero": "78-1239",
+      "loi_type": "LF",
+      "loi_annee": 1979,
+      "law_article": "5",
+      "evidence_text": "Le montant minimal de la déduction forfaitaire pour frais professionnels accordée aux salariés et mentionnée au quatrième alinéa du 3° de l'article 83 du code général des impôts est porté de 1 500 F à 1 800 F",
+      "nature": "Modification (abattement porté à 1 800 F)",
+      "legifrance_evidence": "JSON earliest 1950, next 1982 - gap 1979 non tracké",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 253,
+        "amendements": 667,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "388",
+      "loi_numero": "76-1232",
+      "loi_type": "LF",
+      "loi_annee": 1977,
+      "law_article": "73",
+      "evidence_text": "Le régime du contingentement des rhums défini à l'article 388 du code général des impôts est reconduit jusqu'au 31 décembre 1979",
+      "nature": "Modification (reconduction jusqu'au 31/12/1979)",
+      "legifrance_evidence": "JSON earliest 1950, next 1979 - reconduction 1977 non tracké",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 221,
+        "amendements": 488,
+        "quality": "EXCELLENT"
+      }
+    },
+    {
+      "cgi_article": "388",
+      "loi_numero": "78-1239",
+      "loi_type": "LF",
+      "loi_annee": 1979,
+      "law_article": "88",
+      "evidence_text": "Le régime du contingentement des rhums défini à l'article 388 du code général des impôts est reconduit jusqu'au 31 décembre 1984 ou jusqu'à la date d'application du règlement communautaire relatif au marché des alcools",
+      "nature": "Modification (reconduction jusqu'au 31/12/1984)",
+      "legifrance_evidence": "Version 1979-03-11 INCONNU - probablement cette loi",
+      "parliamentary_documentation": {
+        "dossiers": 2,
+        "debats": 253,
+        "amendements": 667,
+        "quality": "EXCELLENT"
+      }
+    }
+  ],
+  "rejected_parallel_provisions": {
+    "description": "Dispositions inscrites dans le texte d'une LF/LFR/LFSS mais ne modifiant pas le texte de l'article CGI cible. Test : aucune nouvelle version LEGIARTI créée à la date d'effet, ou cessation/extension par règle parallèle.",
+    "count": 9,
+    "items": [
+      {
+        "cgi": "200",
+        "loi": "LFR 2021-953 art 18",
+        "raison": "Taux temporaire 75% pour Alsace-Moselle 2021-2022 - inscrit dans la LFR elle-même"
+      },
+      {
+        "cgi": "1600",
+        "loi": "LF 2005-1719 art 130",
+        "raison": "Fixation annuelle 'Pour 2006' de l'augmentation max - exercice du cadre, pas modification texte"
+      },
+      {
+        "cgi": "1600",
+        "loi": "LF 2006-1666 art 107",
+        "raison": "Idem fixation annuelle pour 2007"
+      },
+      {
+        "cgi": "885-0 V bis",
+        "loi": "LFR 2009-122 art 15",
+        "raison": "Plafond temporaire 2,5M€ pour 2009-2010"
+      },
+      {
+        "cgi": "119 bis",
+        "loi": "LF 64-1279 art 7",
+        "raison": "Cessation partielle 'pour les emprunts post-1965' - règle de scope dans LF"
+      },
+      {
+        "cgi": "130",
+        "loi": "LF 64-1279 art 7",
+        "raison": "Idem cessation partielle"
+      },
+      {
+        "cgi": "136",
+        "loi": "LF 64-1279 art 7",
+        "raison": "Idem"
+      },
+      {
+        "cgi": "138",
+        "loi": "LF 64-1279 art 7",
+        "raison": "Idem"
+      },
+      {
+        "cgi": "139",
+        "loi": "LF 64-1279 art 7",
+        "raison": "Idem"
+      }
+    ]
+  },
+  "rejected_old_articles": {
+    "description": "L'article CGI dans le JSON est un article créé/recréé après la modification trouvée. La modification concerne une ancienne version désormais différente.",
+    "count": 7,
+    "items": [
+      {
+        "cgi": "199 ter",
+        "loi": "LF 64-1279 art 5",
+        "raison": "JSON 199 ter post-1985 = CIR (crédit impôt recherche). La 1965 modification concernait l'ancienne version sur retenue à la source des revenus mobiliers."
+      },
+      {
+        "cgi": "949 bis",
+        "loi": "LF 64-1279 art 13",
+        "raison": "JSON 949 bis créé 1992. L'abrogation 1965 portait sur ancienne version."
+      },
+      {
+        "cgi": "126 bis",
+        "loi": "LF 64-1279 art 7",
+        "raison": "JSON 126 bis créé 2002-03-31, différente version."
+      },
+      {
+        "cgi": "133",
+        "loi": "LF 64-1279 art 7",
+        "raison": "JSON anomalie creation date 2999 - article réutilisé pour autre disposition."
+      },
+      {
+        "cgi": "146 quater",
+        "loi": "LF 64-1279 art 7",
+        "raison": "JSON 146 quater créé 2013-01-01."
+      },
+      {
+        "cgi": "125 quater",
+        "loi": "LF 64-1279 art 7",
+        "raison": "JSON earliest 2013-01-01, ABROGE - différente version."
+      },
+      {
+        "cgi": "683",
+        "loi": "LOI 80-531 art 30",
+        "raison": "JSON earliest 1983-12-30 'Réécriture complète'. La modification 1980 portait sur version pré-réécriture."
+      }
+    ]
+  },
+  "articles_entirely_absent_from_json": {
+    "description": "Articles CGI mentionnés dans les lois de la DB mais absents de modifications_cgi_enriched.json. Très probablement des articles anciens définitivement abrogés (avant constitution du JSON).",
+    "count": 6,
+    "items": [
+      {
+        "cgi": "143 bis",
+        "loi": "LF 64-1279 art 7 (1965)",
+        "nature": "Cessation partielle"
+      },
+      {
+        "cgi": "143 ter",
+        "loi": "LF 64-1279 art 7 (1965)",
+        "nature": "Cessation partielle"
+      },
+      {
+        "cgi": "204 sexies",
+        "loi": "LF 64-1279 art 3 (1965)",
+        "nature": "Changement de taux"
+      },
+      {
+        "cgi": "714-1",
+        "loi": "LF 64-1279 art 9 (1965)",
+        "nature": "Changement de taux"
+      },
+      {
+        "cgi": "812 I",
+        "loi": "LOI 77-1467 art 70 (1978)",
+        "nature": "Reconduction"
+      },
+      {
+        "cgi": "953 I",
+        "loi": "LF 80-1094 art 6 (1981)",
+        "nature": "Fixation montant"
+      }
+    ]
+  },
+  "json_attribution_errors": [
+    {
+      "description": "Le JSON attribue à 'LFR 89-936' des modifications qui appartiennent en réalité à 'LF 89-935' (Loi de Finances pour 1990). Le champ article_in_law contient 'Finances pour 1990' qui correspond à LF 89-935.",
+      "concerned_articles": [
+        {
+          "cgi": "154",
+          "json_says": "LFR 89-936 art 25 II Finances pour 1990",
+          "actually_is": "LF 89-935 art 25 II"
+        },
+        {
+          "cgi": "219",
+          "json_says": "LFR 89-936 art 19 Finances pour 1990",
+          "actually_is": "LF 89-935 art 19"
+        },
+        {
+          "cgi": "298 quater",
+          "json_says": "LFR 89-936 art 37 Finances pour 1990",
+          "actually_is": "LF 89-935 art 37"
+        }
+      ]
+    }
+  ],
+  "filtered_false_positives_summary": {
+    "count": 25,
+    "categories": {
+      "allocation_revenu_taxe": 7,
+      "modification_dans_autre_code": 9,
+      "application_specifique_montant": 4,
+      "regle_parallele_extension_scope": 5
+    },
+    "examples": "Voir version v3 pour détails complets - cas type : LF 2004-1484 art 47 modifie CGCT L.2334-21 en référençant CGI 1465 A ; LF 2011-1978 art 44 alloue revenus TSCA aux départements en référençant CGI 1001 ; etc."
+  },
+  "limitations_residuelles": [
+    "Gaps Légifrance pré-1985 : les modifications anciennes peuvent ne pas créer de version LEGIARTI trackée. Acceptées par défaut si verbe de modification clair.",
+    "Cessations partielles 'pour les actes/emprunts post-1965' : classées PARALLEL_PROV par cohérence Légifrance. Interprétation juridique alternative possible.",
+    "Modifications par décrets de codification (DECRET 81-866, 90-798, 95-1281, 97-661, 2001-435, 94-899) : ces décrets compilent et codifient. Non analysés ici.",
+    "Variantes orthographiques : 'I' vs 'İ' (encodage Turkish), '1er' vs '1' : couverts mais sous-détection résiduelle possible.",
+    "Amendements adoptés non survivants au texte final (CMP/CC) : exclus comme source unique."
+  ],
+  "final_recommendation": {
+    "modifications_a_integrer_au_json": 17,
+    "documentation_parlementaire_solide": 14,
+    "classification_finale": {
+      "17_CONFIRMEES_robustes": "Modifications du texte d article CGI actuel avec verbe explicite et cohérence Légifrance",
+      "9_PARALLEL_PROV_a_exclure": "4 cas MOYENNE + 5 cessations partielles 1965 - règles dans LF mais pas modifications texte CGI",
+      "7_OLD_ARTICLE_a_exclure": "Modifications d anciens articles abrogés/réutilisés - hors champ JSON actuel",
+      "6_ABSENTS_du_JSON": "Articles absents du JSON (probablement anciens abrogés définitivement)"
+    },
+    "erreurs_attribution_JSON_a_corriger": {
+      "count": 3,
+      "description": "Le JSON attribue à LFR 89-936 ce qui appartient à LF 89-935 pour articles 154, 219, 298 quater. Le texte de LF 89-935 art 25/19/37 modifie ces articles ; LFR 89-936 art 25 a un contenu différent (prélèvement social)."
+    }
+  }
+}

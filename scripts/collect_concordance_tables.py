@@ -32,7 +32,7 @@ OUTPUT_PATH = Path(__file__).parent.parent / "data" / "concordance_articles.json
 
 # Known URL corrections (DB has wrong dossier ref)
 URL_CORRECTIONS = {
-    "pjl22-096": "pjl22-113",  # LFR 2022 (2) — DB ref returns 404
+    "pjl22-096": "pjl22-113",  # LFR 2022 (2) - DB ref returns 404
 }
 
 RATE_LIMIT_SECONDS = 0.5
@@ -91,7 +91,7 @@ def _parse_concordance_page(html: str) -> list[dict] | None:
     """
     soup = BeautifulSoup(html, "html.parser")
 
-    # Find the concordance table — it's the main table with article mappings
+    # Find the concordance table - it's the main table with article mappings
     tables = soup.find_all("table")
     if not tables:
         return None

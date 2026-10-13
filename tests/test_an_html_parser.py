@@ -171,7 +171,7 @@ class TestDetectFormat:
         assert detect_format(SAMPLE_STRONG_HTML) == HtmlFormat.STRONG
 
     def test_leg13_priority_over_semantic(self):
-        """LEG13 pages also have <div id="englobe"> — LEG13 must be detected first."""
+        """LEG13 pages also have <div id="englobe"> - LEG13 must be detected first."""
         html = (
             '<html><!-- RSPEAK_START --><div id="englobe">'
             '<h2 class="titre1">X</h2><h1 class="seance">Y</h1>'

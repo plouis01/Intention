@@ -23,15 +23,17 @@ class EmbeddingService:
     """
     Service for generating and managing embeddings.
 
-    Supports two providers:
+    Supports three providers:
     - "local": Uses sentence-transformers (free, runs locally)
     - "openai": Uses OpenAI API (requires OPENAI_API_KEY)
+    - "vertex": Uses Google Vertex AI text-embedding-004 (requires gcloud auth)
     """
 
     def __init__(self, cache_dir: Path | None = None):
         self.settings = get_settings()
         self._openai_client = None
         self._local_model = None
+        self._vertex_client = None
         self.cache_dir = cache_dir or Path("data/embeddings_cache")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -67,10 +69,168 @@ class EmbeddingService:
             self._openai_client = OpenAI(api_key=self.settings.openai_api_key)
         return self._openai_client
 
+    @property
+    def vertex_client(self):
+        """Lazy-load Google GenAI client for Vertex AI embeddings.
+
+        Auth order:
+        1. GOOGLE_APPLICATION_CREDENTIALS_JSON env var (JSON string, for Railway)
+        2. GOOGLE_APPLICATION_CREDENTIALS_JSON_FILE env var (path to JSON file, for local .env)
+        3. Application Default Credentials (gcloud auth application-default login)
+        """
+        if self._vertex_client is None:
+            import json as json_mod
+            import os
+
+            from google import genai
+
+            if not self.settings.vertex_project:
+                raise ValueError(
+                    "Vertex AI project not configured. Set VERTEX_PROJECT environment variable."
+                )
+
+            credentials = None
+            creds_json = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+            if not creds_json:
+                json_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON_FILE")
+                if json_file and Path(json_file).exists():
+                    creds_json = Path(json_file).read_text()
+            if creds_json:
+                from google.oauth2 import service_account
+                info = json_mod.loads(creds_json)
+                credentials = service_account.Credentials.from_service_account_info(
+                    info,
+                    scopes=["https://www.googleapis.com/auth/cloud-platform"],
+                )
+
+            self._vertex_client = genai.Client(
+                vertexai=True,
+                project=self.settings.vertex_project,
+                location=self.settings.vertex_location,
+                credentials=credentials,
+            )
+        return self._vertex_client
+
+    def _generate_vertex_embedding(self, text: str) -> list[float]:
+        """Generate embedding using Vertex AI text-embedding-005."""
+        max_chars = 6000
+        if len(text) > max_chars:
+            text = text[:max_chars]
+
+        result = self.vertex_client.models.embed_content(
+            model=self.settings.vertex_embedding_model,
+            contents=text,
+        )
+        return result.embeddings[0].values
+
+    def _create_vertex_client(self):
+        """Create a new Vertex AI client (for use in thread pools)."""
+        import json as json_mod
+        import os
+
+        from google import genai
+
+        credentials = None
+        creds_json = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+        if not creds_json:
+            json_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS_JSON_FILE")
+            if json_file and Path(json_file).exists():
+                creds_json = Path(json_file).read_text()
+        if creds_json:
+            from google.oauth2 import service_account
+            info = json_mod.loads(creds_json)
+            credentials = service_account.Credentials.from_service_account_info(
+                info,
+                scopes=["https://www.googleapis.com/auth/cloud-platform"],
+            )
+
+        return genai.Client(
+            vertexai=True,
+            project=self.settings.vertex_project,
+            location=self.settings.vertex_location,
+            credentials=credentials,
+        )
+
+    def _embed_vertex_batch_with_retry(self, client, batch: list[str]) -> list[list[float]]:
+        """Embed a single batch with retry on transient errors and split on token overflow."""
+        import time as _time
+
+        for attempt in range(5):
+            try:
+                result = client.models.embed_content(
+                    model=self.settings.vertex_embedding_model,
+                    contents=batch,
+                )
+                return [e.values for e in result.embeddings]
+            except Exception as e:
+                err_str = str(e)
+                if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "timed out" in err_str.lower() or "ReadTimeout" in type(e).__name__:
+                    wait = 2 ** attempt
+                    logger.warning(f"Retryable error, waiting {wait}s (attempt {attempt + 1}/5): {type(e).__name__}")
+                    _time.sleep(wait)
+                elif "400" in err_str or "INVALID_ARGUMENT" in err_str:
+                    # Token limit or bad request - split or truncate
+                    if len(batch) <= 1:
+                        batch = [batch[0][:2000]]
+                        logger.warning(f"Single text too large, truncating to 2000 chars")
+                        continue
+                    mid = len(batch) // 2
+                    logger.warning(f"Batch of {len(batch)} got 400, splitting in half")
+                    return self._embed_vertex_batch_with_retry(client, batch[:mid]) + \
+                           self._embed_vertex_batch_with_retry(client, batch[mid:])
+                else:
+                    raise
+        raise RuntimeError(f"Failed after 5 retries for batch of {len(batch)}")
+
+    def _generate_vertex_embeddings_batch(
+        self, texts: list[str], batch_size: int = 25, max_workers: int = 5
+    ) -> list[list[float]]:
+        """Generate embeddings in batch using Vertex AI with parallel requests.
+
+        Each worker thread gets its own genai.Client to avoid httpx thread-safety issues.
+        """
+        import threading
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        max_chars = 4000
+        batches = []
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i : i + batch_size]
+            batch = [t[:max_chars] if len(t) > max_chars else t for t in batch]
+            batches.append((i, batch))
+
+        # Thread-local clients
+        local = threading.local()
+
+        def _get_client():
+            if not hasattr(local, "client"):
+                local.client = self._create_vertex_client()
+            return local.client
+
+        def _process_batch(batch):
+            return self._embed_vertex_batch_with_retry(_get_client(), batch)
+
+        results = [None] * len(batches)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(_process_batch, batch): idx
+                for idx, (_, batch) in enumerate(batches)
+            }
+            for future in as_completed(futures):
+                idx = futures[future]
+                results[idx] = future.result()
+
+        all_embeddings = []
+        for r in results:
+            all_embeddings.extend(r)
+        return all_embeddings
+
     def _get_cache_key(self, text: str) -> str:
         """Generate cache key for text."""
         if self.provider == "local":
             model_id = self.settings.local_embedding_model
+        elif self.provider == "vertex":
+            model_id = self.settings.vertex_embedding_model
         else:
             model_id = self.settings.embedding_model
         return hashlib.md5(f"{model_id}:{text}".encode()).hexdigest()
@@ -143,6 +303,8 @@ class EmbeddingService:
         # Generate embedding based on provider
         if self.provider == "local":
             embedding = self._generate_local_embedding(text)
+        elif self.provider == "vertex":
+            embedding = self._generate_vertex_embedding(text)
         else:
             embedding = self._generate_openai_embedding(text)
 
@@ -208,6 +370,17 @@ class EmbeddingService:
 
                         if use_cache:
                             self._cache_embedding(uncached_texts[i + j], emb_list)
+            elif self.provider == "vertex":
+                # Vertex AI batch API - limit to 25 per request to stay under 20K token limit
+                vertex_results = self._generate_vertex_embeddings_batch(
+                    uncached_texts, batch_size=25
+                )
+                for j, emb_list in enumerate(vertex_results):
+                    idx = uncached_indices[j]
+                    embeddings[idx] = emb_list
+
+                    if use_cache:
+                        self._cache_embedding(uncached_texts[j], emb_list)
             else:
                 # OpenAI batch API
                 for i in range(0, len(uncached_texts), batch_size):

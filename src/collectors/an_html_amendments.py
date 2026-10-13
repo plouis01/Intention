@@ -327,8 +327,9 @@ class ANHtmlAmendmentCollector:
         # Column 3: Date
         date = cell_texts[3] if len(cell_texts) > 3 else None
 
-        # Column 4: Auteurs
-        auteurs = cell_texts[4] if len(cell_texts) > 4 else None
+        # Column 4: Auteurs (normalize to first author only)
+        from src.parsers.amendments import normalize_amendment_author
+        auteurs = normalize_amendment_author(cell_texts[4] if len(cell_texts) > 4 else None)
 
         # Column 5: Sort
         sort_raw = cell_texts[5] if len(cell_texts) > 5 else None
@@ -694,7 +695,7 @@ def collect_an_html_amendments(
 ) -> dict[int, tuple[int, int]]:
     """Collect amendments for legislatures 12 and/or 13 from AN archives.
 
-    Discovers texts automatically from the search dropdown — no mapping
+    Discovers texts automatically from the search dropdown - no mapping
     file needed.
 
     Args:

@@ -68,7 +68,7 @@ class HtmlFormat(Enum):
 def detect_format(html_content: str) -> HtmlFormat:
     """Detect which HTML format a debate page uses.
 
-    Detection order is strict — earlier rules take priority.
+    Detection order is strict - earlier rules take priority.
     """
     # Step 1: LEG13
     if "RSPEAK_START" in html_content:
@@ -158,7 +158,7 @@ def extract_date_from_html(soup: BeautifulSoup, fmt: HtmlFormat,
         if m:
             return _parse_french_date(m.group(1), m.group(2), m.group(3))
 
-        # Fallback: title has day+month but no year — infer from path
+        # Fallback: title has day+month but no year - infer from path
         m = _DATE_NO_YEAR_PATTERN.search(title_text)
         if m:
             month = FRENCH_MONTHS.get(m.group(2).lower())
@@ -217,6 +217,49 @@ def _clean_speaker_name(raw_name: str) -> str:
     return name.strip()
 
 
+def _strip_function_prefix(content: str, italic_tag: Tag | None) -> str:
+    """Remove function/role text that leaked into the start of speech content.
+
+    When the fallback path in _get_text_after_speaker strips only the speaker
+    name (bold tag), the italic tag text (e.g. "rapporteur général de la
+    commission des finances") may remain at the beginning of the content.
+    This function detects and removes it.
+    """
+    if not italic_tag or not content:
+        return content
+
+    italic_text = italic_tag.get_text().strip()
+    if not italic_text:
+        return content
+
+    content_stripped = content.lstrip(".,;: \xa0\n")
+    italic_clean = italic_text.rstrip(".,;: \xa0")
+
+    # Case 1: Content starts with the full italic text
+    if content_stripped.lower().startswith(italic_clean.lower()):
+        content = content_stripped[len(italic_clean):].lstrip(".,;: \xa0\n")
+        return content
+
+    # Case 2: Content starts with a suffix of the italic text
+    # e.g. italic="rapporteur général de la commission des finances"
+    #      content="général de la commission des finances. La commission..."
+    # or   content="de la commission des finances. La commission..."
+    italic_words = italic_clean.split()
+    for start_idx in range(1, len(italic_words)):
+        suffix = " ".join(italic_words[start_idx:])
+        if content_stripped.lower().startswith(suffix.lower()):
+            candidate = content_stripped[len(suffix):].lstrip(".,;: \xa0\n")
+            # Safety: the remaining text should start with an uppercase letter
+            # or a quote (beginning of actual speech), not a lowercase continuation
+            if candidate and (candidate[0].isupper() or candidate[0] in ('"', '«', "'")):
+                return candidate
+            # Also accept if the suffix is long enough to be confident
+            if len(suffix) > 10:
+                return candidate
+
+    return content
+
+
 def _get_text_after_speaker(p_tag: Tag, bold_tag: Tag, italic_tag: Tag | None) -> str:
     """Extract the intervention text after the speaker name (and optional function) in a <p>."""
     # Get full text of the <p>
@@ -238,6 +281,9 @@ def _get_text_after_speaker(p_tag: Tag, bold_tag: Tag, italic_tag: Tag | None) -
             content = full_text[name_idx + len(speaker_name_text):]
         else:
             content = full_text
+        # The fallback only stripped the bold name - the italic function text
+        # may still be at the start of the content. Strip it.
+        content = _strip_function_prefix(content, italic_tag)
 
     # Clean leading punctuation and whitespace
     content = content.lstrip(".,;: \xa0")
@@ -254,7 +300,7 @@ def parse_leg13(soup: BeautifulSoup) -> ParsedDebat | None:
             rspeak_start = comment
             break
 
-    # Get the container — typically <div id="englobe">
+    # Get the container - typically <div id="englobe">
     container = soup.find("div", id="englobe")
     if not rspeak_start and not container:
         return None
@@ -487,7 +533,7 @@ def parse_font_b(soup: BeautifulSoup) -> ParsedDebat | None:
 
         fonction = _extract_function_from_html(bold, italic, speaker_name)
 
-        # Get text content — everything in the <font> after the <b> (and optional <i>)
+        # Get text content - everything in the <font> after the <b> (and optional <i>)
         font_text = font.get_text()
         speaker_part = bold.get_text()
         if italic:
@@ -496,7 +542,14 @@ def parse_font_b(soup: BeautifulSoup) -> ParsedDebat | None:
         if idx >= 0:
             content = font_text[idx + len(speaker_part):]
         else:
-            content = font_text
+            # Fallback: only bold found - strip function prefix too
+            bold_text_only = bold.get_text()
+            bold_idx = font_text.find(bold_text_only)
+            if bold_idx >= 0:
+                content = font_text[bold_idx + len(bold_text_only):]
+            else:
+                content = font_text
+            content = _strip_function_prefix(content, italic)
         content = content.lstrip(".,;: \xa0").strip()
 
         if not content:
@@ -551,8 +604,12 @@ def parse_strong(soup: BeautifulSoup) -> ParsedDebat | None:
     current_function = None
     current_content_parts = []
 
+    # Track the italic tag used for function detection so we can skip it
+    # when processing italic children (avoid appending function text to content)
+    _strong_function_italic = None
+
     def _flush_intervention():
-        nonlocal current_speaker, current_function, current_content_parts
+        nonlocal current_speaker, current_function, current_content_parts, _strong_function_italic
         if current_speaker and current_content_parts:
             content = " ".join(current_content_parts).strip()
             if content:
@@ -568,12 +625,13 @@ def parse_strong(soup: BeautifulSoup) -> ParsedDebat | None:
         current_speaker = None
         current_function = None
         current_content_parts = []
+        _strong_function_italic = None
 
     for p_tag in soup.find_all("p"):
         # Skip page anchor tables and centered section headers
         align = p_tag.get("align", "").upper()
         if align == "CENTER":
-            # Check if this is a section header — flush current speaker
+            # Check if this is a section header - flush current speaker
             text = p_tag.get_text().strip()
             if text and not text.isdigit():
                 _flush_intervention()
@@ -601,7 +659,7 @@ def parse_strong(soup: BeautifulSoup) -> ParsedDebat | None:
                 )
 
                 if is_speaker:
-                    # New speaker — flush previous
+                    # New speaker - flush previous
                     _flush_intervention()
                     current_speaker = _clean_speaker_name(strong_text)
 
@@ -617,11 +675,13 @@ def parse_strong(soup: BeautifulSoup) -> ParsedDebat | None:
                         current_function = "autre"
 
                     # Check for <i> tag right after this <strong> for function
+                    _strong_function_italic = None
                     next_sib = child.next_sibling
                     while next_sib:
                         if isinstance(next_sib, Tag) and next_sib.name == "i":
                             italic_text = next_sib.get_text().lower().strip()
                             if not italic_text.startswith(("monsieur", "madame")):
+                                _strong_function_italic = next_sib
                                 if "ministre" in italic_text:
                                     current_function = "ministre"
                                 elif "rapporteur" in italic_text:
@@ -633,21 +693,24 @@ def parse_strong(soup: BeautifulSoup) -> ParsedDebat | None:
                             break
                         next_sib = next_sib.next_sibling
                 else:
-                    # Not a speaker name — treat as content if we have a speaker
+                    # Not a speaker name - treat as content if we have a speaker
                     if current_speaker:
                         current_content_parts.append(strong_text)
 
             elif isinstance(child, Tag) and child.name == "i":
-                # Didascalie or italic text — skip didascalies starting with (
+                # Didascalie or italic text - skip didascalies starting with (
                 text = child.get_text().strip()
                 if text.startswith("("):
+                    continue
+                # Skip the function italic tag (already captured as current_function)
+                if _strong_function_italic is not None and child is _strong_function_italic:
                     continue
                 # Could be function info if right after speaker or content
                 if current_speaker:
                     current_content_parts.append(text)
 
             elif isinstance(child, Tag) and child.name == "br":
-                # Line break — might separate interventions but we handle via <strong> detection
+                # Line break - might separate interventions but we handle via <strong> detection
                 continue
 
             elif isinstance(child, Tag):
@@ -699,7 +762,13 @@ def _detect_encoding(file_path: Path) -> str:
     # Meta charset check (case-insensitive)
     head_lower = head.lower()
     if b'charset="utf-8"' in head_lower or b"charset=utf-8" in head_lower:
-        return "utf-8"
+        # Verify the file is actually valid UTF-8 (some AN pages lie about encoding)
+        with open(file_path, "rb") as f2:
+            try:
+                f2.read().decode("utf-8")
+                return "utf-8"
+            except UnicodeDecodeError:
+                return "iso-8859-1"
 
     return "iso-8859-1"
 

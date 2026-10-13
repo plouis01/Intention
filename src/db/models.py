@@ -24,6 +24,299 @@ class Base(DeclarativeBase):
     pass
 
 
+class User(Base):
+    """User account for authentication."""
+
+    __tablename__ = "users"
+
+    id = Column(String(36), primary_key=True)  # UUID
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    name = Column(String(255), nullable=False)
+    hashed_password = Column(String(255), nullable=True)  # Nullable for OAuth-only users
+    provider = Column(String(20), nullable=False, default="email")  # email, google, apple
+    role = Column(String(20), nullable=False, server_default="user")  # user, admin
+    provider_id = Column(String(255), nullable=True)  # OAuth subject ID
+    email_verified = Column(Integer, nullable=False, server_default="0")  # 0=pending, 1=verified (SQLite compat)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=True)
+
+    search_history = relationship("SearchHistory", back_populates="user", cascade="all, delete-orphan")
+    trial_links = relationship("TrialLink", back_populates="user", foreign_keys="TrialLink.user_id")
+    subscription = relationship("Subscription", back_populates="user", uselist=False)
+
+
+class TrialLink(Base):
+    """Trial access link created by admin for prospects."""
+
+    __tablename__ = "trial_links"
+
+    id = Column(Integer, primary_key=True)
+    token = Column(String(64), unique=True, nullable=False, index=True)
+    prospect_email = Column(String(255), nullable=False, index=True)
+    prospect_name = Column(String(255), nullable=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+    status = Column(String(20), nullable=False, server_default="pending")
+    created_at = Column(DateTime, nullable=False)
+    expires_at = Column(DateTime, nullable=True)  # Set on first redemption (trial duration)
+    link_expires_at = Column(DateTime, nullable=False)  # Link validity (before first open)
+    redeemed_at = Column(DateTime, nullable=True)
+    converted_at = Column(DateTime, nullable=True)
+    visit_count = Column(Integer, nullable=False, server_default="0")
+    created_by = Column(String(36), ForeignKey("users.id"), nullable=False)
+
+    user = relationship("User", back_populates="trial_links", foreign_keys=[user_id])
+    creator = relationship("User", foreign_keys=[created_by])
+
+    __table_args__ = (
+        Index("ix_trial_links_status", "status"),
+    )
+
+
+class TrialLinkVisit(Base):
+    """Audit trail for every hit on a trial link (inspect or redeem).
+
+    Lets admins distinguish real prospect opens from antivirus / email-scanner
+    pre-fetches (Microsoft SafeLinks, Mimecast, Proofpoint, etc.).
+    """
+
+    __tablename__ = "trial_link_visits"
+
+    id = Column(Integer, primary_key=True)
+    trial_link_id = Column(Integer, ForeignKey("trial_links.id"), nullable=False, index=True)
+    event_type = Column(String(20), nullable=False)  # "inspect" | "redeem"
+    classification = Column(String(20), nullable=False)  # "human" | "bot" | "unknown"
+    scanner_name = Column(String(50), nullable=True)
+    ip_address = Column(String(45), nullable=True)
+    user_agent = Column(String(300), nullable=True)
+    accept_language = Column(String(100), nullable=True)
+    created_at = Column(DateTime, nullable=False)
+
+    __table_args__ = (
+        Index("ix_trial_visits_link_created", "trial_link_id", "created_at"),
+    )
+
+
+class Subscription(Base):
+    """Stripe subscription for paid access."""
+
+    __tablename__ = "subscriptions"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id"), unique=True, nullable=False)
+    stripe_customer_id = Column(String(255), nullable=True)
+    stripe_subscription_id = Column(String(255), nullable=True)
+    plan = Column(String(20), nullable=False, server_default="pro")  # pro
+    billing_period = Column(String(20), nullable=True)  # monthly, yearly
+    status = Column(String(20), nullable=False, server_default="active")  # active, canceled, past_due, incomplete
+    current_period_start = Column(DateTime, nullable=True)
+    current_period_end = Column(DateTime, nullable=True)
+    cancel_at_period_end = Column(Integer, nullable=False, server_default="0")  # 0/1, SQLite compat
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=True)
+
+    user = relationship("User", back_populates="subscription")
+
+    __table_args__ = (
+        Index("ix_subscriptions_user", "user_id", unique=True),
+        Index("ix_subscriptions_status", "status"),
+    )
+
+
+class SearchHistory(Base):
+    """Search history entry for a user."""
+
+    __tablename__ = "search_history"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    article_ref = Column(String(100), nullable=False)
+    article_title = Column(String(500), nullable=False)
+    searched_at = Column(DateTime, nullable=False)
+
+    user = relationship("User", back_populates="search_history")
+
+    __table_args__ = (
+        Index("ix_search_history_user_date", "user_id", "searched_at"),
+    )
+
+
+class Notification(Base):
+    """In-app notifications for users."""
+
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    title = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    link = Column(String(500), nullable=True)
+    type = Column(String(50), nullable=True)  # "contact_reply", "article_added", etc.
+    extra_data = Column("metadata", Text, nullable=True)  # JSON string for extra data
+    read = Column(Integer, nullable=False, server_default="0")  # 0=unread, 1=read
+    created_at = Column(DateTime, nullable=False)
+
+    __table_args__ = (
+        Index("ix_notifications_user_read", "user_id", "read"),
+    )
+
+
+class UserSession(Base):
+    """Active user sessions (one per device/browser)."""
+
+    __tablename__ = "user_sessions"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    refresh_token_hash = Column(String(64), unique=True, nullable=False)  # SHA-256
+    device_info = Column(String(200), nullable=True)  # User-Agent truncated
+    ip_address = Column(String(45), nullable=True)  # IPv4 or IPv6
+    location = Column(String(100), nullable=True)  # "City, Country"
+    created_at = Column(DateTime, nullable=False)
+    last_used_at = Column(DateTime, nullable=False)
+
+    __table_args__ = (
+        Index("ix_user_sessions_user", "user_id"),
+        Index("ix_user_sessions_token_hash", "refresh_token_hash", unique=True),
+        # Speeds up GET /auth/sessions which sorts by last_used_at DESC for a user.
+        Index("ix_user_sessions_user_last_used", "user_id", "last_used_at"),
+    )
+
+
+class AccountLog(Base):
+    """Anonymized account event log (GDPR-compliant, no personal data)."""
+
+    __tablename__ = "account_logs"
+
+    id = Column(Integer, primary_key=True)
+    event = Column(String(50), nullable=False)  # account_created, account_deleted
+    provider = Column(String(20), nullable=False)  # email, google
+    timestamp = Column(DateTime, nullable=False)
+
+
+class ContactMessage(Base):
+    """Contact/support messages from users."""
+
+    __tablename__ = "contact_messages"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+    email = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    status = Column(String(20), nullable=False, server_default="open")  # "open", "closed"
+    last_seen_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, nullable=False)
+
+
+class ConversationMessage(Base):
+    """Messages within a contact ticket thread."""
+
+    __tablename__ = "conversation_messages"
+
+    id = Column(Integer, primary_key=True)
+    contact_id = Column(Integer, ForeignKey("contact_messages.id"), nullable=False)
+    sender = Column(String(10), nullable=False)  # "user" or "admin"
+    message = Column(Text, nullable=False)
+    file_path = Column(String(500), nullable=True)
+    created_at = Column(DateTime, nullable=False)
+
+    __table_args__ = (
+        Index("ix_conversation_messages_contact", "contact_id"),
+    )
+
+
+class AnalysisFeedback(Base):
+    """User feedback on article analyses."""
+
+    __tablename__ = "analysis_feedback"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    article_ref = Column(String(100), nullable=False)
+    section_index = Column(Integer, nullable=True)  # null = global, int = specific section
+    rating = Column(String(10), nullable=True)  # up, down, or null (cleared)
+    message = Column(Text, nullable=True)
+    created_at = Column(DateTime, nullable=False)
+
+    admin_reply = Column(Text, nullable=True)
+    admin_reply_at = Column(DateTime, nullable=True)
+    admin_reply_by = Column(String(36), ForeignKey("users.id"), nullable=True)
+
+    __table_args__ = (
+        Index("ix_analysis_feedback_article", "article_ref"),
+    )
+
+
+class ArticleReport(Base):
+    """User-reported missing articles."""
+
+    __tablename__ = "article_reports"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=True)
+    article_ref = Column(String(100), nullable=False)
+    notify = Column(Integer, default=0)  # 1 = user wants email notification
+    created_at = Column(DateTime, nullable=False)
+
+    __table_args__ = (
+        Index("ix_article_reports_ref", "article_ref"),
+    )
+
+
+class PasswordResetToken(Base):
+    """Token for password reset requests."""
+
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    token = Column(String(36), unique=True, nullable=False, index=True)
+    expires_at = Column(DateTime, nullable=False)
+    used = Column(Integer, default=0)  # 0=unused, 1=used (SQLite compat)
+
+
+class EmailVerificationToken(Base):
+    """Single-use token to verify a newly-signed-up email address."""
+
+    __tablename__ = "email_verification_tokens"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
+    token = Column(String(36), unique=True, nullable=False, index=True)
+    expires_at = Column(DateTime, nullable=False)
+    used = Column(Integer, default=0)
+
+
+class EmailChangeToken(Base):
+    """Token emitted when a user requests an email change; confirmed via the new email."""
+
+    __tablename__ = "email_change_tokens"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
+    new_email = Column(String(255), nullable=False)
+    token = Column(String(36), unique=True, nullable=False, index=True)
+    expires_at = Column(DateTime, nullable=False)
+    used = Column(Integer, default=0)
+
+
+class AuthEvent(Base):
+    """Structured audit log for authentication and profile events.
+
+    Rows expire after 90 days (purge task at startup).
+    user_id is nullable so we can record failed logins where no user matched.
+    """
+
+    __tablename__ = "auth_events"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    event = Column(String(50), nullable=False, index=True)
+    ip_address = Column(String(45), nullable=True)
+    user_agent = Column(String(200), nullable=True)
+    extra_data = Column(Text, nullable=True)  # JSON string
+    created_at = Column(DateTime, nullable=False, index=True)
+
+
 class LoiType(str, Enum):
     """Types of finance laws."""
 
@@ -223,7 +516,7 @@ class ChunkEmbedding(Base):
     id = Column(Integer, primary_key=True)
     chunk_type = Column(String(50), nullable=False)  # intervention, amendement, etc.
     content = Column(Text, nullable=False)  # The text that was embedded
-    content_hash = Column(String(64), nullable=False, unique=True)  # SHA256 hash for deduplication
+    content_hash = Column(String(64), nullable=False)  # SHA256 hash (unique per source_id)
     chunk_metadata = Column(JSON)  # {orateur, fonction, chambre, date, etc.}
     source_id = Column(String(100))  # Reference to source (debat_id, amendement_id)
     position = Column(Integer)  # Order within source
@@ -254,7 +547,7 @@ class AnalysisCache(Base):
     id = Column(Integer, primary_key=True)
     cgi_article = Column(String(50), nullable=False)  # e.g., "150-0 B ter"
 
-    # Analysis result (JSON) — full consolidated analysis
+    # Analysis result (JSON) - full consolidated analysis
     analysis_json = Column(JSON, nullable=False)
 
     # Invalidation tracking
@@ -313,15 +606,19 @@ class SourceExterne(Base):
 
     __table_args__ = (
         Index("ix_sources_externes_type", "type"),
+        Index("ix_sources_externes_type_ref", "type", "reference"),
+        Index("ix_sources_externes_type_date", "type", "date"),
     )
 
 
 _engine = None
 _SessionLocal = None
+_engine_light = None
+_SessionLocal_light = None
 
 
 def get_engine():
-    """Create database engine from settings (cached singleton)."""
+    """Heavy pool: used by analyses, search, background workers."""
     global _engine
     if _engine is None:
         settings = get_settings()
@@ -329,9 +626,9 @@ def get_engine():
         kwargs = {"echo": settings.environment == "development"}
         if is_pg:
             kwargs["pool_pre_ping"] = True
-            kwargs["pool_size"] = 5
-            kwargs["max_overflow"] = 10
-            kwargs["pool_timeout"] = 30
+            kwargs["pool_size"] = 15
+            kwargs["max_overflow"] = 25
+            kwargs["pool_timeout"] = 5
             kwargs["pool_recycle"] = 600
         _engine = create_engine(settings.effective_database_url, **kwargs)
         _init_sessionmaker()
@@ -351,6 +648,32 @@ def get_session():
     return _SessionLocal()
 
 
+def get_engine_light():
+    """Light pool: dedicated to short-lived auth/trial/admin/subscription endpoints.
+    Isolated from the heavy pool so analyses can never starve auth queries."""
+    global _engine_light, _SessionLocal_light
+    if _engine_light is None:
+        settings = get_settings()
+        is_pg = settings.effective_database_url.startswith("postgresql")
+        kwargs = {"echo": settings.environment == "development"}
+        if is_pg:
+            kwargs["pool_pre_ping"] = True
+            kwargs["pool_size"] = 8
+            kwargs["max_overflow"] = 8
+            kwargs["pool_timeout"] = 5
+            kwargs["pool_recycle"] = 600
+        _engine_light = create_engine(settings.effective_database_url, **kwargs)
+        _SessionLocal_light = sessionmaker(bind=_engine_light)
+    return _engine_light
+
+
+def get_session_light():
+    """Session on the LIGHT pool (auth/trial/admin/subscription only)."""
+    if _SessionLocal_light is None:
+        get_engine_light()
+    return _SessionLocal_light()
+
+
 def init_db():
     """Initialize database tables."""
     engine = get_engine()
@@ -358,7 +681,25 @@ def init_db():
 
 
 def reset_db():
-    """Drop and recreate all tables (use with caution)."""
+    """Drop and recreate all tables (use with caution).
+
+    Safety rails: refuses to run against a PostgreSQL URL unless the URL or
+    database name contains "test". SQLite is always allowed since it is
+    developer-local and expected to be disposable. This prevents accidental
+    data loss on shared / production databases (e.g. when a test fixture
+    inadvertently picks up the developer's DATABASE_URL from .env).
+    """
+    settings = get_settings()
+    url = settings.effective_database_url
+    if url.startswith("postgresql"):
+        # Only allow when the URL is clearly test-scoped
+        if "test" not in url.lower():
+            raise RuntimeError(
+                "reset_db() refused: current DATABASE_URL does not look like a "
+                f"test database ({url}). Override DATABASE_URL with a sqlite:// "
+                "URL or a Postgres URL whose name contains 'test' before "
+                "calling reset_db()."
+            )
     engine = get_engine()
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)

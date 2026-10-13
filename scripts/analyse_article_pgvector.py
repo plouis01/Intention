@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Database URL — override via CLI flag or env var
+# Database URL - override via CLI flag or env var
 # ---------------------------------------------------------------------------
 DEFAULT_DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -85,7 +85,7 @@ def _build_search_service(db_url: str):
     Build a SearchService backed by pgvector on the production DB.
 
     Uses a single ChunkEmbeddingsPgVectorStore for both debate and amendment
-    stores — chunk_type filtering is handled in SQL.
+    stores - chunk_type filtering is handled in SQL.
     """
     from src.indexing.search import SearchService
     from src.indexing.vector_stores import ChunkEmbeddingsPgVectorStore
@@ -94,10 +94,10 @@ def _build_search_service(db_url: str):
 
     pgvector_store = ChunkEmbeddingsPgVectorStore(
         connection_string=db_url,
-        embedding_dim=384,
+        embedding_dim=768,
     )
 
-    # Quick connectivity check — count is expensive on 3M rows, use estimate
+    # Quick connectivity check - count is expensive on 3M rows, use estimate
     import psycopg2
     conn = psycopg2.connect(db_url)
     conn.autocommit = True
@@ -200,7 +200,6 @@ def analyze_article(
         result = analyzer.analyze_article(
             article_ref=article_ref,
             question=question,
-            include_jurisprudence=True,
             max_modifications=max_modifications,
             include_consolidation_periods=include_consolidation,
         )
@@ -232,7 +231,7 @@ def analyze_article(
     print(f"  Fichier        : {output_path}")
     print(f"  Modifications  : {len(result.sections)}")
     print(f"  Débats analysés: {result.total_debates_searched}")
-    print(f"  Jurisprudence  : {len(result.jurisprudence)}")
+    print(f"  Interventions  : {result.total_interventions_found}")
 
     # Quality summary
     eleve = sum(
@@ -255,8 +254,6 @@ def analyze_article(
     print(f"  Sources totales: {total_sources}")
     if result.consolidation_periods:
         print(f"  Périodes consolidation: {len(result.consolidation_periods)}")
-    if result.forward_looking:
-        print(f"  Forward-looking (PLF) : {len(result.forward_looking)}")
     print(f"{'='*70}\n")
 
     return True

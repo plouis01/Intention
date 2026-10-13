@@ -114,7 +114,7 @@ def extract_keywords_from_titre(titre: str) -> list[str]:
     }
 
     # Split on common separators
-    parts = re.split(r'[\s\-–—/,;:()]+', titre_lower)
+    parts = re.split(r'[\s\-–-/,;:()]+', titre_lower)
     words = [w for w in parts if w and w not in stopwords and len(w) > 2]
 
     # Add individual significant words

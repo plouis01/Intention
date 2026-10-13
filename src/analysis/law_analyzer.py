@@ -393,7 +393,7 @@ class LawAnalyzer:
         except Exception:
             return "", [], 0, "faible"
 
-        # Search for debates — wider window for LF/LFSS (full budget calendar)
+        # Search for debates - wider window for LF/LFSS (full budget calendar)
         if mod.law_type in ("LF", "LFSS"):
             date_start = date_obj - timedelta(days=270)
         else:

@@ -11,6 +11,32 @@ from defusedxml import ElementTree as ET
 logger = logging.getLogger(__name__)
 
 
+def _extract_date_from_reference(reference: str | None = None, path: Path | None = None) -> datetime | None:
+    """Try to extract a date from a debate reference string or file path.
+
+    AN references like "CRAN20191115" or filenames like "20191115_seance.xml"
+    contain embedded dates in YYYYMMDD format.
+    """
+    candidates = []
+    if reference:
+        candidates.append(str(reference))
+    if path:
+        candidates.append(path.stem)
+        candidates.append(str(path.name))
+
+    date_pattern = re.compile(r'(\d{4})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])')
+    for candidate in candidates:
+        match = date_pattern.search(candidate)
+        if match:
+            year, month, day = int(match.group(1)), int(match.group(2)), int(match.group(3))
+            if 2000 <= year <= 2030:
+                try:
+                    return datetime(year, month, day)
+                except ValueError:
+                    continue
+    return None
+
+
 @dataclass
 class Intervention:
     """A single speaker intervention in a debate."""
@@ -115,7 +141,7 @@ def extract_article_mentions(text: str) -> list[str]:
     for _ in re.finditer(r"articles?\s+liminaire\b", text_lower):
         mentions.add("liminaire")
 
-    # 4. "articles 1 à 12" / "articles 1 et 2" (range/pair — must come before single)
+    # 4. "articles 1 à 12" / "articles 1 et 2" (range/pair - must come before single)
     range_pattern = rf"articles?\s+({ARTICLE_NUM})\s+(?:à|et)\s+({ARTICLE_NUM})"
     for match in re.finditer(range_pattern, text_lower):
         for g in match.groups():
@@ -156,9 +182,13 @@ def parse_an_compte_rendu_xml(xml_path: Path) -> ParsedDebat | None:
             try:
                 date = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
             except ValueError:
-                date = datetime.now()
+                date = _extract_date_from_reference(path=xml_path) or datetime(1970, 1, 1)
+                if date.year == 1970:
+                    logger.warning(f"Could not parse date from {xml_path}, using sentinel 1970-01-01")
         else:
-            date = datetime.now()
+            date = _extract_date_from_reference(path=xml_path) or datetime(1970, 1, 1)
+            if date.year == 1970:
+                logger.warning(f"No date found in {xml_path}, using sentinel 1970-01-01")
 
         # Determine etape
         etape = "seance_publique"
@@ -247,9 +277,13 @@ def parse_an_compte_rendu_json(json_path: Path) -> ParsedDebat | None:
             try:
                 date = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
             except ValueError:
-                date = datetime.now()
+                date = _extract_date_from_reference(path=json_path) or datetime(1970, 1, 1)
+                if date.year == 1970:
+                    logger.warning(f"Could not parse date from {json_path}, using sentinel 1970-01-01")
         else:
-            date = datetime.now()
+            date = _extract_date_from_reference(path=json_path) or datetime(1970, 1, 1)
+            if date.year == 1970:
+                logger.warning(f"No date found in {json_path}, using sentinel 1970-01-01")
 
         # Determine etape
         etape = "seance_publique"
@@ -378,9 +412,13 @@ def parse_senat_compte_rendu_xml(xml_path: Path) -> ParsedDebat | None:
             try:
                 date = datetime.fromisoformat(date_str)
             except ValueError:
-                date = datetime.now()
+                date = _extract_date_from_reference(path=xml_path) or datetime(1970, 1, 1)
+                if date.year == 1970:
+                    logger.warning(f"Could not parse date from {xml_path}, using sentinel 1970-01-01")
         else:
-            date = datetime.now()
+            date = _extract_date_from_reference(path=xml_path) or datetime(1970, 1, 1)
+            if date.year == 1970:
+                logger.warning(f"No date found in {xml_path}, using sentinel 1970-01-01")
 
         # Extract speeches
         interventions = []

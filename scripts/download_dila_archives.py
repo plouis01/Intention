@@ -18,8 +18,8 @@ def list_archives(year: int) -> list:
     response = httpx.get(url, timeout=30)
     response.raise_for_status()
 
-    # Extract archive filenames
-    pattern = rf'href="(AN_{year}\d+\.taz)"'
+    # Extract archive filenames (format: AN_YYYYMMDD_NNN.taz)
+    pattern = rf'href="(AN_{year}\d+_\d+\.taz)"'
     archives = re.findall(pattern, response.text)
     return archives
 

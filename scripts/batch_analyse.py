@@ -168,7 +168,6 @@ def process_article(
         result = analyzer.analyze_article(
             article_ref=article_ref,
             question=question,
-            include_jurisprudence=True,
         )
 
         # Render and save

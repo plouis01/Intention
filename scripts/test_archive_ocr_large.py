@@ -154,7 +154,7 @@ def build_test_urls():
     add(10, "1995-1996-ordinaire1", 1)
     add(10, "1995-1996-ordinaire1", 30)
 
-    # ── Legislature 11 (10 PDFs) — extra one to reach 100 ──
+    # ── Legislature 11 (10 PDFs) - extra one to reach 100 ──
     add(11, "1997-1998-ordinaire1", 1)
     add(11, "1997-1998-ordinaire1", 40)
     add(11, "1997-1998-ordinaire1", 100)
@@ -387,9 +387,9 @@ def main():
     outliers = [r for r in results if r["avg_chars_per_page"] < 500]
     if outliers:
         for r in outliers:
-            print(f"  Leg {r['legislature']:>2}, {r['session']}/{r['number']}.pdf — avg {r['avg_chars_per_page']:.0f} chars/page, {r['total_pages']} pages")
+            print(f"  Leg {r['legislature']:>2}, {r['session']}/{r['number']}.pdf - avg {r['avg_chars_per_page']:.0f} chars/page, {r['total_pages']} pages")
     else:
-        print("  None found — all PDFs have >= 500 avg chars/page")
+        print("  None found - all PDFs have >= 500 avg chars/page")
 
     # ── Errors ──
     if errors:
@@ -398,7 +398,7 @@ def main():
         print(f"ERRORS ({len(errors)})")
         print("-" * 100)
         for e in errors:
-            print(f"  #{e['idx']} Leg {e['legislature']}, {e['session']}/{e['number']}.pdf — {e['error']}")
+            print(f"  #{e['idx']} Leg {e['legislature']}, {e['session']}/{e['number']}.pdf - {e['error']}")
 
     # ── Conclusion ──
     print()
@@ -422,12 +422,12 @@ def main():
     poor_or_none = quality_counts.get("POOR", 0) + quality_counts.get("NO_OCR", 0)
     if poor_or_none == 0:
         print("No PDFs with poor or missing OCR were found.")
-        print("RECOMMENDATION: The existing OCR layers are sufficient — no re-OCR needed.")
+        print("RECOMMENDATION: The existing OCR layers are sufficient - no re-OCR needed.")
     elif poor_or_none < total_tested * 0.1:
-        print(f"Only {poor_or_none} PDFs had poor/no OCR — minimal issues.")
+        print(f"Only {poor_or_none} PDFs had poor/no OCR - minimal issues.")
         print("RECOMMENDATION: The existing OCR layers are largely sufficient.")
     else:
-        print(f"{poor_or_none} PDFs had poor/no OCR — consider selective re-processing.")
+        print(f"{poor_or_none} PDFs had poor/no OCR - consider selective re-processing.")
 
     print("=" * 100)
 

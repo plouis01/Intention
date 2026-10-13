@@ -189,8 +189,8 @@ def test_rrf_fusion():
 
     # c1 and c2 appear in both lists, so they should have higher RRF scores
     fused_ids = [c.source_id for c, _ in fused]
-    # c2 is rank 1 in sparse and rank 2 in dense — should be top
-    # c1 is rank 1 in dense and rank 3 in sparse — should be second
+    # c2 is rank 1 in sparse and rank 2 in dense - should be top
+    # c1 is rank 1 in dense and rank 3 in sparse - should be second
     assert fused_ids[0] in ("1", "2")
     assert fused_ids[1] in ("1", "2")
     assert len(fused) == 4

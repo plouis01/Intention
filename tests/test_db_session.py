@@ -55,7 +55,10 @@ class TestConnectionPoolConfig:
         from src.db.models import get_engine
 
         engine = get_engine()
-        if isinstance(engine.pool, QueuePool):
+        # SQLite file-based engines also use QueuePool in recent SQLAlchemy
+        # versions; gate on the dialect so these PG-specific assertions don't
+        # fire against a test sqlite:// URL.
+        if isinstance(engine.pool, QueuePool) and engine.dialect.name == "postgresql":
             assert engine.pool.size() == 5
 
     def test_pg_engine_has_max_overflow(self):
@@ -63,28 +66,37 @@ class TestConnectionPoolConfig:
         from src.db.models import get_engine
 
         engine = get_engine()
-        if isinstance(engine.pool, QueuePool):
+        # SQLite file-based engines also use QueuePool in recent SQLAlchemy
+        # versions; gate on the dialect so these PG-specific assertions don't
+        # fire against a test sqlite:// URL.
+        if isinstance(engine.pool, QueuePool) and engine.dialect.name == "postgresql":
             assert engine.pool._max_overflow == 10
 
     def test_pg_engine_has_pool_timeout(self):
-        """PostgreSQL engine must have pool_timeout=30."""
+        """PostgreSQL heavy engine must have pool_timeout=5 (fail-fast)."""
         from src.db.models import get_engine
 
         engine = get_engine()
-        if isinstance(engine.pool, QueuePool):
-            assert engine.pool._timeout == 30
+        # SQLite file-based engines also use QueuePool in recent SQLAlchemy
+        # versions; gate on the dialect so these PG-specific assertions don't
+        # fire against a test sqlite:// URL.
+        if isinstance(engine.pool, QueuePool) and engine.dialect.name == "postgresql":
+            assert engine.pool._timeout == 5
 
     def test_pg_engine_has_pool_recycle(self):
         """PostgreSQL engine must have pool_recycle=600."""
         from src.db.models import get_engine
 
         engine = get_engine()
-        if isinstance(engine.pool, QueuePool):
+        # SQLite file-based engines also use QueuePool in recent SQLAlchemy
+        # versions; gate on the dialect so these PG-specific assertions don't
+        # fire against a test sqlite:// URL.
+        if isinstance(engine.pool, QueuePool) and engine.dialect.name == "postgresql":
             assert engine.pool._recycle == 600
 
     @patch("src.db.models.get_settings")
     def test_pg_pool_config_applied(self, mock_settings):
-        """When DB is PostgreSQL, pool config params are passed to create_engine."""
+        """When DB is PostgreSQL, heavy pool config (15+25, timeout 5) is applied."""
         import src.db.models as models
 
         # Reset engine to force recreation
@@ -104,9 +116,9 @@ class TestConnectionPoolConfig:
             pool = engine.pool
 
             assert isinstance(pool, QueuePool)
-            assert pool.size() == 5
-            assert pool._max_overflow == 10
-            assert pool._timeout == 30
+            assert pool.size() == 15
+            assert pool._max_overflow == 25
+            assert pool._timeout == 5
             assert pool._recycle == 600
         finally:
             # Restore original engine
@@ -115,6 +127,39 @@ class TestConnectionPoolConfig:
             models._engine = old_engine
             if hasattr(models, "_SessionLocal"):
                 models._SessionLocal = old_session
+
+    @patch("src.db.models.get_settings")
+    def test_pg_light_pool_config_applied(self, mock_settings):
+        """Light pool (auth/trial/admin/subscription) is sized 8+8 with timeout 5."""
+        import src.db.models as models
+
+        old_engine_light = models._engine_light
+        old_session_light = getattr(models, "_SessionLocal_light", None)
+        models._engine_light = None
+        if hasattr(models, "_SessionLocal_light"):
+            models._SessionLocal_light = None
+
+        engine_light = None
+        try:
+            mock_settings.return_value.effective_database_url = (
+                "postgresql://user:pass@localhost/testdb"
+            )
+            mock_settings.return_value.environment = "production"
+
+            engine_light = models.get_engine_light()
+            pool = engine_light.pool
+
+            assert isinstance(pool, QueuePool)
+            assert pool.size() == 8
+            assert pool._max_overflow == 8
+            assert pool._timeout == 5
+            assert pool._recycle == 600
+        finally:
+            if engine_light is not None:
+                engine_light.dispose()
+            models._engine_light = old_engine_light
+            if hasattr(models, "_SessionLocal_light"):
+                models._SessionLocal_light = old_session_light
 
 
 class TestSessionContextManager:

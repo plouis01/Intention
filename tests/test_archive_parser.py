@@ -32,23 +32,23 @@ COMPTE RENDU INTÉGRAL
 
 PRÉSIDENCE DE M. CHABAN-DELMAS
 
-M. LE PRÉSIDENT. — La séance est ouverte.
+M. LE PRÉSIDENT. - La séance est ouverte.
 La parole est à M. le rapporteur général.
 
-M. GILBERT-JULES, rapporteur général. — Mes chers collègues,
+M. GILBERT-JULES, rapporteur général. - Mes chers collègues,
 nous sommes appelés à examiner aujourd'hui l'article 8 du projet
 de loi de finances pour 1959. Cet article modifie les dispositions
 relatives aux plus-values mobilières prévues à l'article 150 du
 code général des impôts.
 
-M. PINAY, ministre des finances et des affaires économiques. —
+M. PINAY, ministre des finances et des affaires économiques. -
 Le Gouvernement a déposé cet amendement en vue de simplifier
 le dispositif fiscal applicable aux cessions de valeurs mobilières.
 Il s'agit d'une mesure de justice fiscale.
 
-M. CHABAN-DELMAS, président. — La parole est à M. Ramadier.
+M. CHABAN-DELMAS, président. - La parole est à M. Ramadier.
 
-M. RAMADIER. — Monsieur le Ministre, je souhaite appeler votre
+M. RAMADIER. - Monsieur le Ministre, je souhaite appeler votre
 attention sur les conséquences de cette disposition pour les petits
 porteurs.
 """
@@ -65,20 +65,20 @@ COMPTE RENDU INTÉGRAL
 
 6789
 
-M. LE PRÉSIDENT. — L'ordre du jour appelle la discussion
+M. LE PRÉSIDENT. - L'ordre du jour appelle la discussion
 du projet de loi de finances pour 1989.
 
 M. BÉRÉGOVOY, ministre d'État, ministre de l'économie,
-des finances et du budget. — Monsieur le président,
+des finances et du budget. - Monsieur le président,
 mesdames, messieurs les députés, le budget que je vous
 présente aujourd'hui est un budget de rigueur et de solidarité.
 
 M. AUBERGER, rapporteur général de la commission des
-finances. — Ce projet de loi de finances comporte des dispositions
+finances. - Ce projet de loi de finances comporte des dispositions
 importantes en matière de fiscalité des entreprises, notamment
 l'article 12 qui modifie le régime des plus-values professionnelles.
 
-M. BALLADUR. — Je voudrais interroger M. le ministre sur
+M. BALLADUR. - Je voudrais interroger M. le ministre sur
 les mesures prévues à l'article 15 bis concernant l'impôt
 de solidarité sur la fortune.
 """
@@ -163,44 +163,44 @@ class TestCleanArchiveText:
 
 class TestCleanArchiveTextAllcapsNormalization:
     def test_simple_name(self):
-        text = "M. DUPONT. — Bonjour."
+        text = "M. DUPONT. - Bonjour."
         result = clean_archive_text(text)
         assert "M. Dupont" in result
 
     def test_mme_name(self):
-        text = "Mme MARTIN. — Je suis d'accord."
+        text = "Mme MARTIN. - Je suis d'accord."
         result = clean_archive_text(text)
         assert "Mme Martin" in result
 
     def test_compound_name(self):
-        text = "M. LE PRÉSIDENT. — La séance est ouverte."
+        text = "M. LE PRÉSIDENT. - La séance est ouverte."
         result = clean_archive_text(text)
         assert "M. Le Président" in result
 
     def test_hyphenated_name(self):
-        text = "M. CHABAN-DELMAS, président. — La parole est à M. Ramadier."
+        text = "M. CHABAN-DELMAS, président. - La parole est à M. Ramadier."
         result = clean_archive_text(text)
         assert "M. Chaban-Delmas" in result
 
     def test_hyphenated_name_gilbert_jules(self):
-        text = "M. GILBERT-JULES, rapporteur général. — Mes chers collègues."
+        text = "M. GILBERT-JULES, rapporteur général. - Mes chers collègues."
         result = clean_archive_text(text)
         assert "M. Gilbert-Jules" in result
 
     def test_mlle_name(self):
-        text = "Mlle DUPONT. — Merci."
+        text = "Mlle DUPONT. - Merci."
         result = clean_archive_text(text)
         assert "Mlle Dupont" in result
 
     def test_multiple_names_in_text(self):
-        text = "M. DUPONT. — Merci.\nMme MARTIN. — Oui.\nM. LE RAPPORTEUR. — Non."
+        text = "M. DUPONT. - Merci.\nMme MARTIN. - Oui.\nM. LE RAPPORTEUR. - Non."
         result = clean_archive_text(text)
         assert "M. Dupont" in result
         assert "Mme Martin" in result
         assert "M. Le Rapporteur" in result
 
     def test_preserves_already_titlecase(self):
-        text = "M. Dupont. — Already fine."
+        text = "M. Dupont. - Already fine."
         result = clean_archive_text(text)
         assert "M. Dupont" in result
 
@@ -298,7 +298,7 @@ class TestDetectArchiveSpeakerFunction:
 
     def test_no_false_positive_on_content(self):
         # A deputy saying "Monsieur le Président" in their speech should not
-        # be classified as president — we only check the intro line
+        # be classified as president - we only check the intro line
         assert detect_archive_speaker_function(
             "Je souhaite poser une question", "M. Dupont"
         ) == "autre"

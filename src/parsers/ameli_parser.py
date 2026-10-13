@@ -160,7 +160,7 @@ def parse_copy_block(
             if len(parts) != num_cols:
                 logger.warning(
                     f"Table '{table_name}': expected {num_cols} columns, "
-                    f"got {len(parts)} — skipping row"
+                    f"got {len(parts)} - skipping row"
                 )
                 continue
 
@@ -352,7 +352,7 @@ def extract_cgi_amendments(
     del txt_rows  # Free memory
 
     if not txt_map:
-        logger.warning("No CGI-relevant texts found — returning empty result")
+        logger.warning("No CGI-relevant texts found - returning empty result")
         return {}
 
     # Build set of relevant text IDs for fast lookup
@@ -428,20 +428,19 @@ def extract_cgi_amendments(
         sub_id = amd.get("subid")
         sub = sub_map.get(sub_id, {}) if sub_id else {}
 
-        # Build author string from amdsen join
+        # Build author string from amdsen join - take first author only
         amd_id = amd.get("id")
         authors = amdsen_map.get(amd_id, [])
         if authors:
-            author_parts = []
-            for a in authors:
-                qua = a.get("qua") or ""
-                prenom = a.get("prenomuse") or ""
-                nom = a.get("nomuse") or ""
-                author_parts.append(f"{qua} {prenom} {nom}".strip())
-            auteur = ", ".join(author_parts)
+            a = authors[0]  # Already sorted by rng (rank)
+            qua = a.get("qua") or ""
+            prenom = a.get("prenomuse") or ""
+            nom = a.get("nomuse") or ""
+            auteur = f"{qua} {prenom} {nom}".strip()
         else:
             # Fallback to autext field
-            auteur = amd.get("autext")
+            from src.parsers.amendments import normalize_amendment_author
+            auteur = normalize_amendment_author(amd.get("autext"))
 
         # Build group label from first author's group or libgrp
         group_label = amd.get("libgrp")
@@ -592,7 +591,7 @@ def main(
         logger.error(f"CGI laws file not found: {cgi_laws_file}")
         return {}
 
-    logger.info(f"Starting AMELI parser — dump: {sql_path}")
+    logger.info(f"Starting AMELI parser - dump: {sql_path}")
     logger.info(f"CGI laws reference: {cgi_laws_file}")
 
     amendments_by_text = extract_cgi_amendments(sql_path, cgi_laws_file)
@@ -600,7 +599,7 @@ def main(
     if amendments_by_text:
         write_ameli_json(amendments_by_text, output_dir)
     else:
-        logger.warning("No amendments extracted — nothing to write")
+        logger.warning("No amendments extracted - nothing to write")
 
     # Summary stats
     total = sum(len(v) for v in amendments_by_text.values())

@@ -46,7 +46,8 @@ class Settings(BaseSettings):
         return url
 
     # Embedding configuration
-    # Provider: "openai" (requires OPENAI_API_KEY) or "local" (free, uses sentence-transformers)
+    # Provider: "local" (free, sentence-transformers), "openai" (requires OPENAI_API_KEY),
+    # or "vertex" (Google Vertex AI, requires gcloud auth)
     embedding_provider: str = "local"
 
     # OpenAI API for embeddings (when embedding_provider="openai")
@@ -59,13 +60,21 @@ class Settings(BaseSettings):
     # Best quality (GPU): OrdalieTech/Solon-embeddings-large-0.1 (1024 dim, French legal domain)
     local_embedding_model: str = "paraphrase-multilingual-MiniLM-L12-v2"
 
+    # Vertex AI embeddings (when embedding_provider="vertex")
+    # Uses Google Cloud text-embedding-005 (768 dim)
+    # Auth: gcloud auth application-default login
+    vertex_project: str = ""
+    vertex_location: str = "us-central1"
+    vertex_embedding_model: str = "text-embedding-005"
+
     # LLM configuration for intent extraction
     # Provider: "anthropic" (requires ANTHROPIC_API_KEY) or "groq" (free, requires GROQ_API_KEY)
     llm_provider: str = "groq"
 
     # Anthropic API for intent extraction (when llm_provider="anthropic")
     anthropic_api_key: str = ""
-    claude_model: str = "claude-sonnet-4-20250514"
+    claude_model: str = "claude-haiku-4-5-20251001"
+    anthropic_call_delay: float = 1.0  # Min seconds between Anthropic API calls (SDK handles retry)
 
     # Groq API for intent extraction (when llm_provider="groq")
     # Free tier available at https://console.groq.com/
@@ -100,7 +109,7 @@ class Settings(BaseSettings):
 
     # Reranker configuration
     # Cross-encoder model for rescoring search results after initial retrieval
-    # French-native CamemBERTv2 reranker — scores in 0-1 range (not raw logits)
+    # French-native CamemBERTv2 reranker - scores in 0-1 range (not raw logits)
     reranker_enabled: bool = True
     reranker_model: str = "tomaarsen/reranker-camembertv2-base-fr"
 
@@ -117,13 +126,18 @@ class Settings(BaseSettings):
     # pgvector uses DATABASE_URL (PostgreSQL with pgvector extension)
 
     # Search thresholds (tunable via env or eval framework)
-    search_min_similarity: float = 0.25
-    search_keyword_boost: float = 0.5
-    search_tier2_min_required: int = 3
+    # Tuned for text-embedding-005 (768d) which produces more discriminant scores
+    search_min_similarity: float = 0.30
+    search_keyword_boost: float = 0.35
+    # Cross-law reference detection: minimum chunk score for regex detection
+    cross_ref_min_score: float = 0.35
+    # Cross-law reference detection: enable Groq-based implicit reference detection
+    cross_ref_enable_llm: bool = False
+    search_tier2_min_required: int = 2
     reranker_min_score: float = 0.1
-    quote_word_overlap_threshold: float = 0.75
-    quote_min_length: int = 80
-    curated_augmentation_min_sources: int = 4
+    quote_word_overlap_threshold: float = 0.60
+    quote_min_length: int = 40
+    chamber_balance_min_per_chamber: int = 3
     speaker_boost_rapporteur_general: float = 0.08
     speaker_boost_rapporteur: float = 0.06
     speaker_boost_ministre: float = 0.05
@@ -138,7 +152,57 @@ class Settings(BaseSettings):
     # Requires LLM API access (Groq or Anthropic). Off by default.
     multi_stage_retrieval: bool = False
     # Lower similarity for Stage 1 broad recall (only used when multi_stage_retrieval=True)
-    multi_stage_min_similarity: float = 0.15
+    # Tuned for text-embedding-004 (raised from 0.15)
+    multi_stage_min_similarity: float = 0.20
+
+    # Bicameral search pipeline: separate AN/Sénat searches with per-modification granularity
+    bicameral_search_enabled: bool = True
+    # Date window: "dossier" = tight (actual debate dates ± 7j), "fixed" = legacy 450j
+    date_window_mode: str = "dossier"
+    # Use articles_mentionnes JSON field as primary filter before ILIKE fallback
+    articles_mentionnes_filter: bool = True
+    # Minimum quality threshold: chamber included only if ≥1 chunk has explicit article ref
+    bicameral_quality_threshold: int = 1
+    # Sibling competition: ratio threshold to assign a chunk to a specific modification
+    sibling_competition_ratio: float = 1.5
+
+    # Multi-signal relevance scoring weights (must sum to ~1.0)
+    signal_weight_semantic: float = 0.20
+    signal_weight_article_ref: float = 0.20
+    signal_weight_keywords: float = 0.15
+    signal_weight_speaker: float = 0.15
+    signal_weight_etape: float = 0.05
+    signal_weight_temporal: float = 0.05
+    signal_weight_amendment: float = 0.10
+    signal_weight_crossencoder: float = 0.10
+
+    # Auth / JWT
+    jwt_secret_key: str = ""
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 15
+    jwt_refresh_token_expire_days: int = 30
+
+    # OAuth providers
+    google_client_id: str = ""
+    # Resend (email)
+    resend_api_key: str = ""
+    frontend_url: str = "http://localhost:5173"
+
+    # Stripe
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
+    stripe_pro_monthly_price_id: str = ""
+    stripe_pro_yearly_price_id: str = ""
+
+    # Trial
+    trial_duration_days: int = 7
+    trial_link_validity_days: int = 30  # How long a link stays valid before first open
+
+    # Admin
+    admin_emails: str = ""  # comma-separated emails that get admin role on signup
+
+    def get_admin_emails(self) -> list[str]:
+        return [e.strip() for e in self.admin_emails.split(",") if e.strip()]
 
     # CORS
     cors_origins: str = "http://localhost:5173"

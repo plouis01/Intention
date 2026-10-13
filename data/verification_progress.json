@@ -1,0 +1,110 @@
+{
+  "started_at": "2026-05-19",
+  "methodology_v2": "Pour chaque article CGI: recherche dans (1) articles.contenu_texte, (2) amendements.contenu/objet/expose_motifs, (3) debats.contenu_integral pour le pattern 'article X du code général des impôts'. Inspection contextuelle pour distinguer MODIFICATION REELLE vs SIMPLE REFERENCE. Cross-check avec modifications listées dans JSON.",
+  "total_articles": 4380,
+  "completed_count": 12,
+  "results_v2": {
+    "1": {
+      "json_mods_count": 6,
+      "db_articles_mentions": ["2003-1311 art 37 (ref)", "2005-1719 art 74 (modif - in JSON)", "2019-1479 art 181 (code douanes, faux positif)"],
+      "db_amendements_mentions": [],
+      "db_debats_mentions": [],
+      "missing_modifications": []
+    },
+    "1 A": {
+      "json_mods_count": 1,
+      "db_articles_mentions": ["(regex '1er A' non match - 1 A dans CGI mais '1er A' dans textes lois)"],
+      "db_amendements_mentions": ["2019-1479 (2 rejetes)"],
+      "db_debats_mentions": [],
+      "missing_modifications": []
+    },
+    "10": {
+      "json_mods_count": 2,
+      "db_articles_mentions": [],
+      "db_amendements_mentions": [],
+      "db_debats_mentions": ["70-1199 (ref dans debat sur benefice agricole)"],
+      "missing_modifications": []
+    },
+    "100": {
+      "json_mods_count": 2,
+      "db_articles_mentions": [],
+      "db_amendements_mentions": [],
+      "db_debats_mentions": [],
+      "missing_modifications": []
+    },
+    "100 bis": {
+      "json_mods_count": 4,
+      "db_articles_mentions": ["82-1126 art 9 (in JSON)", "85-1403 art 61 (extension aux artistes, pas modif directe)"],
+      "db_amendements_mentions": ["78-1239 (ref dans rapporteur)", "2019-1479 (tombe)"],
+      "db_debats_mentions": ["73-1150, 78-1239, 82-540, 85-1404, 86-824, 88-1193, 88-1149, 91-1322 - tous references"],
+      "missing_modifications": []
+    },
+    "1000": {
+      "json_mods_count": 5,
+      "db_articles_mentions": [],
+      "db_amendements_mentions": ["2019-1479 (rejete)"],
+      "db_debats_mentions": [],
+      "missing_modifications": []
+    },
+    "1000 A": {
+      "json_mods_count": 3,
+      "db_articles_mentions": [],
+      "db_amendements_mentions": [],
+      "db_debats_mentions": [],
+      "missing_modifications": []
+    },
+    "1001": {
+      "json_mods_count": 32,
+      "db_articles_mentions": ["19 matches inspectes - majorite refs allocation revenu", "78-1239 art 5 (VRAI MODIF: taux 8.75% -> 9%)"],
+      "db_amendements_mentions": ["2011-1977, 2018-1317, 2019-1479 (in JSON), 2021-1900 I-85 (adopte mais absent du texte final)", "2023-1322 (in JSON)"],
+      "db_debats_mentions": ["nombreux - references uniquement pour TSCA"],
+      "missing_modifications": [
+        {
+          "loi_numero": "78-1239",
+          "loi_type": "LF",
+          "loi_annee": 1979,
+          "article_in_law": "Art. 5",
+          "nature": "Modification",
+          "objet": "Le taux de 8,75% prévu au 6° de l'article 1001 du CGI est porté à 9%",
+          "evidence": "articles.contenu_texte de art 5 LF 78-1239 contient texte explicite de modification",
+          "db_law_id": 111,
+          "db_dossiers": "AN(196) + SENAT(272), 253 debats, 667 amendements disponibles"
+        }
+      ]
+    },
+    "1002": {
+      "json_mods_count": 3,
+      "db_articles_mentions": ["89-935 art 122 (ref: 'tenir un repertoire...prevues a art 1002')"],
+      "db_amendements_mentions": ["2018-1317 (retire)"],
+      "db_debats_mentions": ["89-935 (ref)"],
+      "missing_modifications": []
+    },
+    "1003": {
+      "json_mods_count": 5,
+      "db_articles_mentions": [],
+      "db_amendements_mentions": ["2023-1322 (rejete)"],
+      "db_debats_mentions": ["60-706, 62-1529 (refs uniquement)"],
+      "missing_modifications": []
+    },
+    "1004": {
+      "json_mods_count": 3,
+      "db_articles_mentions": [],
+      "db_amendements_mentions": [],
+      "db_debats_mentions": [],
+      "missing_modifications": []
+    },
+    "1004 bis": {
+      "json_mods_count": 3,
+      "db_articles_mentions": ["95-101 art 13 (ref: 'representant fiscal vise a art 1004 bis')"],
+      "db_amendements_mentions": [],
+      "db_debats_mentions": ["94-1162, 95-1346, 2006-1666 (refs)"],
+      "missing_modifications": []
+    }
+  },
+  "summary": {
+    "total_inspected": 12,
+    "articles_with_missing_mods": 1,
+    "missing_modifications_count": 1,
+    "key_finding": "Article 1001 manque la modification par LF 78-1239 art 5 (1979) qui releve le taux du 6° de 8.75% a 9%. Loi presente en DB avec 2 dossiers et substantial documentation parlementaire."
+  }
+}

@@ -107,7 +107,7 @@ def main():
     print(f"Potentiels faux positifs (loi/code/L.R.): ~{len(fp_autre_loi) + len(fp_code) + len(fp_lr)}/{len(results)}")
     print(f"Taux: ~{100*(len(fp_autre_loi) + len(fp_code) + len(fp_lr))/max(len(results),1):.1f}%")
     print()
-    print("NOTE: 'article X du CGI' n'est PAS un faux positif pour notre usage —")
+    print("NOTE: 'article X du CGI' n'est PAS un faux positif pour notre usage -")
     print("on veut justement savoir quels articles du CGI sont mentionnés dans les débats.")
     print(f"Vrais faux positifs (hors CGI): ~{len(fp_autre_loi) + len(fp_lr)}/{len(results)} ({100*(len(fp_autre_loi) + len(fp_lr))/max(len(results),1):.1f}%)")
 

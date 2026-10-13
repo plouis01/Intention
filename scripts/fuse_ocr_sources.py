@@ -202,7 +202,7 @@ def align_words(
     None means the word exists in only one source (insert/delete).
 
     Large misaligned regions (replace blocks > 3 words with very different sizes)
-    are treated as unaligned — Tesseract words are kept, embedded words dropped.
+    are treated as unaligned - Tesseract words are kept, embedded words dropped.
     This prevents garbage substitutions from column ordering differences.
     """
     # Normalize for matching
@@ -221,14 +221,14 @@ def align_words(
                 pairs.append((tess_words[ti], embed_words[ej]))
         elif op == "replace":
             # If the replace block is large and sizes differ a lot,
-            # it's a misaligned region — keep Tesseract, drop embedded
+            # it's a misaligned region - keep Tesseract, drop embedded
             size_ratio = max(tess_len, embed_len) / max(min(tess_len, embed_len), 1)
             if (tess_len > 3 or embed_len > 3) and size_ratio > 2.0:
-                # Misaligned region — keep Tesseract words as-is
+                # Misaligned region - keep Tesseract words as-is
                 for ti in range(i1, i2):
                     pairs.append((tess_words[ti], None))
             else:
-                # Small replace — zip 1:1 for word-level comparison
+                # Small replace - zip 1:1 for word-level comparison
                 tess_slice = tess_words[i1:i2]
                 embed_slice = embed_words[j1:j2]
                 for k in range(max(len(tess_slice), len(embed_slice))):
@@ -312,12 +312,12 @@ def choose_best_word(
     1. If only one exists, use Tesseract (drop embed-only insertions to avoid column artifacts)
     2. If identical (normalized), prefer embedded (better accents)
     3. Score both and choose the better one, with bias toward Tesseract (structure)
-    4. Never adopt a word that only differs in punctuation — keep Tesseract
+    4. Never adopt a word that only differs in punctuation - keep Tesseract
     """
     if tess_word is None and embed_word is None:
         return ""
     if tess_word is None:
-        # Embed-only insertions are usually column interleaving artifacts — drop them
+        # Embed-only insertions are usually column interleaving artifacts - drop them
         return ""
     if embed_word is None:
         return tess_word
@@ -341,11 +341,11 @@ def choose_best_word(
             return embed_word
         return tess_word
 
-    # If the alpha cores are identical, only punctuation differs — keep Tesseract
+    # If the alpha cores are identical, only punctuation differs - keep Tesseract
     tess_core = strip_punct(tess_word)
     embed_core = strip_punct(embed_word)
     if tess_core and normalize_for_match(tess_core) == normalize_for_match(embed_core):
-        # Same word, different punctuation — keep Tesseract (preserves structure)
+        # Same word, different punctuation - keep Tesseract (preserves structure)
         # But still upgrade accents on the core if applicable
         if has_accents(embed_core) and not has_accents(tess_core):
             tess_prefix = tess_word[:tess_word.find(tess_core)]

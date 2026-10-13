@@ -93,7 +93,7 @@ def classify_ref_ambiguity(ref: str) -> str:
         return "extreme"  # "1", "39", "44"
     if len(digits_only) <= 4:
         return "high"  # "200", "1411", "1729"
-    return "moderate"  # "16586" — long enough to be fairly unique
+    return "moderate"  # "16586" - long enough to be fairly unique
 
 
 def build_article_pattern(ref: str) -> re.Pattern:
@@ -531,7 +531,7 @@ def main():
             json.dump(index_data, f, ensure_ascii=False, indent=2)
         logger.info("Saved.")
     else:
-        logger.info("DRY RUN — not saving")
+        logger.info("DRY RUN - not saving")
 
     # Report
     logger.info("=" * 60)

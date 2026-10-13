@@ -56,7 +56,7 @@ def normalize_article_ref(ref: str) -> str | None:
 
     ref = ref.strip()
 
-    # Reject "APRÈS/AVANT L'ARTICLE X" — these are insertion amendments that
+    # Reject "APRÈS/AVANT L'ARTICLE X" - these are insertion amendments that
     # do NOT modify the referenced article. Linking them would be a false positive.
     if re.match(r"(?:APR[ÈE]S|AVANT)\s+L", ref, flags=re.IGNORECASE):
         return None
@@ -483,7 +483,7 @@ def _resolve_text_ref_to_loi(
                 if loi.id == d.loi_id:
                     return loi
 
-    # In strict mode, don't use fuzzy matching — risk of false positives
+    # In strict mode, don't use fuzzy matching - risk of false positives
     if strict:
         return None
 
@@ -741,7 +741,7 @@ def fix_amendement_linkage():
             resolved = an_html_text_to_loi.get((legislature, text_number))
             if resolved:
                 resolved_loi_id, is_exact = resolved
-                # Fix dossier (even with fuzzy match — better than default)
+                # Fix dossier (even with fuzzy match - better than default)
                 correct_dossier = loi_to_an_dossier.get(resolved_loi_id)
                 if correct_dossier and correct_dossier.id != dossier_id:
                     new_dossier_id = correct_dossier.id
@@ -792,7 +792,7 @@ def fix_amendement_linkage():
                 if conc_key in concordance:
                     definitif = concordance[conc_key]
                     if definitif is None:
-                        # Article was suppressed — skip linking
+                        # Article was suppressed - skip linking
                         stats["concordance_suppressed"] += 1
                         if new_dossier_id:
                             updates.append({"id": amend_id, "dossier_id": new_dossier_id})

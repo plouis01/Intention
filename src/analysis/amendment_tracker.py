@@ -106,6 +106,7 @@ class AmendmentTracker:
                         ),
                     )
                     .order_by(Amendement.date_depot)
+                    .limit(500)
                     .all()
                 )
         except Exception as e:

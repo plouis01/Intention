@@ -252,7 +252,7 @@ class GroqClientPool:
                 else:
                     raise
 
-        # All keys tried — attempt Anthropic fallback
+        # All keys tried - attempt Anthropic fallback
         if self._anthropic_fallback:
             logger.info("All Groq keys failed, falling back to Anthropic")
             try:
@@ -267,6 +267,125 @@ class GroqClientPool:
             f"All {len(self._keys)} Groq API keys failed. "
             "Add more API keys or use --anthropic-fallback."
         ) from last_error
+
+    def chat_completion_with_usage(
+        self,
+        model: str,
+        messages: list[dict],
+        max_tokens: int = 2000,
+        temperature: float = 0.3,
+        **kwargs,
+    ) -> tuple[str, dict]:
+        """Same as chat_completion but also returns token usage dict.
+
+        Returns:
+            Tuple of (response_text, usage_dict) where usage_dict has
+            'prompt_tokens' and 'completion_tokens' keys.
+        """
+        self._apply_call_delay()
+
+        last_error = None
+
+        with self._lock:
+            start_index = self._current_index
+
+        for attempt in range(len(self._keys)):
+            key_index = (start_index + attempt) % len(self._keys)
+            with self._lock:
+                client = self._get_client(key_index)
+
+            try:
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    **kwargs,
+                )
+                with self._lock:
+                    self._last_call_time = time.time()
+                    self._current_index = (key_index + 1) % len(self._keys)
+                usage = {
+                    "prompt_tokens": getattr(response.usage, "prompt_tokens", 0) or 0,
+                    "completion_tokens": getattr(response.usage, "completion_tokens", 0) or 0,
+                }
+                return response.choices[0].message.content, usage
+
+            except Exception as e:
+                last_error = e
+                error_str = str(e).lower()
+
+                is_rate_limit = (
+                    "429" in error_str
+                    or "rate_limit" in error_str
+                    or "rate limit" in error_str
+                    or "too many requests" in error_str
+                )
+                is_timeout = (
+                    "timeout" in error_str
+                    or "timed out" in error_str
+                    or isinstance(e, TimeoutError)
+                )
+                is_transient = is_rate_limit or is_timeout or "403" in error_str or "access denied" in error_str
+
+                if is_transient:
+                    logger.warning(
+                        f"{'Rate limit' if is_rate_limit else 'Transient error'} on key "
+                        f"{key_index + 1} ({attempt + 1}/{len(self._keys)} tried)"
+                    )
+                    continue
+                else:
+                    raise
+
+        # All keys tried - attempt Anthropic fallback
+        if self._anthropic_fallback:
+            logger.info("All Groq keys failed, falling back to Anthropic")
+            try:
+                text, usage = self._call_anthropic_with_usage(messages, max_tokens, temperature)
+                with self._lock:
+                    self._last_call_time = time.time()
+                return text, usage
+            except Exception as anthropic_err:
+                logger.error(f"Anthropic fallback also failed: {anthropic_err}")
+
+        raise RuntimeError(
+            f"All {len(self._keys)} Groq API keys failed. "
+            "Add more API keys or use --anthropic-fallback."
+        ) from last_error
+
+    def _call_anthropic_with_usage(
+        self,
+        messages: list[dict],
+        max_tokens: int,
+        temperature: float,
+    ) -> tuple[str, dict]:
+        """Make a call to Anthropic API as fallback, returning usage."""
+        settings = get_settings()
+        client = self._get_anthropic_client()
+
+        system_msg = ""
+        user_messages = []
+        for msg in messages:
+            if msg["role"] == "system":
+                system_msg = msg["content"]
+            else:
+                user_messages.append(msg)
+
+        kwargs = {
+            "model": settings.claude_model,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "messages": user_messages,
+        }
+        if system_msg:
+            kwargs["system"] = system_msg
+
+        response = client.messages.create(**kwargs)
+        usage = {
+            "prompt_tokens": response.usage.input_tokens,
+            "completion_tokens": response.usage.output_tokens,
+        }
+        return response.content[0].text, usage
 
 
 # Singleton instance for shared use
@@ -294,7 +413,7 @@ def get_groq_pool(
                     key = settings.anthropic_api_key or ""
                     if not key or key.startswith("your_"):
                         logger.warning(
-                            "ANTHROPIC_API_KEY is unset or a placeholder — disabling Anthropic fallback"
+                            "ANTHROPIC_API_KEY is unset or a placeholder - disabling Anthropic fallback"
                         )
                         anthropic_fallback = False
                 _default_pool = GroqClientPool(

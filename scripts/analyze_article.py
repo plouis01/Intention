@@ -133,7 +133,6 @@ def analyze_article(
         result = analyzer.analyze_article(
             article_ref=article_ref,
             question=question,
-            include_jurisprudence=True,
             max_modifications=max_modifications,
         )
 
@@ -141,7 +140,7 @@ def analyze_article(
         print(f"  Sections analyzed: {len(result.sections)}")
         print(f"  Total debates searched: {result.total_debates_searched}")
         print(f"  Total interventions found: {result.total_interventions_found}")
-        print(f"  Jurisprudence entries: {len(result.jurisprudence)}")
+        print(f"  Interventions found: {result.total_interventions_found}")
 
         # Render to markdown
         print("\nRendering markdown...")

@@ -8,6 +8,7 @@ Tests are skipped if vector stores are not available (CI-safe).
 """
 
 import logging
+from datetime import date
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -18,6 +19,7 @@ from src.indexing.chunking import Chunk
 from src.indexing.search import (
     ScoreExplanation,
     SearchService,
+    _directional_date_filter,
     _is_specific_keyword,
     _normalize_text,
     expand_legal_terms,
@@ -756,3 +758,123 @@ def test_passes_date_filter_no_date_metadata_no_filter():
     """Chunk without date metadata should pass when no filter is active."""
     chunk = _make_chunk_with_meta("content", "1", {})
     assert SearchService._passes_date_filter(chunk, None, None) is True
+
+
+# --- Tests for directional date filter ---
+
+
+def test_directional_filter_excludes_past_modification():
+    """A debate after a modification's promulgation should not be assigned to it."""
+    # Debate on 2016-01-15, LFR 2015 promulgated 2015-12-29, LFR 2016 promulgated 2016-12-29
+    anchor_ids = ["debate_A"]
+    anchor_dates = {"debate_A": date(2016, 1, 15)}
+    all_mods = [
+        (date(2015, 12, 29), "LFR"),  # LFR 2015
+        (date(2016, 12, 29), "LFR"),  # LFR 2016
+    ]
+
+    # Searching for LFR 2016 (current_mod_date=2016-12-29)
+    result = _directional_date_filter(
+        anchor_ids, anchor_dates, all_mods,
+        current_mod_date=date(2016, 12, 29),
+        date_start=date(2015, 7, 2), date_end=date(2017, 1, 28),
+    )
+    assert "debate_A" in result, "Debate should be assigned to LFR 2016 (closest future mod)"
+
+    # Searching for LFR 2015 (current_mod_date=2015-12-29) - debate is AFTER this mod
+    result = _directional_date_filter(
+        anchor_ids, anchor_dates, all_mods,
+        current_mod_date=date(2015, 12, 29),
+        date_start=date(2015, 7, 2), date_end=date(2016, 1, 28),
+    )
+    assert "debate_A" not in result, "Debate should NOT be assigned to LFR 2015 (already enacted)"
+
+
+def test_directional_filter_assigns_to_closest_future():
+    """Debate assigned to the closest future modification."""
+    anchor_ids = ["debate_A"]
+    anchor_dates = {"debate_A": date(2012, 12, 5)}
+    all_mods = [
+        (date(2012, 12, 29), "LFR"),  # LFR 2012 - 24 days away
+        (date(2013, 12, 29), "LF"),   # LF 2014 - 389 days away
+    ]
+
+    result = _directional_date_filter(
+        anchor_ids, anchor_dates, all_mods,
+        current_mod_date=date(2012, 12, 29),
+        date_start=None, date_end=None,
+    )
+    assert "debate_A" in result, "Debate should be assigned to LFR 2012 (closest future)"
+
+
+def test_directional_filter_post_last_mod_uses_window():
+    """Debate after all modifications kept if within search window."""
+    anchor_ids = ["debate_A"]
+    anchor_dates = {"debate_A": date(2026, 3, 1)}
+    all_mods = [
+        (date(2025, 2, 14), "LF"),
+    ]
+
+    # Within window
+    result = _directional_date_filter(
+        anchor_ids, anchor_dates, all_mods,
+        current_mod_date=date(2025, 2, 14),
+        date_start=date(2024, 1, 1), date_end=date(2026, 3, 16),
+    )
+    assert "debate_A" in result
+
+    # Outside window
+    result = _directional_date_filter(
+        anchor_ids, anchor_dates, all_mods,
+        current_mod_date=date(2025, 2, 14),
+        date_start=date(2024, 1, 1), date_end=date(2025, 3, 16),
+    )
+    assert "debate_A" not in result
+
+
+def test_directional_filter_no_dates_kept():
+    """Debates without a date in anchor_dates should be kept."""
+    anchor_ids = ["debate_A", "debate_B"]
+    anchor_dates = {"debate_B": date(2020, 1, 1)}
+    all_mods = [(date(2019, 12, 29), "LF")]
+
+    result = _directional_date_filter(
+        anchor_ids, anchor_dates, all_mods,
+        current_mod_date=date(2019, 12, 29),
+        date_start=None, date_end=None,
+    )
+    assert "debate_A" in result, "Debate without date should be kept"
+
+
+def test_directional_filter_rejects_distant_debate():
+    """Debate 443 days before modification is rejected (>400 day threshold)."""
+    mods = [(date(2023, 12, 29), "LF")]
+    result = _directional_date_filter(
+        ["debate_1"], {"debate_1": date(2022, 10, 12)},
+        mods, date(2023, 12, 29),
+        date(2022, 6, 1), date(2024, 1, 28),
+    )
+    assert "debate_1" not in result, "Debate 443 days away should be rejected"
+
+def test_directional_filter_keeps_close_debate():
+    """Debate 89 days before modification is kept."""
+    mods = [(date(2023, 12, 29), "LF")]
+    result = _directional_date_filter(
+        ["debate_1"], {"debate_1": date(2023, 10, 1)},
+        mods, date(2023, 12, 29),
+        date(2023, 6, 1), date(2024, 1, 28),
+    )
+    assert "debate_1" in result, "Debate 89 days away should be kept"
+
+def test_directional_filter_keeps_boundary_debate():
+    """Debate exactly 400 days before modification is kept (boundary case)."""
+    from datetime import timedelta
+    mod_date = date(2023, 12, 29)
+    debate_date = mod_date - timedelta(days=400)
+    mods = [(mod_date, "LF")]
+    result = _directional_date_filter(
+        ["debate_1"], {"debate_1": debate_date},
+        mods, mod_date,
+        debate_date - timedelta(days=50), mod_date + timedelta(days=30),
+    )
+    assert "debate_1" in result, "Debate exactly 400 days away should be kept (boundary)"

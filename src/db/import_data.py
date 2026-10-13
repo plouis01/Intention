@@ -23,7 +23,7 @@ from src.db.models import (
     get_session,
     init_db,
 )
-from src.parsers.amendments import ParsedAmendement, parse_amendment_file
+from src.parsers.amendments import ParsedAmendement, normalize_amendment_author, parse_amendment_file
 from src.parsers.debates import (
     ParsedDebat,
     detect_speaker_function,
@@ -31,6 +31,12 @@ from src.parsers.debates import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _normalize_auteur_guard(auteur: str | None) -> str | None:
+    """Final safety net: normalize amendment author before DB insert."""
+    return normalize_amendment_author(auteur)
+
 
 # Keywords for identifying finance law debates
 FINANCE_LAW_KEYWORDS = [
@@ -55,6 +61,10 @@ FINANCE_LAW_PATTERNS = [
     (r"(?:plfss|projet de loi de financement de la sécurité sociale)\s*(?:pour\s*)?(\d{4})", "LFSS"),
     # "PLFR 2024", "projet de loi de finances rectificative pour 2024"
     (r"(?:plfr|projet de loi de finances rectificative)\s*(?:pour\s*)?(\d{4})", "LFR"),
+    # "projet de loi de finances de fin de gestion pour 2024", "PLFFG 2024"
+    (r"(?:plffg|projet de loi de finances de fin de gestion)\s*(?:pour\s*)?(\d{4})", "LFR"),
+    # "loi de finances de fin de gestion pour 2024"
+    (r"loi de finances de fin de gestion\s+(?:pour\s+)?(\d{4})", "LFR"),
     # "loi de finances pour 2024"
     (r"loi de finances\s+(?:initiale\s+)?pour\s+(\d{4})", "LF"),
     # "loi de financement de la sécurité sociale pour 2024"
@@ -259,7 +269,7 @@ def extract_law_reference_from_content(content: str) -> tuple[str, int] | None:
         if law_type in ("LFR", "LFSS"):
             return (law_type, year)
 
-    # For LF matches, check if "rectificativ" appears nearby — indicates LFR
+    # For LF matches, check if "rectificativ" appears nearby - indicates LFR
     for law_type, year, start, end in all_matches:
         if law_type == "LF":
             # Check ±200 chars around the match for "rectificativ" context
@@ -277,7 +287,7 @@ def build_debate_lookup_cache(dossiers, lois):
     """Build lookup indexes for find_dossier_for_debate (call once, reuse)."""
     from collections import defaultdict
 
-    # Multiple laws can share (type, year) — e.g. LFR 2014-891 and LFR 2014-1655
+    # Multiple laws can share (type, year) - e.g. LFR 2014-891 and LFR 2014-1655
     lois_by_type_year = defaultdict(list)
     for loi in lois:
         lois_by_type_year[(loi.type, loi.annee)].append(loi)
@@ -286,6 +296,22 @@ def build_debate_lookup_cache(dossiers, lois):
         key = (dossier.loi_id, dossier.chambre)
         dossiers_by_loi_chambre[key] = dossier
     return lois_by_type_year, dossiers_by_loi_chambre
+
+
+def _pick_closest_loi_by_date(lois_list: list[Loi], debate_date: datetime) -> Loi | None:
+    """Pick the law whose promulgation date is closest after the debate date.
+
+    When multiple laws share (type, year) - e.g. 4 LFR in 2020 - a debate
+    must have happened before the law was promulgated.  We pick the law with
+    the earliest promulgation date that is still >= debate_date.  If none
+    qualifies (debate after all promulgations), fall back to the last one.
+    """
+    sorted_lois = sorted(lois_list, key=lambda l: l.date_promulgation)
+    for loi in sorted_lois:
+        if loi.date_promulgation >= debate_date:
+            return loi
+    # Fallback: debate happened after all promulgations - return the last one
+    return sorted_lois[-1] if sorted_lois else None
 
 
 def find_dossier_for_debate(
@@ -321,11 +347,18 @@ def find_dossier_for_debate(
 
     if law_ref:
         law_type, year = law_ref
-        # Multiple laws may share (type, year) — iterate the list
-        for loi in lois_by_type_year.get((law_type, year), []):
-            dossier = dossiers_by_loi_chambre.get((loi.id, chambre))
+        candidates = lois_by_type_year.get((law_type, year), [])
+        if len(candidates) == 1:
+            dossier = dossiers_by_loi_chambre.get((candidates[0].id, chambre))
             if dossier:
                 return dossier
+        elif len(candidates) > 1:
+            # Multiple laws of same type/year: use date proximity
+            loi = _pick_closest_loi_by_date(candidates, debate_date)
+            if loi:
+                dossier = dossiers_by_loi_chambre.get((loi.id, chambre))
+                if dossier:
+                    return dossier
 
     # Fallback: match by date
     # PLF debates typically happen Oct-Dec of year N-1 for LF year N
@@ -339,12 +372,19 @@ def find_dossier_for_debate(
     else:  # Jan-Aug: likely for current year's law (LFR) or ongoing debates
         target_year = debate_year
 
-    # Try all law types in date fallback, not just LF
+    # Try all law types in date fallback, prioritize by date proximity
     for law_type in ("LF", "LFR", "LFSS"):
-        for loi in lois_by_type_year.get((law_type, target_year), []):
-            dossier = dossiers_by_loi_chambre.get((loi.id, chambre))
+        candidates = lois_by_type_year.get((law_type, target_year), [])
+        if len(candidates) == 1:
+            dossier = dossiers_by_loi_chambre.get((candidates[0].id, chambre))
             if dossier:
                 return dossier
+        elif len(candidates) > 1:
+            loi = _pick_closest_loi_by_date(candidates, debate_date)
+            if loi:
+                dossier = dossiers_by_loi_chambre.get((loi.id, chambre))
+                if dossier:
+                    return dossier
 
     return None
 
@@ -682,7 +722,7 @@ def import_amendement(
         dossier_id=dossier.id,
         article_id=article_id,
         numero=amend.numero,
-        auteur=amend.auteur,
+        auteur=_normalize_auteur_guard(amend.auteur),
         objet=amend.objet,
         contenu=amend.contenu,
         expose_motifs=amend.expose_motifs,
@@ -709,7 +749,7 @@ def extract_articles_from_legifrance_json(json_data: dict) -> list[dict]:
     Returns:
         List of article dicts with numero_article, contenu_texte, position_dans_loi
     """
-    # Detect rectificatif texts — these are errata, not the actual law
+    # Detect rectificatif texts - these are errata, not the actual law
     title = json_data.get("title", "")
     if "(rectificatif)" in title.lower():
         logger.warning(f"JORF text is a rectificatif, not the main law text: {title}")
@@ -2218,7 +2258,7 @@ def import_amendments_from_files(
                         dossier_id=resolved_dossier.id,
                         article_id=article_id,
                         numero=amend_data["numero"],
-                        auteur=amend_data["auteur"],
+                        auteur=_normalize_auteur_guard(amend_data["auteur"]),
                         objet=amend_data["objet"],
                         contenu=amend_data["contenu"],
                         expose_motifs=amend_data["expose_motifs"],

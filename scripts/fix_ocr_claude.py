@@ -168,7 +168,7 @@ def simplify_name(deputy: dict) -> str:
     """Build 'FirstName LastName' using only the first (usage) first name."""
     first = deputy.get("first_name", "")
     last = deputy.get("last_name", "")
-    # Sycomore stores "Robert, Victor, Marcel, François" — take only the first
+    # Sycomore stores "Robert, Victor, Marcel, François" - take only the first
     if "," in first:
         first = first.split(",")[0].strip()
     # Strip "dit ..." / "née ..." suffixes from last name

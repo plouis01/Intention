@@ -212,7 +212,7 @@ def discover_csv_url(client: httpx.Client, url_source: str, annee: int) -> list[
         results.append((session, text))
         return results
 
-    # Try pjlfYYYY format — use known text numbers
+    # Try pjlfYYYY format - use known text numbers
     m = re.search(r"pjlf(\d{4})", url_source or "")
     if m:
         budget_year = int(m.group(1))

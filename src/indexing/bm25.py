@@ -9,7 +9,7 @@ from src.indexing.chunking import Chunk
 
 logger = logging.getLogger(__name__)
 
-# Minimal French stopwords — no NLTK dependency
+# Minimal French stopwords - no NLTK dependency
 FRENCH_STOPWORDS = frozenset({
     "le", "la", "les", "de", "du", "des", "un", "une",
     "et", "en", "au", "aux", "ce", "ces", "se", "sa", "son", "ses",
@@ -90,7 +90,7 @@ class BM25Index:
     def save(self, path: Path) -> None:
         """Save tokenized corpus to disk as JSON.
 
-        Chunks are already persisted in VectorStore metadata —
+        Chunks are already persisted in VectorStore metadata -
         only the tokenized corpus is saved here for fast BM25 rebuild.
         """
         path = Path(path)

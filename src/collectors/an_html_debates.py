@@ -1,4 +1,4 @@
-"""Collector for AN HTML debates (legislatures 12-13, 2002-2012).
+"""Collector for AN HTML debates (legislatures 12-14, 2002-2017).
 
 Downloads raw HTML debate pages from assemblee-nationale.fr with
 idempotent checks and adaptive rate limiting.
@@ -23,7 +23,7 @@ DEFAULT_DELAY = 0.0
 BACKOFF_WAIT = 60
 MAX_RETRIES = 3
 
-# Session registry — all known sessions per legislature
+# Session registry - all known sessions per legislature
 SESSIONS = {
     12: [
         "2001-2002", "2001-2002-extra",
@@ -41,16 +41,23 @@ SESSIONS = {
         "2010-2011", "2010-2011-extra", "2010-2011-extra2", "2010-2011-extra3",
         "2011-2012",
     ],
+    14: [
+        "2012-2013", "2012-2013-extra", "2012-2013-extra2", "2012-2013-extra3",
+        "2013-2014", "2013-2014-extra", "2013-2014-extra2", "2013-2014-extra3",
+        "2014-2015", "2014-2015-extra", "2014-2015-extra2",
+        "2015-2016", "2015-2016-extra", "2015-2016-extra2",
+        "2016-2017", "2016-2017-extra", "2016-2017-extra2",
+    ],
 }
 
-# Content validation markers — at least one must be present in first 8KB
+# Content validation markers - at least one must be present in first 8KB
 # (leg12 pages have ~6KB of boilerplate CSS/JS before content)
 # Note: use ISO-8859-1 encoding for accented characters (é = \xe9)
 _CONTENT_MARKERS = [b"compte rendu", b"rspeak", b"s\xe9ance", b"seance", b"<strong>"]
 
 
 class ANHtmlCollector:
-    """Collector for AN HTML debate pages (legislatures 12-13)."""
+    """Collector for AN HTML debate pages (legislatures 12-14)."""
 
     def __init__(self, output_dir: Path):
         self.output_dir = output_dir
@@ -122,8 +129,8 @@ class ANHtmlCollector:
         debates = []
         seen = set()
 
-        if legislature == 13:
-            # LEG13 format: <table id="listecri">
+        if legislature >= 13:
+            # LEG13+ format: <table id="listecri">
             debates = self._parse_index_leg13(soup, legislature, session)
         else:
             # LEG12: try both formats
@@ -144,26 +151,31 @@ class ANHtmlCollector:
 
     def _parse_index_leg13(self, soup: BeautifulSoup, legislature: int,
                            session: str) -> list[dict]:
-        """Parse leg13 index format: <table id="listecri">."""
+        """Parse leg13+ index format: <table id="listecri">.
+
+        Some sessions have multiple tables with id="listecri" (e.g., 2007-2008
+        splits sessions into two semester tables). We scan all of them.
+        """
         debates = []
-        table = soup.find("table", id="listecri")
-        if not table:
+        tables = soup.find_all("table", id="listecri")
+        if not tables:
             # Fallback to generic link parsing
             return self._parse_index_generic(soup, legislature, session)
 
-        for a_tag in table.find_all("a", href=True):
-            href = a_tag["href"]
-            if href.endswith(".asp") and not href.startswith("#"):
-                filename = href.rsplit("/", 1)[-1]
-                title = a_tag.get_text(strip=True)
-                url = urljoin(f"{AN_BASE_URL}/{legislature}/cri/{session}/", href)
-                debates.append({
-                    "legislature": legislature,
-                    "session": session,
-                    "filename": filename,
-                    "url": url,
-                    "title": title,
-                })
+        for table in tables:
+            for a_tag in table.find_all("a", href=True):
+                href = a_tag["href"]
+                if href.endswith(".asp") and not href.startswith("#"):
+                    filename = href.rsplit("/", 1)[-1]
+                    title = a_tag.get_text(strip=True)
+                    url = urljoin(f"{AN_BASE_URL}/{legislature}/cri/{session}/", href)
+                    debates.append({
+                        "legislature": legislature,
+                        "session": session,
+                        "filename": filename,
+                        "url": url,
+                        "title": title,
+                    })
 
         return debates
 
@@ -223,7 +235,7 @@ class ANHtmlCollector:
 
     def download_debate(self, url: str, output_path: Path,
                         force: bool = False) -> Path | None:
-        """Download a single debate HTML. Idempotent — skips existing files.
+        """Download a single debate HTML. Idempotent - skips existing files.
 
         Returns path on success, None on failure.
         """

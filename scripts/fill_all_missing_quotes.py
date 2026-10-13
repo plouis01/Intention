@@ -735,7 +735,7 @@ def main():
             json.dump(index_data, f, ensure_ascii=False, indent=2)
         logger.info("Saved.")
     else:
-        logger.info("DRY RUN — not saving")
+        logger.info("DRY RUN - not saving")
 
     # ── After stats ──────────────────────────────────────────────────────
     after_has = sum(1 for a in articles.values() if has_quotes(a))

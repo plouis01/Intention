@@ -110,7 +110,7 @@ END $$;
 \echo ''
 
 
--- Step 4: Rebuild indexes (CONCURRENTLY — no write locks)
+-- Step 4: Rebuild indexes (CONCURRENTLY - no write locks)
 -- ============================================================================
 -- REINDEX CONCURRENTLY cannot be inside a DO block or transaction.
 -- We run them as top-level statements unconditionally

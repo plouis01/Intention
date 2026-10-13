@@ -252,7 +252,7 @@ def main():
             if not quote_text:
                 continue
 
-            # Quality check — for key articles, we treat "high" as "moderate"
+            # Quality check - for key articles, we treat "high" as "moderate"
             # since we know these are real CGI articles
             effective_ambiguity = "moderate" if ambiguity == "high" else ambiguity
             if not is_quality_quote(

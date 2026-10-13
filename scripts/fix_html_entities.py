@@ -4,7 +4,7 @@ Sénat debates imported via XML/HTML contain unescaped HTML entities in
 orateur, fonction, and contenu fields (e.g., pr&#233;sident → président).
 
 This script decodes all HTML entities in the interventions table in-place.
-Safe to run multiple times (idempotent — already-clean text is unchanged).
+Safe to run multiple times (idempotent - already-clean text is unchanged).
 """
 
 import html
@@ -54,7 +54,7 @@ def fix_html_entities(batch_size: int = 5000, dry_run: bool = False):
             affected_count = max(affected_count, count)
 
     if affected_count == 0:
-        logger.info("No HTML entities found — database is clean.")
+        logger.info("No HTML entities found - database is clean.")
         session.close()
         return
 
@@ -110,7 +110,7 @@ def fix_html_entities(batch_size: int = 5000, dry_run: bool = False):
             fixed_total += fixed_in_batch
 
         offset += batch_size
-        logger.info(f"  Processed {min(offset, total)}/{total} — fixed {fixed_in_batch} in batch")
+        logger.info(f"  Processed {min(offset, total)}/{total} - fixed {fixed_in_batch} in batch")
 
     session.close()
     logger.info(f"Done. Fixed {fixed_total} interventions total.")
