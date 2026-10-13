@@ -1,0 +1,63 @@
+# Key CGI articles to fetch modification history for
+# Run: python scripts/fetch_article_history.py --batch data/cgi_articles_to_fetch.txt --save
+# Or:  python scripts/scrape_article_history.py --batch data/cgi_articles_to_fetch.txt --save
+
+# Plus-values mobilières
+150-0 A
+150-0 B
+150-0 B ter
+150-0 D
+150-0 D ter
+
+# Transmission d'entreprise (Dutreil)
+787 B
+787 C
+
+# PFU / Flat tax
+200 A
+
+# Réductions d'impôt
+199 terdecies-0 A
+
+# Crédits d'impôt entreprises
+244 quater B
+244 quater C
+
+# JEI / Startups
+44 sexies A
+163 bis G
+80 quaterdecies
+
+# IFI
+964
+965
+966
+
+# Groupes de sociétés
+145
+223 A
+223 B
+
+# IS
+209
+209 B
+219
+
+# Restructurations
+210 A
+210 B
+
+# Retenues à la source
+119 bis
+182 B
+
+# Crypto-actifs
+150 VH bis
+1649 quater-0 B bis
+
+# Plus-values professionnelles
+151 septies
+151 septies A
+
+# Mécénat
+238 bis

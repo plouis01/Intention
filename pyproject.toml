@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "intention-legislateur"
+version = "0.1.1"
+description = "Analyse de l'intention du législateur pour les lois de finances françaises"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.27.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.0.0",
+    "sqlalchemy>=2.0.0",
+    "psycopg2-binary>=2.9.0",
+    "pgvector>=0.4.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "openai>=1.0.0",
+    "anthropic>=0.20.0",
+    "numpy>=1.24.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.29.0",
+    "sentence-transformers>=2.5.0",
+    "onnxruntime>=1.17.0",
+    "optimum[onnxruntime]>=1.17.0",
+    "groq>=0.5.0",
+    "defusedxml>=0.7.0",
+    "rank-bm25>=0.2.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.4.0",
+]
+pgvector = [
+    "pgvector>=0.4.0",
+    "psycopg2-binary>=2.9.0",
+]
+qdrant = [
+    "qdrant-client>=1.8.0",
+]
+langextract = [
+    "langextract>=0.1.0",
+]
+all-vectordb = [
+    "pgvector>=0.4.0",
+    "psycopg2-binary>=2.9.0",
+    "qdrant-client>=1.8.0",
+]
+pdf = [
+    "pymupdf>=1.24.0",
+]
+ocr = [
+    "pymupdf>=1.24.0",
+    "pytesseract>=0.3.10",
+    "opencv-python-headless>=4.8.0",
+    "Pillow>=10.0.0",
+    "lxml>=5.0.0",
+    "tesserocr>=2.9.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

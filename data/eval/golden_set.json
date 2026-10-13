@@ -1,0 +1,3521 @@
+{
+  "description": "Golden evaluation dataset for article analysis pipeline",
+  "version": "1.1",
+  "total_cases": 79,
+  "cases": [
+    {
+      "id": "150_0_b_ter_lfr_2012",
+      "article_ref": "150-0 B ter",
+      "law_type": "LFR",
+      "law_year": 2012,
+      "must_find": [
+        {
+          "content_substring": "Cet amendement vise à simplifier et à clarifier le dispositif en rendant automat",
+          "speaker": "M. Christian Eckert"
+        },
+        {
+          "content_substring": "Le présent article vise à mettre un terme aux schémas d'apport-cessions abusifs,",
+          "speaker": "M. François Marc"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "taxe d'habitation",
+          "reason": "Unrelated tax topic"
+        },
+        {
+          "content_substring": "taxe foncière",
+          "reason": "Unrelated property tax"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Cet amendement vise à simplifier et à clarifier le dispositif en rendant automat",
+          "orateur": "M. Christian Eckert",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Le présent article vise à mettre un terme aux schémas d'apport-cessions abusifs,",
+          "orateur": "M. François Marc",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 150-0 B ter",
+        "l'article 150-0 b ter",
+        "reinvestissement",
+        "régime de l'apport-cession",
+        "150-0 b ter"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "150_0_b_ter_lfr_2015",
+      "article_ref": "150-0 B ter",
+      "law_type": "LFR",
+      "law_year": 2015,
+      "must_find": [
+        {
+          "content_substring": "Le but de ce mécanisme d'apport-cession est non de permettre à un dirigeant d'en",
+          "speaker": "M. Albéric de Montgolfier"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "taxe d'habitation",
+          "reason": "Unrelated tax topic"
+        },
+        {
+          "content_substring": "taxe foncière",
+          "reason": "Unrelated property tax"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Le but de ce mécanisme d'apport-cession est non de permettre à un dirigeant d'en",
+          "orateur": "M. Albéric de Montgolfier",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 150-0 B ter",
+        "l'article 150-0 b ter",
+        "reinvestissement",
+        "régime de l'apport-cession",
+        "150-0 b ter"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "150_0_b_ter_lfr_2016",
+      "article_ref": "150-0 B ter",
+      "law_type": "LFR",
+      "law_year": 2016,
+      "must_find": [
+        {
+          "content_substring": "Il s'agit de fixer le seuil de réinvestissement à 50% avec une durée de conserva",
+          "speaker": "M. Richard Yung"
+        },
+        {
+          "content_substring": "Lorsqu'un contribuable bénéficie d'un report d'imposition en application des dis",
+          "speaker": "M. Christophe Caresche"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "taxe d'habitation",
+          "reason": "Unrelated tax topic"
+        },
+        {
+          "content_substring": "taxe foncière",
+          "reason": "Unrelated property tax"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Il s'agit de fixer le seuil de réinvestissement à 50% avec une durée de conserva",
+          "orateur": "M. Richard Yung",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "Lorsqu'un contribuable bénéficie d'un report d'imposition en application des dis",
+          "orateur": "M. Christophe Caresche",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 150-0 B ter",
+        "l'article 150-0 b ter",
+        "reinvestissement",
+        "régime de l'apport-cession",
+        "150-0 b ter"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "150_0_b_ter_lf_2018",
+      "article_ref": "150-0 B ter",
+      "law_type": "LF",
+      "law_year": 2018,
+      "must_find": [
+        {
+          "content_substring": "Mon amendement propose donc que le même report d'imposition puisse s'appliquer d",
+          "speaker": "M. Jean-Noël Barrot"
+        },
+        {
+          "content_substring": "Le compte PME innovation n'a pas du tout marché, sans doute en raison des corset",
+          "speaker": "M. Jean-Noël Barrot"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "taxe d'habitation",
+          "reason": "Unrelated tax topic"
+        },
+        {
+          "content_substring": "taxe foncière",
+          "reason": "Unrelated property tax"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Mon amendement propose donc que le même report d'imposition puisse s'appliquer d",
+          "orateur": "M. Jean-Noël Barrot",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Le compte PME innovation n'a pas du tout marché, sans doute en raison des corset",
+          "orateur": "M. Jean-Noël Barrot",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 150-0 B ter",
+        "l'article 150-0 b ter",
+        "reinvestissement",
+        "régime de l'apport-cession",
+        "150-0 b ter"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "150_0_b_ter_lf_2025",
+      "article_ref": "150-0 B ter",
+      "law_type": "LF",
+      "law_year": 2025,
+      "must_find": [
+        {
+          "content_substring": "Les entrepreneurs qui réalisent des plus-values à l'occasion d'un événement de l",
+          "speaker": "M. Paul Midy"
+        },
+        {
+          "content_substring": "La loi de finances pour 2024 a modifié l'article 150-0 B ter du code général des",
+          "speaker": "M. Mathieu Lefèvre"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "taxe d'habitation",
+          "reason": "Unrelated tax topic"
+        },
+        {
+          "content_substring": "taxe foncière",
+          "reason": "Unrelated property tax"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Les entrepreneurs qui réalisent des plus-values à l'occasion d'un événement de l",
+          "orateur": "M. Paul Midy",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "La loi de finances pour 2024 a modifié l'article 150-0 B ter du code général des",
+          "orateur": "M. Mathieu Lefèvre",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 150-0 B ter",
+        "l'article 150-0 b ter",
+        "reinvestissement",
+        "régime de l'apport-cession",
+        "150-0 b ter"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "787_b_lf_2019",
+      "article_ref": "787 B",
+      "law_type": "LF",
+      "law_year": 2019,
+      "must_find": [
+        {
+          "content_substring": "L'article 787 B du CGI prévoit aujourd'hui qu'il ne peut exister plus de deux so",
+          "speaker": "Mme Élisabeth Lamure"
+        },
+        {
+          "content_substring": "Cet amendement tend donc à délier les bénéficiaires de la transmission de l'exig",
+          "speaker": "Mme Élisabeth Lamure"
+        },
+        {
+          "content_substring": "Pour être éligibles au régime Dutreil, les entreprises doivent, selon la doctrin",
+          "speaker": "M. Stanislas Guerini"
+        },
+        {
+          "content_substring": "Cet amendement technique vise à permettre, de façon transitoire, que le signatai",
+          "speaker": "M. Charles de Courson"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "L'article 787 B du CGI prévoit aujourd'hui qu'il ne peut exister plus de deux so",
+          "orateur": "Mme Élisabeth Lamure",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "Cet amendement tend donc à délier les bénéficiaires de la transmission de l'exig",
+          "orateur": "Mme Élisabeth Lamure",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "Pour être éligibles au régime Dutreil, les entreprises doivent, selon la doctrin",
+          "orateur": "M. Stanislas Guerini",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Cet amendement technique vise à permettre, de façon transitoire, que le signatai",
+          "orateur": "M. Charles de Courson",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 787 b",
+        "pacte dutreil",
+        "article 787 B",
+        "Droits de succession",
+        "droits de donation"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "787_b_lfr_2022",
+      "article_ref": "787 B",
+      "law_type": "LFR",
+      "law_year": 2022,
+      "must_find": [
+        {
+          "content_substring": "Cet amendement que je vous invite à lire en détail fait suite à un arrêt de la C",
+          "speaker": "M. Jean-René Cazeneuve"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Cet amendement que je vous invite à lire en détail fait suite à un arrêt de la C",
+          "orateur": "M. Jean-René Cazeneuve",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 787 b",
+        "pacte dutreil",
+        "article 787 B",
+        "Droits de succession",
+        "droits de donation"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "787_b_lf_2024",
+      "article_ref": "787 B",
+      "law_type": "LF",
+      "law_year": 2024,
+      "must_find": [
+        {
+          "content_substring": "La condition que l'activité de holding animatrice de groupe constitue l'activité",
+          "speaker": "M. Thomas Cazenave"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "La condition que l'activité de holding animatrice de groupe constitue l'activité",
+          "orateur": "M. Thomas Cazenave",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 787 b",
+        "pacte dutreil",
+        "article 787 B",
+        "Droits de succession",
+        "droits de donation"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "787_b_lf_2018",
+      "article_ref": "787 B",
+      "law_type": "LF",
+      "law_year": 2018,
+      "must_find": [
+        {
+          "content_substring": "Or la rédaction actuelle de l'article 787 B du code général des impôts ne donne",
+          "speaker": "M. Stanislas Guerini"
+        },
+        {
+          "content_substring": "F encore en cours au 1er janvier 2019 et venant à son terme entre cette date et",
+          "speaker": "M. Charles de Courson"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Or la rédaction actuelle de l'article 787 B du code général des impôts ne donne",
+          "orateur": "M. Stanislas Guerini",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "F encore en cours au 1er janvier 2019 et venant à son terme entre cette date et",
+          "orateur": "M. Charles de Courson",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 787 b",
+        "pacte dutreil",
+        "article 787 B",
+        "Droits de succession",
+        "droits de donation"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "199_terdecies_0_a_lf_2013",
+      "article_ref": "199 terdecies-0 A",
+      "law_type": "LF",
+      "law_year": 2013,
+      "must_find": [
+        {
+          "content_substring": "Je souhaite interroger le Gouvernement et le rapporteur général. Le sous-amendem",
+          "speaker": "M. Serge Letchimy"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Je souhaite interroger le Gouvernement et le rapporteur général. Le sous-amendem",
+          "orateur": "M. Serge Letchimy",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "pme madelin",
+        "terdecies 199 -0 a",
+        "article 199 terdecies-0 a",
+        "article 199 terdecies-0 A",
+        "d'impôt pme"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "199_terdecies_0_a_lf_2022",
+      "article_ref": "199 terdecies-0 A",
+      "law_type": "LF",
+      "law_year": 2022,
+      "must_find": [
+        {
+          "content_substring": "Il s'agit de supprimer le plafonnement de la niche fiscale créée par le disposit",
+          "speaker": "Mme Emmanuelle Ménard"
+        },
+        {
+          "content_substring": "Cet amendement vise à adapter le dispositif, car l'avantage fiscal obtenu lors d",
+          "speaker": "M. Charles de Courson"
+        },
+        {
+          "content_substring": "Il vise à supprimer le plafonnement de la « niche » fiscale crée par le disposit",
+          "speaker": "Mme Emmanuelle Ménard"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Il s'agit de supprimer le plafonnement de la niche fiscale créée par le disposit",
+          "orateur": "Mme Emmanuelle Ménard",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Cet amendement vise à adapter le dispositif, car l'avantage fiscal obtenu lors d",
+          "orateur": "M. Charles de Courson",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Il vise à supprimer le plafonnement de la « niche » fiscale crée par le disposit",
+          "orateur": "Mme Emmanuelle Ménard",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "pme madelin",
+        "terdecies 199 -0 a",
+        "article 199 terdecies-0 a",
+        "article 199 terdecies-0 A",
+        "d'impôt pme"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "199_terdecies_0_a_lf_2023",
+      "article_ref": "199 terdecies-0 A",
+      "law_type": "LF",
+      "law_year": 2023,
+      "must_find": [
+        {
+          "content_substring": "Avec cet amendement, je poursuis une discussion commencée hier après-midi. Il vi",
+          "speaker": "Mme Emmanuelle Ménard"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Avec cet amendement, je poursuis une discussion commencée hier après-midi. Il vi",
+          "orateur": "Mme Emmanuelle Ménard",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "pme madelin",
+        "terdecies 199 -0 a",
+        "article 199 terdecies-0 a",
+        "article 199 terdecies-0 A",
+        "d'impôt pme"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "199_terdecies_0_a_lf_2025",
+      "article_ref": "199 terdecies-0 A",
+      "law_type": "LF",
+      "law_year": 2025,
+      "must_find": [
+        {
+          "content_substring": "Il s'agit de corriger une erreur matérielle introduite par la loi de finances po",
+          "speaker": "M. Laurent Saint-Martin"
+        },
+        {
+          "content_substring": "Chaque euro investi dans des opérations en capital de nos PME permettrait alors",
+          "speaker": "M. Charles Alloncle"
+        },
+        {
+          "content_substring": "Les souscriptions au capital des foncières solidaires disposant de l'agrément Es",
+          "speaker": "M. Gérard Leseul"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Il s'agit de corriger une erreur matérielle introduite par la loi de finances po",
+          "orateur": "M. Laurent Saint-Martin",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Chaque euro investi dans des opérations en capital de nos PME permettrait alors",
+          "orateur": "M. Charles Alloncle",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Les souscriptions au capital des foncières solidaires disposant de l'agrément Es",
+          "orateur": "M. Gérard Leseul",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "pme madelin",
+        "terdecies 199 -0 a",
+        "article 199 terdecies-0 a",
+        "article 199 terdecies-0 A",
+        "d'impôt pme"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "200_a_lf_2013",
+      "article_ref": "200 A",
+      "law_type": "LF",
+      "law_year": 2013,
+      "must_find": [
+        {
+          "content_substring": "La commission a rejeté ces amendements, en rappelant que le taux de cotisation d",
+          "speaker": "M. Gérard Bapt"
+        },
+        {
+          "content_substring": "L'augmentation de 0,2 % du taux forfaitaire d'imposition pour chaque année de dé",
+          "speaker": "M. Jérôme Cahuzac"
+        },
+        {
+          "content_substring": "La commission est défavorable à l'amendement n° I-91, qui, en réécrivant totalem",
+          "speaker": "M. François Marc, M. François Marc,"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "La commission a rejeté ces amendements, en rappelant que le taux de cotisation d",
+          "orateur": "M. Gérard Bapt",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "L'augmentation de 0,2 % du taux forfaitaire d'imposition pour chaque année de dé",
+          "orateur": "M. Jérôme Cahuzac",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "La commission est défavorable à l'amendement n° I-91, qui, en réécrivant totalem",
+          "orateur": "M. François Marc, M. François Marc,",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "prélèvement",
+        "revenus de capitaux mobiliers",
+        "forfaitaire",
+        "taux forfaitaire",
+        "12,8%"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "200_a_lfr_2012",
+      "article_ref": "200 A",
+      "law_type": "LFR",
+      "law_year": 2012,
+      "must_find": [
+        {
+          "content_substring": "La loi de financement\nde la sécurité sociale pour 2009 avait introduit, pour les",
+          "speaker": "M. Gilbert Barbier"
+        },
+        {
+          "content_substring": "« 6bisde l'article 200 A » est remplacée par la référence : « et au I",
+          "speaker": "M. Jérôme Cahuzac"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "La loi de financement\nde la sécurité sociale pour 2009 avait introduit, pour les",
+          "orateur": "M. Gilbert Barbier",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "« 6bisde l'article 200 A » est remplacée par la référence : « et au I",
+          "orateur": "M. Jérôme Cahuzac",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "prélèvement",
+        "revenus de capitaux mobiliers",
+        "forfaitaire",
+        "taux forfaitaire",
+        "12,8%"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "200_a_lf_2018",
+      "article_ref": "200 A",
+      "law_type": "LF",
+      "law_year": 2018,
+      "must_find": [
+        {
+          "content_substring": "Les articles 28 et 29 illustrent la volonté de désengagement de l'État, au profi",
+          "speaker": "M. Fabien Gay"
+        },
+        {
+          "content_substring": "Vous attribuez 9 milliards de cadeaux fiscaux aux plus riches au travers de la s",
+          "speaker": "M. Éric Coquerel"
+        },
+        {
+          "content_substring": "J'ai évoqué la fameuse phrase de M. Le Maire, nous répondant d'ailleurs avec hon",
+          "speaker": "M. Éric Coquerel"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Les articles 28 et 29 illustrent la volonté de désengagement de l'État, au profi",
+          "orateur": "M. Fabien Gay",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "Vous attribuez 9 milliards de cadeaux fiscaux aux plus riches au travers de la s",
+          "orateur": "M. Éric Coquerel",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "J'ai évoqué la fameuse phrase de M. Le Maire, nous répondant d'ailleurs avec hon",
+          "orateur": "M. Éric Coquerel",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "prélèvement",
+        "revenus de capitaux mobiliers",
+        "forfaitaire",
+        "taux forfaitaire",
+        "12,8%"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "200_a_lf_2019",
+      "article_ref": "200 A",
+      "law_type": "LF",
+      "law_year": 2019,
+      "must_find": [
+        {
+          "content_substring": "C'est en gardant à l'esprit cette double exigence, et en m'appuyant sur les étud",
+          "speaker": "M. Jean-Noël Barrot"
+        },
+        {
+          "content_substring": "...en ce qu'elle vise à encourager l'investissement dans l'économie productive,",
+          "speaker": "Mme Bénédicte Peyrol"
+        },
+        {
+          "content_substring": "Nous sommes confrontés à de légitimes interrogations sur l'efficacité économique",
+          "speaker": "M. Jean-Louis Bricout"
+        },
+        {
+          "content_substring": "Après tout, si certains veulent partir, libre à eux. Mais le vrai problème écono",
+          "speaker": "M. Bruno Le Maire"
+        },
+        {
+          "content_substring": "Toutes vos interrogations sont parfaitement légitimes. Nous avons fait le choix",
+          "speaker": "M. Bruno Le Maire"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "C'est en gardant à l'esprit cette double exigence, et en m'appuyant sur les étud",
+          "orateur": "M. Jean-Noël Barrot",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "...en ce qu'elle vise à encourager l'investissement dans l'économie productive,",
+          "orateur": "Mme Bénédicte Peyrol",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Nous sommes confrontés à de légitimes interrogations sur l'efficacité économique",
+          "orateur": "M. Jean-Louis Bricout",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Après tout, si certains veulent partir, libre à eux. Mais le vrai problème écono",
+          "orateur": "M. Bruno Le Maire",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Toutes vos interrogations sont parfaitement légitimes. Nous avons fait le choix",
+          "orateur": "M. Bruno Le Maire",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "prélèvement",
+        "revenus de capitaux mobiliers",
+        "forfaitaire",
+        "taux forfaitaire",
+        "12,8%"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "200_a_lf_2011",
+      "article_ref": "200 A",
+      "law_type": "LF",
+      "law_year": 2011,
+      "must_find": [
+        {
+          "content_substring": "Toutefois, nous refusons de déroger au principe suivant : tous les revenus, qu'i",
+          "speaker": "Mme Nicole Bricq"
+        },
+        {
+          "content_substring": "J'ajoute qu'en limitant aux seuls dividendes le champ de la mesure que vous préc",
+          "speaker": "Mme Valérie Pécresse"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Toutefois, nous refusons de déroger au principe suivant : tous les revenus, qu'i",
+          "orateur": "Mme Nicole Bricq",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "J'ajoute qu'en limitant aux seuls dividendes le champ de la mesure que vous préc",
+          "orateur": "Mme Valérie Pécresse",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "prélèvement",
+        "revenus de capitaux mobiliers",
+        "forfaitaire",
+        "taux forfaitaire",
+        "12,8%"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "219_lf_2019",
+      "article_ref": "219",
+      "law_type": "LF",
+      "law_year": 2019,
+      "must_find": [
+        {
+          "content_substring": "; 2° Le premier alinéa du I de l'article 209 est remplacé par trois alinéas ains",
+          "speaker": "M. Mazuir"
+        },
+        {
+          "content_substring": "59 à 259 D. » ; 2° Après le premier alinéa du I de l'article 209, sont insérés t",
+          "speaker": "Mme Harribey et les membres du groupe socialiste et républicain"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "; 2° Le premier alinéa du I de l'article 209 est remplacé par trois alinéas ains",
+          "orateur": "M. Mazuir",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "59 à 259 D. » ; 2° Après le premier alinéa du I de l'article 209, sont insérés t",
+          "orateur": "Mme Harribey et les membres du groupe socialiste et républicain",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 219",
+        "taux l'impôt",
+        "taux reduit pme",
+        "benefice imposable",
+        "taux is"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "219_lfr_2015",
+      "article_ref": "219",
+      "law_type": "LFR",
+      "law_year": 2015,
+      "must_find": [
+        {
+          "content_substring": "Le fait de viser le premier alinéa du f du I de l'article 219 du code général de",
+          "speaker": "M. Albéric de Montgolfier"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Le fait de viser le premier alinéa du f du I de l'article 219 du code général de",
+          "orateur": "M. Albéric de Montgolfier",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 219",
+        "taux l'impôt",
+        "taux reduit pme",
+        "benefice imposable",
+        "taux is"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "219_lf_2016",
+      "article_ref": "219",
+      "law_type": "LF",
+      "law_year": 2016,
+      "must_find": [
+        {
+          "content_substring": "C'est la poursuite de l'allégement de la fiscalité sur la production et l'emploi",
+          "speaker": "M. Christian Eckert"
+        },
+        {
+          "content_substring": "Du côté des entreprises, le projet de loi de finances met en œuvre la dernière é",
+          "speaker": "Mme Valérie Rabault"
+        },
+        {
+          "content_substring": "Les entreprises ont encore dix minutes pour payer le « cinquième acompte » d'imp",
+          "speaker": "M. Christian Eckert"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "C'est la poursuite de l'allégement de la fiscalité sur la production et l'emploi",
+          "orateur": "M. Christian Eckert",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Du côté des entreprises, le projet de loi de finances met en œuvre la dernière é",
+          "orateur": "Mme Valérie Rabault",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Les entreprises ont encore dix minutes pour payer le « cinquième acompte » d'imp",
+          "orateur": "M. Christian Eckert",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 219",
+        "taux l'impôt",
+        "taux reduit pme",
+        "benefice imposable",
+        "taux is"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "219_lf_2017",
+      "article_ref": "219",
+      "law_type": "LF",
+      "law_year": 2017,
+      "must_find": [
+        {
+          "content_substring": "Cela va totalement à l'encontre de ce prévoit le projet de loi de finances pour",
+          "speaker": "M. Albéric de Montgolfier"
+        },
+        {
+          "content_substring": "Le Sénat a approuvé certaines de ces réformes fiscales, dont le prélèvement forf",
+          "speaker": "M. Joël Giraud"
+        },
+        {
+          "content_substring": "La modernisation économique de notre pays passe d'abord par la réforme de la fis",
+          "speaker": "M. Jean-Noël Barrot"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Cela va totalement à l'encontre de ce prévoit le projet de loi de finances pour",
+          "orateur": "M. Albéric de Montgolfier",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "Le Sénat a approuvé certaines de ces réformes fiscales, dont le prélèvement forf",
+          "orateur": "M. Joël Giraud",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "La modernisation économique de notre pays passe d'abord par la réforme de la fis",
+          "orateur": "M. Jean-Noël Barrot",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 219",
+        "taux l'impôt",
+        "taux reduit pme",
+        "benefice imposable",
+        "taux is"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "219_lf_2020",
+      "article_ref": "219",
+      "law_type": "LF",
+      "law_year": 2020,
+      "must_find": [
+        {
+          "content_substring": "Il a pour objectif d'exonérer d'impôt sur les sociétés ou sur le revenu et de co",
+          "speaker": "M. Olivier Dussopt"
+        },
+        {
+          "content_substring": "L'une consiste à relever le plafond d'exonération de l'impôt sur les sociétés pe",
+          "speaker": "M. Dominique Potier"
+        },
+        {
+          "content_substring": "Il s'agit de rendre les surcoûts supportés par le secteur du bâtiment à cause de",
+          "speaker": "M. Dominique Potier"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Il a pour objectif d'exonérer d'impôt sur les sociétés ou sur le revenu et de co",
+          "orateur": "M. Olivier Dussopt",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "L'une consiste à relever le plafond d'exonération de l'impôt sur les sociétés pe",
+          "orateur": "M. Dominique Potier",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Il s'agit de rendre les surcoûts supportés par le secteur du bâtiment à cause de",
+          "orateur": "M. Dominique Potier",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 219",
+        "taux l'impôt",
+        "taux reduit pme",
+        "benefice imposable",
+        "taux is"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "219_lf_2011",
+      "article_ref": "219",
+      "law_type": "LF",
+      "law_year": 2011,
+      "must_find": [
+        {
+          "content_substring": "Le Conseil des prélèvements obligatoires, auquel vous avez fait référence, justi",
+          "speaker": "Mme Nicole Bricq"
+        },
+        {
+          "content_substring": "Il s'agit simplement de rétablir ce que j'appellerai « la vérité de l'impôt » :",
+          "speaker": "Mme Nicole Bricq"
+        },
+        {
+          "content_substring": "C'est la raison pour laquelle nous avons instauré, dans le cadre du projet de lo",
+          "speaker": "Mme Valérie Pécresse"
+        },
+        {
+          "content_substring": "Par exemple, une société qui reçoit 10 millions d'euros de dividendes d'une fili",
+          "speaker": "Mme Nicole Bricq"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Le Conseil des prélèvements obligatoires, auquel vous avez fait référence, justi",
+          "orateur": "Mme Nicole Bricq",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "Il s'agit simplement de rétablir ce que j'appellerai « la vérité de l'impôt » :",
+          "orateur": "Mme Nicole Bricq",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "C'est la raison pour laquelle nous avons instauré, dans le cadre du projet de lo",
+          "orateur": "Mme Valérie Pécresse",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "Par exemple, une société qui reçoit 10 millions d'euros de dividendes d'une fili",
+          "orateur": "Mme Nicole Bricq",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 219",
+        "taux l'impôt",
+        "taux reduit pme",
+        "benefice imposable",
+        "taux is"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "219_lf_2013",
+      "article_ref": "219",
+      "law_type": "LF",
+      "law_year": 2013,
+      "must_find": [
+        {
+          "content_substring": "Toutefois, si l'on prend en compte toute une série de mécanismes en réduisant l'",
+          "speaker": "M. Benoît Hamon"
+        },
+        {
+          "content_substring": "De plus, la création d'une nouvelle tranche d'impôt sur les sociétés serait inop",
+          "speaker": "M. François Marc"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Toutefois, si l'on prend en compte toute une série de mécanismes en réduisant l'",
+          "orateur": "M. Benoît Hamon",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "De plus, la création d'une nouvelle tranche d'impôt sur les sociétés serait inop",
+          "orateur": "M. François Marc",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 219",
+        "taux l'impôt",
+        "taux reduit pme",
+        "benefice imposable",
+        "taux is"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "219_lf_2023",
+      "article_ref": "219",
+      "law_type": "LF",
+      "law_year": 2023,
+      "must_find": [
+        {
+          "content_substring": "En 2013, le produit de l'impôt sur les sociétés était de 44 milliards d'euros ;",
+          "speaker": "M. Claude Raynal"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "En 2013, le produit de l'impôt sur les sociétés était de 44 milliards d'euros ;",
+          "orateur": "M. Claude Raynal",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 219",
+        "taux l'impôt",
+        "taux reduit pme",
+        "benefice imposable",
+        "taux is"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "44_sexies_a_lf_2004",
+      "article_ref": "44 sexies A",
+      "law_type": "LF",
+      "law_year": 2004,
+      "must_find": [
+        {
+          "content_substring": "Des dispositions spécifiques sont prévues pour les entreprises de travail tempor",
+          "speaker": "Mme Annick Bocandé"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Des dispositions spécifiques sont prévues pour les entreprises de travail tempor",
+          "orateur": "Mme Annick Bocandé",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 44 sexies A",
+        "article 44 sexies a",
+        "innovation",
+        "innovantes jei",
+        "jeunes entreprises"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "44_sexies_a_lfr_2007",
+      "article_ref": "44 sexies A",
+      "law_type": "LFR",
+      "law_year": 2007,
+      "must_find": [
+        {
+          "content_substring": "L'article 44 sexies A du code général des impôts est abrogé.",
+          "speaker": "M. Muzeau"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "L'article 44 sexies A du code général des impôts est abrogé.",
+          "orateur": "M. Muzeau",
+          "chambre": ""
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 44 sexies A",
+        "article 44 sexies a",
+        "innovation",
+        "innovantes jei",
+        "jeunes entreprises"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "44_sexies_a_lf_2011",
+      "article_ref": "44 sexies A",
+      "law_type": "LF",
+      "law_year": 2011,
+      "must_find": [
+        {
+          "content_substring": "9 AH et 39 AK, à la seconde phrase du dernier alinéa de l'article 39 quinquies D",
+          "speaker": "M. Thierry Mandon"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "9 AH et 39 AK, à la seconde phrase du dernier alinéa de l'article 39 quinquies D",
+          "orateur": "M. Thierry Mandon",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 44 sexies A",
+        "article 44 sexies a",
+        "innovation",
+        "innovantes jei",
+        "jeunes entreprises"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "39_lf_2022",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2022,
+      "must_find": [
+        {
+          "content_substring": "Votre question se rapporte à la notion d'acte anormal de gestion et, par conséqu",
+          "speaker": "M. Alain Griset"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Votre question se rapporte à la notion d'acte anormal de gestion et, par conséqu",
+          "orateur": "M. Alain Griset",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "39_lf_2012",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2012,
+      "must_find": [
+        {
+          "content_substring": "L'article 11 a\ntrait au renversement de la charge de la preuve pour les transfer",
+          "speaker": "Mme Nathalie Goulet"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "L'article 11 a\ntrait au renversement de la charge de la preuve pour les transfer",
+          "orateur": "Mme Nathalie Goulet",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "39_lf_2017",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2017,
+      "must_find": [
+        {
+          "content_substring": "L'article 48 vise à prolonger la durée de\nl'expérimentation relative au parcours",
+          "speaker": "M. Gilbert Barbier"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "L'article 48 vise à prolonger la durée de\nl'expérimentation relative au parcours",
+          "orateur": "M. Gilbert Barbier",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "39_lf_2020",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2020,
+      "must_find": [
+        {
+          "content_substring": "Cet amendement vise à\nintroduire un mécanisme de réduction d'impôt en\nremplaceme",
+          "speaker": "M. Michel Magras"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Cet amendement vise à\nintroduire un mécanisme de réduction d'impôt en\nremplaceme",
+          "orateur": "M. Michel Magras",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "39_lf_2021",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2021,
+      "must_find": [
+        {
+          "content_substring": ", de reconstruction ou\nd'agrandissement. L'amendement tend à inclure les travaux",
+          "speaker": "M. Jean-François Husson"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": ", de reconstruction ou\nd'agrandissement. L'amendement tend à inclure les travaux",
+          "orateur": "M. Jean-François Husson",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "39_lf_2025",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2025,
+      "must_find": [
+        {
+          "content_substring": "Il s'agit, là\nencore, d'une proposition de notre collègue Pierre-Antoine Levi. L",
+          "speaker": "Mme Annick Billon"
+        },
+        {
+          "content_substring": "Cet article 11 est sensible, comme l'ont rappelé les orateurs\nprécédents ; il in",
+          "speaker": "M. Marc Laménie"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Il s'agit, là\nencore, d'une proposition de notre collègue Pierre-Antoine Levi. L",
+          "orateur": "Mme Annick Billon",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "Cet article 11 est sensible, comme l'ont rappelé les orateurs\nprécédents ; il in",
+          "orateur": "M. Marc Laménie",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "39_lf_2005",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2005,
+      "must_find": [
+        {
+          "content_substring": "Alors que le Gouvernement, comme le démontre l'article 36 du projet de loi, reme",
+          "speaker": "M. Patrick Bloche"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Alors que le Gouvernement, comme le démontre l'article 36 du projet de loi, reme",
+          "orateur": "M. Patrick Bloche",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "39_lf_2006",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2006,
+      "must_find": [
+        {
+          "content_substring": "C'est sous le bénéfice de cet engagement que j'accepte de retirer mon amendement",
+          "speaker": "M. Borloo"
+        },
+        {
+          "content_substring": ",rapporteur pour avis.Le I de l'article 17\nvise à supprimer le bénéfice des mesu",
+          "speaker": "M. Jean-Jacques Jégou"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "C'est sous le bénéfice de cet engagement que j'accepte de retirer mon amendement",
+          "orateur": "M. Borloo",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": ",rapporteur pour avis.Le I de l'article 17\nvise à supprimer le bénéfice des mesu",
+          "orateur": "M. Jean-Jacques Jégou",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "39_lf_2014",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2014,
+      "must_find": [
+        {
+          "content_substring": "Ensuite, sur le plan fiscal, en application du 5bisde l'article 39 du code génér",
+          "speaker": "Mme Fleur Pellerin"
+        },
+        {
+          "content_substring": "En effet, en vertu de l'article 39 du code général des impôts,",
+          "speaker": "M. Albéric de Montgolfier"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Ensuite, sur le plan fiscal, en application du 5bisde l'article 39 du code génér",
+          "orateur": "Mme Fleur Pellerin",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "En effet, en vertu de l'article 39 du code général des impôts,",
+          "orateur": "M. Albéric de Montgolfier",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "39_lf_2011",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2011,
+      "must_find": [
+        {
+          "content_substring": "Nous agissons donc sur l'assiette de la quote-part. La raison d'être de cette qu",
+          "speaker": "Mme Nicole Bricq"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Nous agissons donc sur l'assiette de la quote-part. La raison d'être de cette qu",
+          "orateur": "Mme Nicole Bricq",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "39_lf_2015",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2015,
+      "must_find": [
+        {
+          "content_substring": "59 A du livre des procédures fiscales, « par dérogation [...] la commission peut",
+          "speaker": "M. Albéric de Montgolfier"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "59 A du livre des procédures fiscales, « par dérogation [...] la commission peut",
+          "orateur": "M. Albéric de Montgolfier",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "39_lf_2016",
+      "article_ref": "39",
+      "law_type": "LF",
+      "law_year": 2016,
+      "must_find": [
+        {
+          "content_substring": "Mon objectif est en effet d'élargir l'assiette, de résoudre quelques problèmes,",
+          "speaker": "M. Sapin et vous-même"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 39 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 A",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 39 AA",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Mon objectif est en effet d'élargir l'assiette, de résoudre quelques problèmes,",
+          "orateur": "M. Sapin et vous-même",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "deduction des charges",
+        "frais generaux",
+        "benefice imposable",
+        "l'article 39",
+        "charges"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "238_bis_lf_2017",
+      "article_ref": "238 bis",
+      "law_type": "LF",
+      "law_year": 2017,
+      "must_find": [
+        {
+          "content_substring": "Non, ce n'est pas bien! Elle est venue complexifier les contraintes opérationne",
+          "speaker": "M. Stéphane Saint-André"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 238 bis AB",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 238 quater",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Non, ce n'est pas bien! Elle est venue complexifier les contraintes opérationne",
+          "orateur": "M. Stéphane Saint-André",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "mecenat d'entreprise",
+        "l'article 238 bis",
+        "article 238 bis",
+        "organisme d'interet general",
+        "mécénat"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "238_bis_lfss_2020",
+      "article_ref": "238 bis",
+      "law_type": "LFSS",
+      "law_year": 2020,
+      "must_find": [
+        {
+          "content_substring": "Nous en arrivons à un sujet qui nous a beaucoup occupés en commission : le dispo",
+          "speaker": "M. Joël Giraud"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 238 bis AB",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 238 quater",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Nous en arrivons à un sujet qui nous a beaucoup occupés en commission : le dispo",
+          "orateur": "M. Joël Giraud",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "mecenat d'entreprise",
+        "l'article 238 bis",
+        "article 238 bis",
+        "organisme d'interet general",
+        "mécénat"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "238_bis_lf_2004",
+      "article_ref": "238 bis",
+      "law_type": "LF",
+      "law_year": 2004,
+      "must_find": [
+        {
+          "content_substring": "Monsieur Hérisson, vous proposez de doubler les plafonds de la réduction d'impôt",
+          "speaker": "M. Renaud Dutreil"
+        },
+        {
+          "content_substring": "L'article 15 institue un crédit d'impôt au bénéfice des entreprises qui emploien",
+          "speaker": "M. Rodolphe Thomas"
+        },
+        {
+          "content_substring": "L'article 15 propose d'introduire le principe de l'intermédiation obligatoire de",
+          "speaker": "Mme Muguette Jacquaint"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 238 bis AB",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 238 quater",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Monsieur Hérisson, vous proposez de doubler les plafonds de la réduction d'impôt",
+          "orateur": "M. Renaud Dutreil",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "L'article 15 institue un crédit d'impôt au bénéfice des entreprises qui emploien",
+          "orateur": "M. Rodolphe Thomas",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "L'article 15 propose d'introduire le principe de l'intermédiation obligatoire de",
+          "orateur": "Mme Muguette Jacquaint",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "mecenat d'entreprise",
+        "l'article 238 bis",
+        "article 238 bis",
+        "organisme d'interet general",
+        "mécénat"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "150_0_a_lf_2013",
+      "article_ref": "150-0 A",
+      "law_type": "LF",
+      "law_year": 2013,
+      "must_find": [
+        {
+          "content_substring": "La taxe proposée, qui serait applicable aux locaux vacants depuis plus d'un an,",
+          "speaker": "M. Christian Eckert"
+        },
+        {
+          "content_substring": "Ma chère collègue, le débat sur la taxation des plus-values à l'impôt sur le rev",
+          "speaker": "M. Christian Eckert"
+        },
+        {
+          "content_substring": "L'augmentation de 0,2 % du taux forfaitaire d'imposition pour chaque année de dé",
+          "speaker": "M. Jérôme Cahuzac"
+        },
+        {
+          "content_substring": "Cet article 10 porte sur la question des plus-values immobilières sur le bâti et",
+          "speaker": "M. Benoist Apparu"
+        },
+        {
+          "content_substring": "L'article 10 prévoit un dispositif transitoire, afin de créer un choc d'offre. A",
+          "speaker": "M. Daniel Goldberg"
+        },
+        {
+          "content_substring": "La commission est défavorable à l'amendement n° I-91, qui, en réécrivant totalem",
+          "speaker": "M. François Marc"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 150-0 B ter",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 150 U",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "La taxe proposée, qui serait applicable aux locaux vacants depuis plus d'un an,",
+          "orateur": "M. Christian Eckert",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Ma chère collègue, le débat sur la taxation des plus-values à l'impôt sur le rev",
+          "orateur": "M. Christian Eckert",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "L'augmentation de 0,2 % du taux forfaitaire d'imposition pour chaque année de dé",
+          "orateur": "M. Jérôme Cahuzac",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Cet article 10 porte sur la question des plus-values immobilières sur le bâti et",
+          "orateur": "M. Benoist Apparu",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "L'article 10 prévoit un dispositif transitoire, afin de créer un choc d'offre. A",
+          "orateur": "M. Daniel Goldberg",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "La commission est défavorable à l'amendement n° I-91, qui, en réécrivant totalem",
+          "orateur": "M. François Marc",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "plus-value mobiliere",
+        "l'article 150-0 A",
+        "l'article 150-0 a",
+        "imposition plus",
+        "valeurs"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "150_0_a_lfr_2012",
+      "article_ref": "150-0 A",
+      "law_type": "LFR",
+      "law_year": 2012,
+      "must_find": [
+        {
+          "content_substring": "2016 ; c'est\nbeaucoup. Le risque sera d'autant plus élevé qu'à\ncompter du 1erjan",
+          "speaker": "M. Jérôme Cahuzac"
+        },
+        {
+          "content_substring": "L'article 10 du projet de loi de finances pour 2013\nréforme le régime actuel de",
+          "speaker": "M. Jacques Mézard"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 150-0 B ter",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 150 U",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "2016 ; c'est\nbeaucoup. Le risque sera d'autant plus élevé qu'à\ncompter du 1erjan",
+          "orateur": "M. Jérôme Cahuzac",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "L'article 10 du projet de loi de finances pour 2013\nréforme le régime actuel de",
+          "orateur": "M. Jacques Mézard",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "plus-value mobiliere",
+        "l'article 150-0 A",
+        "l'article 150-0 a",
+        "imposition plus",
+        "valeurs"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "150_0_a_lf_2011",
+      "article_ref": "150-0 A",
+      "law_type": "LF",
+      "law_year": 2011,
+      "must_find": [
+        {
+          "content_substring": "Lorsqu'il existe des liens de dépendance entre l'entreprise cédante et l'entrepr",
+          "speaker": "M. Marini"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 150-0 B ter",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 150 U",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Lorsqu'il existe des liens de dépendance entre l'entreprise cédante et l'entrepr",
+          "orateur": "M. Marini",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "plus-value mobiliere",
+        "l'article 150-0 A",
+        "l'article 150-0 a",
+        "imposition plus",
+        "valeurs"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "885_i_bis_lfr_2007",
+      "article_ref": "885 I bis",
+      "law_type": "LFR",
+      "law_year": 2007,
+      "must_find": [
+        {
+          "content_substring": "_ Dans le premier alinéa du texte proposé par cet article pour l'article 885 I b",
+          "speaker": "M. Badré et les membres du groupe de l'Union centriste"
+        },
+        {
+          "content_substring": "- Au premier alinéa du b du texte proposé par cet article pour l'article 885 I b",
+          "speaker": "M. Trégouët"
+        },
+        {
+          "content_substring": "Rédiger comme suit le texte proposé par cet article pour l'article 885 I bis du",
+          "speaker": "M. Badré et les membres du groupe de l'Union centriste"
+        },
+        {
+          "content_substring": "_ Compléter le quatrième alinéa du texte proposé par cet article pour l'article",
+          "speaker": "M. Badré et les membres du groupe de l'Union centriste"
+        },
+        {
+          "content_substring": "_ Dans la première phrase du dernier alinéa du b du texte proposé par cet articl",
+          "speaker": "M. Badré et les membres du groupe de l'Union centriste"
+        },
+        {
+          "content_substring": "_ Supprimer le c du texte proposé par cet article pour l'article 885 I bis du co",
+          "speaker": "M. Badré et les membres du groupe de l'Union centriste"
+        },
+        {
+          "content_substring": "_ Dans le dernier alinéa du b du texte proposé par cet article pour insérer un a",
+          "speaker": "M. Badré et les membres du groupe de l'Union centriste"
+        },
+        {
+          "content_substring": "Monsieur le rapporteur général, monsieur le secrétaire d'État, quelle sera l'inc",
+          "speaker": "M. Gérard Bapt"
+        },
+        {
+          "content_substring": "Nous proposons d'abroger l'article 885 I bis du CGI afin de mettre un terme aux",
+          "speaker": "M. Jean-Louis Idiart"
+        },
+        {
+          "content_substring": "- Dans le premier alinéa de l'article 885 I bis du même code, les mots : « de la",
+          "speaker": "M. Philippe Marini"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 885 I ter",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "_ Dans le premier alinéa du texte proposé par cet article pour l'article 885 I b",
+          "orateur": "M. Badré et les membres du groupe de l'Union centriste",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "- Au premier alinéa du b du texte proposé par cet article pour l'article 885 I b",
+          "orateur": "M. Trégouët",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Rédiger comme suit le texte proposé par cet article pour l'article 885 I bis du",
+          "orateur": "M. Badré et les membres du groupe de l'Union centriste",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "_ Compléter le quatrième alinéa du texte proposé par cet article pour l'article",
+          "orateur": "M. Badré et les membres du groupe de l'Union centriste",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "_ Dans la première phrase du dernier alinéa du b du texte proposé par cet articl",
+          "orateur": "M. Badré et les membres du groupe de l'Union centriste",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "_ Supprimer le c du texte proposé par cet article pour l'article 885 I bis du co",
+          "orateur": "M. Badré et les membres du groupe de l'Union centriste",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "_ Dans le dernier alinéa du b du texte proposé par cet article pour insérer un a",
+          "orateur": "M. Badré et les membres du groupe de l'Union centriste",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Monsieur le rapporteur général, monsieur le secrétaire d'État, quelle sera l'inc",
+          "orateur": "M. Gérard Bapt",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Nous proposons d'abroger l'article 885 I bis du CGI afin de mettre un terme aux",
+          "orateur": "M. Jean-Louis Idiart",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "- Dans le premier alinéa de l'article 885 I bis du même code, les mots : « de la",
+          "orateur": "M. Philippe Marini",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "exoneration isf",
+        "885Ibis",
+        "885 I bis",
+        "isf pacte",
+        "impot de solidarite sur la fortune"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "200_lfr_2016",
+      "article_ref": "200",
+      "law_type": "LFR",
+      "law_year": 2016,
+      "must_find": [
+        {
+          "content_substring": "Cet amendement\nvise à supprimer le crédit d'impôt au titre des contrats\nd'assura",
+          "speaker": "M. Jean-Claude Requier"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 A",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Cet amendement\nvise à supprimer le crédit d'impôt au titre des contrats\nd'assura",
+          "orateur": "M. Jean-Claude Requier",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "crédits",
+        "l'article 200",
+        "revenu",
+        "générales",
+        "article 200"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "200_lf_2007",
+      "article_ref": "200",
+      "law_type": "LF",
+      "law_year": 2007,
+      "must_find": [
+        {
+          "content_substring": "J'en veux pour preuves l'article 8, sur l'élargissement du crédit d'impôt pour l",
+          "speaker": "M. Jean-Pierre Soisson"
+        },
+        {
+          "content_substring": "61, 61 bis et 61 ter, et l'amendement n° II-38 qui tend à insérer un article add",
+          "speaker": "Mme Létard et reprises par M"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 A",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "J'en veux pour preuves l'article 8, sur l'élargissement du crédit d'impôt pour l",
+          "orateur": "M. Jean-Pierre Soisson",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "61, 61 bis et 61 ter, et l'amendement n° II-38 qui tend à insérer un article add",
+          "orateur": "Mme Létard et reprises par M",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "crédits",
+        "l'article 200",
+        "revenu",
+        "générales",
+        "article 200"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "200_lfr_2015",
+      "article_ref": "200",
+      "law_type": "LFR",
+      "law_year": 2015,
+      "must_find": [
+        {
+          "content_substring": "Seules les associations d'intérêt général, dont l'objet entre intégralement dans",
+          "speaker": "Mme Najat Vallaud-Belkacem"
+        },
+        {
+          "content_substring": "Cet amendement vise à modifier l'article 12septiesafin que le crédit d'impôt pré",
+          "speaker": "M. Christian Eckert"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 A",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Seules les associations d'intérêt général, dont l'objet entre intégralement dans",
+          "orateur": "Mme Najat Vallaud-Belkacem",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Cet amendement vise à modifier l'article 12septiesafin que le crédit d'impôt pré",
+          "orateur": "M. Christian Eckert",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "crédits",
+        "l'article 200",
+        "revenu",
+        "générales",
+        "article 200"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "200_lf_2018",
+      "article_ref": "200",
+      "law_type": "LF",
+      "law_year": 2018,
+      "must_find": [
+        {
+          "content_substring": "Le dispositif fait référence à deux listes différentes, et il est vrai que le f",
+          "speaker": "M. Joël Giraud"
+        },
+        {
+          "content_substring": "Il a eu raison de le faire, car le dispositif que nous voulions mettre en place",
+          "speaker": "M. Christophe Blanchet"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 A",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Le dispositif fait référence à deux listes différentes, et il est vrai que le f",
+          "orateur": "M. Joël Giraud",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Il a eu raison de le faire, car le dispositif que nous voulions mettre en place",
+          "orateur": "M. Christophe Blanchet",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "crédits",
+        "l'article 200",
+        "revenu",
+        "générales",
+        "article 200"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "200_lf_2019",
+      "article_ref": "200",
+      "law_type": "LF",
+      "law_year": 2019,
+      "must_find": [
+        {
+          "content_substring": "Au-delà de ce plafond, les dons ouvriront droit à la réduction d'impôt, prévue p",
+          "speaker": "Mme Marie-Ange Magne"
+        },
+        {
+          "content_substring": "Vous vous référez au point b de l'article 200 du code général des impôts, mais e",
+          "speaker": "M. Jean-Paul Mattei"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 A",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Au-delà de ce plafond, les dons ouvriront droit à la réduction d'impôt, prévue p",
+          "orateur": "Mme Marie-Ange Magne",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Vous vous référez au point b de l'article 200 du code général des impôts, mais e",
+          "orateur": "M. Jean-Paul Mattei",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "crédits",
+        "l'article 200",
+        "revenu",
+        "générales",
+        "article 200"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "200_lfss_2020",
+      "article_ref": "200",
+      "law_type": "LFSS",
+      "law_year": 2020,
+      "must_find": [
+        {
+          "content_substring": "Aux termes de l'amendement, lorsqu'un salarié renonce à son supplément de rémuné",
+          "speaker": "M. Bertrand Sorre"
+        },
+        {
+          "content_substring": "Il vise à augmenter provisoirement le taux de réduction d'impôt prévu à l'articl",
+          "speaker": "M. Guillaume Chiche"
+        },
+        {
+          "content_substring": "Or ces associations sont financées par des dons qui bénéficient de la réduction",
+          "speaker": "Mme Émilie Bonnivard"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 A",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Aux termes de l'amendement, lorsqu'un salarié renonce à son supplément de rémuné",
+          "orateur": "M. Bertrand Sorre",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Il vise à augmenter provisoirement le taux de réduction d'impôt prévu à l'articl",
+          "orateur": "M. Guillaume Chiche",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Or ces associations sont financées par des dons qui bénéficient de la réduction",
+          "orateur": "Mme Émilie Bonnivard",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "crédits",
+        "l'article 200",
+        "revenu",
+        "générales",
+        "article 200"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "200_lf_2021",
+      "article_ref": "200",
+      "law_type": "LF",
+      "law_year": 2021,
+      "must_find": [
+        {
+          "content_substring": "Or ces associations, financées par des dons, bénéficient par conséquent de la ré",
+          "speaker": "M. Dino Cinieri"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 A",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Or ces associations, financées par des dons, bénéficient par conséquent de la ré",
+          "orateur": "M. Dino Cinieri",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "crédits",
+        "l'article 200",
+        "revenu",
+        "générales",
+        "article 200"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "200_lf_2022",
+      "article_ref": "200",
+      "law_type": "LF",
+      "law_year": 2022,
+      "must_find": [
+        {
+          "content_substring": "Ma famille politique soutient donc le présent amendement, qui vise à exclure de",
+          "speaker": "Mme Laure Lavalette"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 A",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Ma famille politique soutient donc le présent amendement, qui vise à exclure de",
+          "orateur": "Mme Laure Lavalette",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "crédits",
+        "l'article 200",
+        "revenu",
+        "générales",
+        "article 200"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "200_lf_2025",
+      "article_ref": "200",
+      "law_type": "LF",
+      "law_year": 2025,
+      "must_find": [
+        {
+          "content_substring": "Les coordinations et fédérations d'associations qui remplissent les conditions p",
+          "speaker": "M. Charles de Courson"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 200 A",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 200 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Les coordinations et fédérations d'associations qui remplissent les conditions p",
+          "orateur": "M. Charles de Courson",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "crédits",
+        "l'article 200",
+        "revenu",
+        "générales",
+        "article 200"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "44_sexies_lf_2004",
+      "article_ref": "44 sexies",
+      "law_type": "LF",
+      "law_year": 2004,
+      "must_find": [
+        {
+          "content_substring": "Des dispositions spécifiques sont prévues pour les entreprises de travail tempor",
+          "speaker": "Mme Annick Bocandé"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 44 bis",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 44 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 44 sexies A",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Des dispositions spécifiques sont prévues pour les entreprises de travail tempor",
+          "orateur": "Mme Annick Bocandé",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "exonération entreprises",
+        "zone franche",
+        "article 44 sexies",
+        "44 sexies",
+        "entreprise nouvelle"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "44_sexies_lfr_2003",
+      "article_ref": "44 sexies",
+      "law_type": "LFR",
+      "law_year": 2003,
+      "must_find": [
+        {
+          "content_substring": "Comme vous le savez, les dispositions de l'article 44 sexies du code général des",
+          "speaker": "M. Renaud Dutreil"
+        },
+        {
+          "content_substring": "Or il se pose un problème très important, et particulier d'interprétation, ou pl",
+          "speaker": "M. Nicolas Forissier"
+        },
+        {
+          "content_substring": "Les dispositions de l'article 44 sexies du code général des impôts accordent un",
+          "speaker": "M. Gilbert Gantier"
+        },
+        {
+          "content_substring": "Mais je voudrais - ce sera le thème des trois amendements qui suivent - que nous",
+          "speaker": "M. Nicolas Forissier"
+        },
+        {
+          "content_substring": "La note est honnête, j'ai d'abord vérifié si elle tenait compte de toutes les en",
+          "speaker": "M. Gilles Carrez"
+        },
+        {
+          "content_substring": "Nous avons tous connaissance de nombreux contentieux fiscaux concernant des repr",
+          "speaker": "M. Nicolas Forissier"
+        },
+        {
+          "content_substring": "Il existe de ce fait, dans les zones définies à l'article 44 sexies, une distors",
+          "speaker": "M. Nicolas Forissier"
+        },
+        {
+          "content_substring": "Il s'agit, là encore, de modifier très légèrement l'article 44 sexies, qui est d",
+          "speaker": "M. Nicolas Forissier"
+        },
+        {
+          "content_substring": "_ Les prêts consentis aux entreprises individuelles doivent remplir les conditio",
+          "speaker": "M. Hérisson"
+        },
+        {
+          "content_substring": "Au deuxième alinéa de l'article 44 sexies du code général des impôts, les mots \"",
+          "speaker": "M. Alduy"
+        },
+        {
+          "content_substring": "Je partage la peine du rapporteur général : avis très défavorable. (Nouveaux sou",
+          "speaker": "M. Alain Lambert"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 44 bis",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 44 quater",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 44 sexies A",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Comme vous le savez, les dispositions de l'article 44 sexies du code général des",
+          "orateur": "M. Renaud Dutreil",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Or il se pose un problème très important, et particulier d'interprétation, ou pl",
+          "orateur": "M. Nicolas Forissier",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Les dispositions de l'article 44 sexies du code général des impôts accordent un",
+          "orateur": "M. Gilbert Gantier",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Mais je voudrais - ce sera le thème des trois amendements qui suivent - que nous",
+          "orateur": "M. Nicolas Forissier",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "La note est honnête, j'ai d'abord vérifié si elle tenait compte de toutes les en",
+          "orateur": "M. Gilles Carrez",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Nous avons tous connaissance de nombreux contentieux fiscaux concernant des repr",
+          "orateur": "M. Nicolas Forissier",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Il existe de ce fait, dans les zones définies à l'article 44 sexies, une distors",
+          "orateur": "M. Nicolas Forissier",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Il s'agit, là encore, de modifier très légèrement l'article 44 sexies, qui est d",
+          "orateur": "M. Nicolas Forissier",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "_ Les prêts consentis aux entreprises individuelles doivent remplir les conditio",
+          "orateur": "M. Hérisson",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Au deuxième alinéa de l'article 44 sexies du code général des impôts, les mots \"",
+          "orateur": "M. Alduy",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Je partage la peine du rapporteur général : avis très défavorable. (Nouveaux sou",
+          "orateur": "M. Alain Lambert",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "exonération entreprises",
+        "zone franche",
+        "article 44 sexies",
+        "44 sexies",
+        "entreprise nouvelle"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "217_undecies_lfr_2014",
+      "article_ref": "217 undecies",
+      "law_type": "LFR",
+      "law_year": 2014,
+      "must_find": [
+        {
+          "content_substring": "Le présent article supprime une déduction d'assiette pour les entreprises prévue",
+          "speaker": "M. Christian Eckert"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 217 octies",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Le présent article supprime une déduction d'assiette pour les entreprises prévue",
+          "orateur": "M. Christian Eckert",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "fiscale investissements",
+        "déduction",
+        "outre mer",
+        "217 undecies",
+        "déduction fiscale"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "217_undecies_lf_2019",
+      "article_ref": "217 undecies",
+      "law_type": "LF",
+      "law_year": 2019,
+      "must_find": [
+        {
+          "content_substring": "Toutefois, nous ne pouvons adopter cette proposition de loi au seul motif qu'ell",
+          "speaker": "M. Guillaume Arnell"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 217 octies",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Toutefois, nous ne pouvons adopter cette proposition de loi au seul motif qu'ell",
+          "orateur": "M. Guillaume Arnell",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "fiscale investissements",
+        "déduction",
+        "outre mer",
+        "217 undecies",
+        "déduction fiscale"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "217_undecies_lf_2020",
+      "article_ref": "217 undecies",
+      "law_type": "LF",
+      "law_year": 2020,
+      "must_find": [
+        {
+          "content_substring": "Il prévoit de substituer à la déduction du résultat imposable prévue à l'article",
+          "speaker": "M. Stéphane Claireaux"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 217 octies",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Il prévoit de substituer à la déduction du résultat imposable prévue à l'article",
+          "orateur": "M. Stéphane Claireaux",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "fiscale investissements",
+        "déduction",
+        "outre mer",
+        "217 undecies",
+        "déduction fiscale"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "1649_quater_b_quater_lfr_2017",
+      "article_ref": "1649 quater B quater",
+      "law_type": "LFR",
+      "law_year": 2017,
+      "must_find": [
+        {
+          "content_substring": "Je pense tout d'abord à la réforme de la procédure parlementaire conduisant au v",
+          "speaker": "M. Gérald Darmanin"
+        },
+        {
+          "content_substring": "J'espère que vous vous expliquerez sur ce point, monsieur le ministre.Le Sénat e",
+          "speaker": "Mme Véronique Louwagie"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "1649 quater B bis",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "1649 quater B ter",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Je pense tout d'abord à la réforme de la procédure parlementaire conduisant au v",
+          "orateur": "M. Gérald Darmanin",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "J'espère que vous vous expliquerez sur ce point, monsieur le ministre.Le Sénat e",
+          "orateur": "Mme Véronique Louwagie",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "télédéclaration seuils",
+        "l'article 1649 quater B quater",
+        "1649 quater b quater",
+        "article 1649 quater b quater",
+        "seuils"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "1649_quater_b_quater_lf_2019",
+      "article_ref": "1649 quater B quater",
+      "law_type": "LF",
+      "law_year": 2019,
+      "must_find": [
+        {
+          "content_substring": "Mais la dotation d'équipement des territoires ruraux, la dotation de soutien à l",
+          "speaker": "Mme Bénédicte Taurine"
+        },
+        {
+          "content_substring": "C'est pour tenir compte des difficultés particulières d'implantation de ces site",
+          "speaker": "Mme Pascale Boyer"
+        },
+        {
+          "content_substring": ". Il existe déjà des informations disponibles sur le sujet, notamment dans les r",
+          "speaker": "Mme Jacqueline Gourault"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "1649 quater B bis",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "1649 quater B ter",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Mais la dotation d'équipement des territoires ruraux, la dotation de soutien à l",
+          "orateur": "Mme Bénédicte Taurine",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "C'est pour tenir compte des difficultés particulières d'implantation de ces site",
+          "orateur": "Mme Pascale Boyer",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": ". Il existe déjà des informations disponibles sur le sujet, notamment dans les r",
+          "orateur": "Mme Jacqueline Gourault",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "télédéclaration seuils",
+        "l'article 1649 quater B quater",
+        "1649 quater b quater",
+        "article 1649 quater b quater",
+        "seuils"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "199_undecies_b_lf_2025",
+      "article_ref": "199 undecies B",
+      "law_type": "LF",
+      "law_year": 2025,
+      "must_find": [
+        {
+          "content_substring": "Comme l'ont souligné les auteurs des amendements, la loi de finances pour 2024 a",
+          "speaker": "M. Charles de Courson"
+        },
+        {
+          "content_substring": "Nous proposons d'étendre son périmètre aux friches de toutes natures dans les se",
+          "speaker": "M. Moerani Frébault"
+        },
+        {
+          "content_substring": "Ensuite, le crédit d'impôt pour l'investissement productif en outre-mer, tout co",
+          "speaker": "M. Charles de Courson"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 199 undecies A",
+          "reason": "Different article (A not B)"
+        },
+        {
+          "content_substring": "article 199 undecies C",
+          "reason": "Different article (C not B)"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Comme l'ont souligné les auteurs des amendements, la loi de finances pour 2024 a",
+          "orateur": "M. Charles de Courson",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Nous proposons d'étendre son périmètre aux friches de toutes natures dans les se",
+          "orateur": "M. Moerani Frébault",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Ensuite, le crédit d'impôt pour l'investissement productif en outre-mer, tout co",
+          "orateur": "M. Charles de Courson",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 199 undecies B",
+        "investissements productifs",
+        "l'article 199 undecies B",
+        "199 undecies b",
+        "199undeciesB"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "150_u_lf_2025",
+      "article_ref": "150 U",
+      "law_type": "LF",
+      "law_year": 2025,
+      "must_find": [
+        {
+          "content_substring": "L'article 150 U du code général des impôts crée un abattement sur les plus-value",
+          "speaker": "M. Charles de Courson"
+        },
+        {
+          "content_substring": "L'article 150 U du code général des impôts contient une disposition permettant a",
+          "speaker": "Mme Amélie de Montchalin"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 150-0 B ter",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 150 V",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "L'article 150 U du code général des impôts crée un abattement sur les plus-value",
+          "orateur": "M. Charles de Courson",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "L'article 150 U du code général des impôts contient une disposition permettant a",
+          "orateur": "Mme Amélie de Montchalin",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "immobilières particuliers",
+        "particuliers",
+        "immobilières",
+        "l'article 150 u",
+        "values immobilières"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "1447_lfss_2025",
+      "article_ref": "1447",
+      "law_type": "LFSS",
+      "law_year": 2025,
+      "must_find": [
+        {
+          "content_substring": "Il tend ainsi à modifier l'article 1447 du code général des impôts - CGI - afin",
+          "speaker": "M. Jean-René Cazeneuve"
+        },
+        {
+          "content_substring": "La réécriture de l'article 1447 permettrait de stabiliser le droit et surtout de",
+          "speaker": "Mme Amélie de Montchalin"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 1448",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Il tend ainsi à modifier l'article 1447 du code général des impôts - CGI - afin",
+          "orateur": "M. Jean-René Cazeneuve",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "La réécriture de l'article 1447 permettrait de stabiliser le droit et surtout de",
+          "orateur": "Mme Amélie de Montchalin",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "assujetties",
+        "article 1447",
+        "l'article 1447",
+        "personnes",
+        "personnes assujetties"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "244_quater_x_lf_2022",
+      "article_ref": "244 quater X",
+      "law_type": "LF",
+      "law_year": 2022,
+      "must_find": [
+        {
+          "content_substring": "L'amendement vise à supprimer les contraintes environnementales définies par déc",
+          "speaker": "M. Frédéric Maillot"
+        },
+        {
+          "content_substring": "Selon le Bulletin officiel des finances publiques (Bofip) : « Le crédit d'impôt",
+          "speaker": "M. Philippe Juvin"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 244 quater B",
+          "reason": "Different article (CIR, not housing)"
+        },
+        {
+          "content_substring": "article 244 quater C",
+          "reason": "Different article (CICE)"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "L'amendement vise à supprimer les contraintes environnementales définies par déc",
+          "orateur": "M. Frédéric Maillot",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Selon le Bulletin officiel des finances publiques (Bofip) : « Le crédit d'impôt",
+          "orateur": "M. Philippe Juvin",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "social outre",
+        "crédit",
+        "outre",
+        "social",
+        "quater 244 x"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "197_lf_2022",
+      "article_ref": "197",
+      "law_type": "LF",
+      "law_year": 2022,
+      "must_find": [
+        {
+          "content_substring": "Cet amendement modifie les plafonds prévus à l'article 197 du code général des i",
+          "speaker": "Mme Nathalie Bassire"
+        },
+        {
+          "content_substring": "Il s'agit de rendre la fiscalité favorable à l'accueil d'un enfant au sein du fo",
+          "speaker": "M. Michel Castellani"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 197 A",
+          "reason": "Different article (non-residents)"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Cet amendement modifie les plafonds prévus à l'article 197 du code général des i",
+          "orateur": "Mme Nathalie Bassire",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "Il s'agit de rendre la fiscalité favorable à l'accueil d'un enfant au sein du fo",
+          "orateur": "M. Michel Castellani",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "l'article 197",
+        "article 197",
+        "barème",
+        "revenu",
+        "barème l'impôt"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "1384_c_bis_lf_2024",
+      "article_ref": "1384 C bis",
+      "law_type": "LF",
+      "law_year": 2024,
+      "must_find": [
+        {
+          "content_substring": "Alinéa 108 Rédiger ainsi cet alinéa : « Art. 1384 C bis. - I. - Il est accordé u",
+          "speaker": "M. Vogel"
+        },
+        {
+          "content_substring": "L'article 1384 C bis du code général des impôts, créé par l'article 6 du projet",
+          "speaker": "Mme Colombe Brossel"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 1384 A",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 1384 B",
+          "reason": "Different article"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Alinéa 108 Rédiger ainsi cet alinéa : « Art. 1384 C bis. - I. - Il est accordé u",
+          "orateur": "M. Vogel",
+          "chambre": "Sénat"
+        },
+        {
+          "citation_substring": "L'article 1384 C bis du code général des impôts, créé par l'article 6 du projet",
+          "orateur": "Mme Colombe Brossel",
+          "chambre": "Sénat"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 1384 C bis",
+        "article 1384 c bis",
+        "l'article 1384 C bis",
+        "1384 C bis",
+        "1384cbis"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "93_lf_2023",
+      "article_ref": "93",
+      "law_type": "LF",
+      "law_year": 2023,
+      "must_find": [
+        {
+          "content_substring": "L'ordonnance du 8 février 2023 relative à l'exercice en société des professions",
+          "speaker": "M. Jean-René Cazeneuve"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 93 A",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "L'ordonnance du 8 février 2023 relative à l'exercice en société des professions",
+          "orateur": "M. Jean-René Cazeneuve",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "93 CGI",
+        "non commerciales",
+        "l'article 93",
+        "cession d'office",
+        "professions non"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "1478_lf_2025",
+      "article_ref": "1478",
+      "law_type": "LF",
+      "law_year": 2025,
+      "must_find": [
+        {
+          "content_substring": "Cet amendement respecte l'esprit du nouvel article 1478 du code général des impô",
+          "speaker": "M. Gérard Leseul"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Cet amendement respecte l'esprit du nouvel article 1478 du code général des impô",
+          "orateur": "M. Gérard Leseul",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "l'année",
+        "l'année création",
+        "création",
+        "cfe base",
+        "l'article 1478"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "199_undecies_a_lf_2021",
+      "article_ref": "199 undecies A",
+      "law_type": "LF",
+      "law_year": 2021,
+      "must_find": [
+        {
+          "content_substring": "Ces amendements en discussion commune visent à modifier l'article 199 undecies A",
+          "speaker": "M. David Lorion"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 199 undecies B",
+          "reason": "Different article (B not A)"
+        },
+        {
+          "content_substring": "article 199 undecies C",
+          "reason": "Different article (C not A)"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Ces amendements en discussion commune visent à modifier l'article 199 undecies A",
+          "orateur": "M. David Lorion",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "l'article 199 undecies A",
+        "199undeciesA",
+        "undecies 199 A",
+        "l'article 199 undecies a",
+        "199undeciesa"
+      ],
+      "expected_certitude": "moyen"
+    },
+    {
+      "id": "156_lf_2022",
+      "article_ref": "156",
+      "law_type": "LF",
+      "law_year": 2022,
+      "must_find": [
+        {
+          "content_substring": ") En application des dispositions du 2° ter du II de l'article 156 du code génér",
+          "speaker": "M. Pierre Cordier"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 156 bis",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": ") En application des dispositions du 2° ter du II de l'article 156 du code génér",
+          "orateur": "M. Pierre Cordier",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "global",
+        "déductibles revenu",
+        "article 156",
+        "charges",
+        "charges déductibles"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "220_q_lf_2022",
+      "article_ref": "220 Q",
+      "law_type": "LF",
+      "law_year": 2022,
+      "must_find": [
+        {
+          "content_substring": "Cet amendement vise à renforcer les exigences de transparence concernant le créd",
+          "speaker": "M. Gérard Leseul"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "Cet amendement vise à renforcer les exigences de transparence concernant le créd",
+          "orateur": "M. Gérard Leseul",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "l'article 220 Q",
+        "dépenses production",
+        "crédit",
+        "l'article 220 q",
+        "phonographique"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "1407_lfr_2022",
+      "article_ref": "1407",
+      "law_type": "LFR",
+      "law_year": 2022,
+      "must_find": [
+        {
+          "content_substring": "Conformément aux dispositions des articles 1407 et 1408 du code général des impô",
+          "speaker": "Mme Roxana Maracineanu"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 1407 bis",
+          "reason": "Different article variant"
+        },
+        {
+          "content_substring": "article 1407 ter",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "Conformément aux dispositions des articles 1407 et 1408 du code général des impô",
+          "orateur": "Mme Roxana Maracineanu",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "champ",
+        "d'habitation",
+        "article 1407",
+        "l'article 1407",
+        "d'application taxe"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "1384_c_lf_2022",
+      "article_ref": "1384 C",
+      "law_type": "LF",
+      "law_year": 2022,
+      "must_find": [
+        {
+          "content_substring": "] ayant fait l'objet d'une opération unique de travaux de rénovation lourde ment",
+          "speaker": "M. Philippe Juvin"
+        }
+      ],
+      "must_not_find": [
+        {
+          "content_substring": "article 1384 A",
+          "reason": "Different article"
+        },
+        {
+          "content_substring": "article 1384 C bis",
+          "reason": "Different article variant"
+        }
+      ],
+      "expected_quotes": [
+        {
+          "citation_substring": "] ayant fait l'objet d'une opération unique de travaux de rénovation lourde ment",
+          "orateur": "M. Philippe Juvin",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "1384c",
+        "1384 c",
+        "logements acquis",
+        "exonération tfpb",
+        "article 1384 C"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "44_sexies_a_lf_2003",
+      "article_ref": "44 sexies A",
+      "law_type": "LF",
+      "law_year": 2003,
+      "must_find": [
+        {
+          "content_substring": "La première phrase du 3 du I de l'article 44 sexies A prévoit que si l'une des c",
+          "speaker": "M. Jean-Pierre Brard"
+        },
+        {
+          "content_substring": "Les pertes de recettes éventuelles résultant de la possibilité pour les jeunes e",
+          "speaker": "M. Marini"
+        },
+        {
+          "content_substring": "En effet, dans le cadre du dispositif « jeunes entreprises innovantes », vous pr",
+          "speaker": "M. Jean-Pierre Brard"
+        },
+        {
+          "content_substring": "Les pertes de recettes résultant de l'exonération d'impôt de solidarité sur la f",
+          "speaker": "M. Adnot et Darniche"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "La première phrase du 3 du I de l'article 44 sexies A prévoit que si l'une des c",
+          "orateur": "M. Jean-Pierre Brard",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Les pertes de recettes éventuelles résultant de la possibilité pour les jeunes e",
+          "orateur": "M. Marini",
+          "chambre": "AN"
+        },
+        {
+          "citation_substring": "En effet, dans le cadre du dispositif « jeunes entreprises innovantes », vous pr",
+          "orateur": "M. Jean-Pierre Brard",
+          "chambre": ""
+        },
+        {
+          "citation_substring": "Les pertes de recettes résultant de l'exonération d'impôt de solidarité sur la f",
+          "orateur": "M. Adnot et Darniche",
+          "chambre": ""
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 44 sexies A",
+        "article 44 sexies a",
+        "innovation",
+        "innovantes jei",
+        "jeunes entreprises"
+      ],
+      "expected_certitude": "eleve"
+    },
+    {
+      "id": "44_sexies_a_lf_2010",
+      "article_ref": "44 sexies A",
+      "law_type": "LF",
+      "law_year": 2010,
+      "must_find": [
+        {
+          "content_substring": "- À la première phrase du III de l'article 44 sexies A, après la référence : « 4",
+          "speaker": "M. François Baroin"
+        }
+      ],
+      "must_not_find": [],
+      "expected_quotes": [
+        {
+          "citation_substring": "- À la première phrase du III de l'article 44 sexies A, après la référence : « 4",
+          "orateur": "M. François Baroin",
+          "chambre": "AN"
+        }
+      ],
+      "expected_intention_keywords": [
+        "article 44 sexies A",
+        "article 44 sexies a",
+        "innovation",
+        "innovantes jei",
+        "jeunes entreprises"
+      ],
+      "expected_certitude": "eleve"
+    }
+  ]
+}

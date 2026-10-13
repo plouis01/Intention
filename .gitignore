@@ -1,0 +1,57 @@
+# Environment
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Data files (large, regenerable)
+data/raw/
+data/processed/
+data/embeddings_cache/
+data/embeddings/
+data/*.dump
+*.log
+*.db
+TODO.md
+reocr/
+
+
+# Generated analysis outputs
+data/analyse_*.md
+data/test_*.md
+data/feedback*.txt
+data/analyses/
+data/batch_state/
+data/article_modifications_auto.json  
+data/samples_amendements
+data/legislateur.db-journal
+data/cache/*.json
+
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Build
+*.egg-info/
+dist/
+build/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+#bmad-method
+_bmad/
+_bmad-output/
+.claude/commands/
+
+.DS_Store
+/rapports
+
+# Migration scripts (one-shot tooling)
+.env.migration
+.env.sample

@@ -1,0 +1,397 @@
+{
+  "description": "Legal term expansions for CGI article searches",
+  "generated_by": "manual curation based on French tax law terminology",
+  "note": "Terms are normalized (lowercase, straight apostrophes) for search matching",
+  "expansions": {
+    "150-0 B ter": [
+      "apport-cession",
+      "report d'imposition",
+      "plus-value en report",
+      "plus-value d'apport",
+      "societe controlee",
+      "holding",
+      "reinvestissement",
+      "cession de titres",
+      "apport de titres",
+      "sursis d'imposition",
+      "activite economique",
+      "delai de reinvestissement",
+      "150 0 b ter",
+      "1500bter"
+    ],
+    "150-0 B": [
+      "apport-cession",
+      "sursis d'imposition",
+      "plus-value d'apport",
+      "echange de titres",
+      "apport de titres",
+      "neutralite fiscale",
+      "150 0 b",
+      "1500b"
+    ],
+    "150-0 A": [
+      "plus-value mobiliere",
+      "cession de valeurs mobilieres",
+      "imposition des plus-values",
+      "cession de titres",
+      "valeurs mobilieres",
+      "droits sociaux",
+      "prelevement forfaitaire unique",
+      "pfu",
+      "flat tax",
+      "150 0 a",
+      "1500a"
+    ],
+    "150-0 D": [
+      "abattement pour duree de detention",
+      "abattement de droit commun",
+      "plus-value mobiliere",
+      "duree de detention",
+      "cession de titres",
+      "150 0 d",
+      "1500d"
+    ],
+    "150-0 D ter": [
+      "abattement dirigeant",
+      "depart a la retraite",
+      "cession de titres",
+      "dirigeant partant en retraite",
+      "abattement renforce",
+      "pme",
+      "150 0 d ter",
+      "1500dter"
+    ],
+    "199 terdecies-0 A": [
+      "ir-pme",
+      "reduction d'impot madelin",
+      "investissement pme",
+      "souscription au capital",
+      "reduction impot sur le revenu",
+      "avantage fiscal pme",
+      "fip",
+      "fcpi",
+      "199 terdecies 0 a"
+    ],
+    "200 A": [
+      "prelevement forfaitaire unique",
+      "pfu",
+      "flat tax",
+      "revenus de capitaux mobiliers",
+      "dividendes",
+      "interets",
+      "plus-values mobilieres",
+      "option bareme progressif",
+      "taux forfaitaire",
+      "12,8%",
+      "30%"
+    ],
+    "787 B": [
+      "pacte dutreil",
+      "dutreil",
+      "transmission d'entreprise",
+      "exoneration partielle",
+      "engagement collectif",
+      "engagement individuel",
+      "droits de succession",
+      "droits de donation",
+      "75%",
+      "exoneration 75",
+      "transmission familiale"
+    ],
+    "787 C": [
+      "pacte dutreil",
+      "dutreil entreprise individuelle",
+      "transmission entreprise individuelle",
+      "exoneration partielle",
+      "fonds de commerce",
+      "clientele liberale"
+    ],
+    "885 I bis": [
+      "isf",
+      "impot de solidarite sur la fortune",
+      "pacte d'actionnaires",
+      "engagement collectif",
+      "exoneration isf",
+      "biens professionnels"
+    ],
+    "964": [
+      "ifi",
+      "impot sur la fortune immobiliere",
+      "seuil d'imposition",
+      "patrimoine immobilier",
+      "1,3 million",
+      "assiette ifi"
+    ],
+    "965": [
+      "ifi",
+      "biens imposables",
+      "patrimoine immobilier",
+      "immeubles",
+      "parts de sci",
+      "droits immobiliers"
+    ],
+    "966": [
+      "ifi",
+      "biens professionnels",
+      "exoneration ifi",
+      "activite professionnelle principale",
+      "immeubles professionnels"
+    ],
+    "238 bis": [
+      "mecenat",
+      "mecenat d'entreprise",
+      "reduction d'impot mecenat",
+      "dons aux associations",
+      "60%",
+      "chiffre d'affaires",
+      "organisme d'interet general"
+    ],
+    "244 quater B": [
+      "credit d'impot recherche",
+      "cir",
+      "recherche et developpement",
+      "r&d",
+      "depenses de recherche",
+      "innovation",
+      "jeunes docteurs"
+    ],
+    "244 quater C": [
+      "cice",
+      "credit d'impot competitivite emploi",
+      "competitivite",
+      "allegement charges",
+      "masse salariale"
+    ],
+    "39": [
+      "charges deductibles",
+      "deduction des charges",
+      "benefice imposable",
+      "charges d'exploitation",
+      "frais generaux"
+    ],
+    "39 duodecies": [
+      "plus-values professionnelles",
+      "regime des plus-values",
+      "court terme",
+      "long terme",
+      "cession d'elements d'actif"
+    ],
+    "151 septies": [
+      "exoneration plus-values professionnelles",
+      "petites entreprises",
+      "seuil de recettes",
+      "cession d'entreprise",
+      "exoneration totale"
+    ],
+    "151 septies A": [
+      "exoneration depart retraite",
+      "cession entreprise retraite",
+      "transmission d'entreprise",
+      "depart a la retraite",
+      "exoneration plus-value"
+    ],
+    "151 septies B": [
+      "abattement immeubles",
+      "immeubles d'exploitation",
+      "plus-value immobiliere professionnelle",
+      "abattement duree detention"
+    ],
+    "44 sexies": [
+      "entreprise nouvelle",
+      "zone aidee",
+      "exoneration benefices",
+      "creation d'entreprise",
+      "zone franche"
+    ],
+    "44 sexies A": [
+      "jei",
+      "jeune entreprise innovante",
+      "jeune entreprise universitaire",
+      "jeu",
+      "innovation",
+      "recherche developpement",
+      "exoneration benefices"
+    ],
+    "163 bis G": [
+      "bspce",
+      "bons de souscription",
+      "parts de createur",
+      "createur d'entreprise",
+      "stock options",
+      "actionnariat salarie"
+    ],
+    "80 quaterdecies": [
+      "aga",
+      "actions gratuites",
+      "attributions gratuites d'actions",
+      "actionnariat salarie",
+      "gain d'acquisition"
+    ],
+    "119 bis": [
+      "retenue a la source",
+      "dividendes",
+      "non-residents",
+      "convention fiscale",
+      "withholding tax"
+    ],
+    "182 B": [
+      "retenue a la source",
+      "redevances",
+      "prestations de services",
+      "non-residents",
+      "propriete intellectuelle"
+    ],
+    "209": [
+      "impot sur les societes",
+      "is",
+      "benefice imposable",
+      "resultat fiscal",
+      "territorialite"
+    ],
+    "209 B": [
+      "cfc",
+      "societes etrangeres controlees",
+      "paradis fiscaux",
+      "regime cfc",
+      "lutte contre l'evasion"
+    ],
+    "210 A": [
+      "fusion",
+      "regime special des fusions",
+      "neutralite fiscale",
+      "plus-value de fusion",
+      "apport-fusion",
+      "transmission universelle"
+    ],
+    "210 B": [
+      "apport partiel d'actif",
+      "branche complete d'activite",
+      "regime de faveur",
+      "scission",
+      "neutralite fiscale"
+    ],
+    "223 A": [
+      "integration fiscale",
+      "groupe fiscal",
+      "societe mere",
+      "filiales",
+      "perimetre d'integration",
+      "option integration"
+    ],
+    "223 B": [
+      "integration fiscale",
+      "resultat d'ensemble",
+      "groupe fiscal",
+      "neutralisation",
+      "dividendes intragroupe"
+    ],
+    "145": [
+      "regime mere-fille",
+      "mere fille",
+      "exoneration dividendes",
+      "participation",
+      "quote-part de frais",
+      "5%"
+    ],
+    "219": [
+      "taux is",
+      "impot sur les societes",
+      "taux normal",
+      "taux reduit pme",
+      "25%",
+      "15%",
+      "benefice imposable"
+    ],
+    "1649 quater-0 B bis": [
+      "declaration compte etranger",
+      "crypto-actifs",
+      "actifs numeriques",
+      "plateforme crypto",
+      "obligation declarative",
+      "comptes a l'etranger"
+    ],
+    "150 VH bis": [
+      "crypto-actifs",
+      "actifs numeriques",
+      "bitcoin",
+      "plus-value crypto",
+      "cession crypto-monnaies",
+      "imposition crypto"
+    ],
+
+    "apport-cession": [
+      "150-0 B ter",
+      "150-0 B",
+      "report d'imposition",
+      "sursis d'imposition",
+      "holding",
+      "reinvestissement",
+      "plus-value d'apport"
+    ],
+    "dutreil": [
+      "787 B",
+      "787 C",
+      "pacte dutreil",
+      "transmission d'entreprise",
+      "engagement collectif",
+      "exoneration 75%"
+    ],
+    "cir": [
+      "244 quater B",
+      "credit d'impot recherche",
+      "recherche et developpement",
+      "r&d"
+    ],
+    "pfu": [
+      "200 A",
+      "prelevement forfaitaire unique",
+      "flat tax",
+      "30%",
+      "12,8%"
+    ],
+    "flat tax": [
+      "200 A",
+      "prelevement forfaitaire unique",
+      "pfu",
+      "30%"
+    ],
+    "integration fiscale": [
+      "223 A",
+      "223 B",
+      "groupe fiscal",
+      "societe mere",
+      "resultat d'ensemble"
+    ],
+    "mere-fille": [
+      "145",
+      "regime mere-fille",
+      "exoneration dividendes",
+      "quote-part de frais"
+    ],
+    "ifi": [
+      "964",
+      "965",
+      "966",
+      "impot sur la fortune immobiliere",
+      "patrimoine immobilier"
+    ],
+    "jei": [
+      "44 sexies A",
+      "jeune entreprise innovante",
+      "exoneration benefices",
+      "innovation"
+    ],
+    "bspce": [
+      "163 bis G",
+      "bons de souscription",
+      "parts de createur",
+      "actionnariat salarie"
+    ],
+    "actions gratuites": [
+      "80 quaterdecies",
+      "aga",
+      "attributions gratuites d'actions",
+      "actionnariat salarie"
+    ]
+  }
+}

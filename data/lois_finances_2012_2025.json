@@ -1,0 +1,359 @@
+{
+  "description": "Liste des lois de finances (LF, LFR, LFSS) de 2012 à 2025",
+  "last_updated": "2026-02-02",
+  "lois": [
+    {
+      "numero": "2011-1977",
+      "type": "LF",
+      "annee_budgetaire": 2012,
+      "date_promulgation": "2011-12-28",
+      "titre": "Loi de finances pour 2012",
+      "jorf": "JORFTEXT000025044460",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000025044460"
+    },
+    {
+      "numero": "2012-354",
+      "type": "LFR",
+      "annee_budgetaire": 2012,
+      "date_promulgation": "2012-03-14",
+      "titre": "Loi de finances rectificative pour 2012 (1)",
+      "jorf": "JORFTEXT000025509584",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000025509584"
+    },
+    {
+      "numero": "2012-958",
+      "type": "LFR",
+      "annee_budgetaire": 2012,
+      "date_promulgation": "2012-08-16",
+      "titre": "Loi de finances rectificative pour 2012 (2)",
+      "jorf": "JORFTEXT000026288927",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000026288927"
+    },
+    {
+      "numero": "2012-1510",
+      "type": "LFR",
+      "annee_budgetaire": 2012,
+      "date_promulgation": "2012-12-29",
+      "titre": "Loi de finances rectificative pour 2012 (3)",
+      "jorf": "JORFTEXT000026857857",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000026857857"
+    },
+    {
+      "numero": "2012-1509",
+      "type": "LF",
+      "annee_budgetaire": 2013,
+      "date_promulgation": "2012-12-29",
+      "titre": "Loi de finances pour 2013",
+      "jorf": "JORFTEXT000026856853",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000026856853"
+    },
+    {
+      "numero": "2013-1278",
+      "type": "LF",
+      "annee_budgetaire": 2014,
+      "date_promulgation": "2013-12-29",
+      "titre": "Loi de finances pour 2014",
+      "jorf": "JORFTEXT000028399511",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000028399511"
+    },
+    {
+      "numero": "2014-891",
+      "type": "LFR",
+      "annee_budgetaire": 2014,
+      "date_promulgation": "2014-08-08",
+      "titre": "Loi de finances rectificative pour 2014 (1)",
+      "jorf": "JORFTEXT000029349482",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000029349482"
+    },
+    {
+      "numero": "2014-1654",
+      "type": "LF",
+      "annee_budgetaire": 2015,
+      "date_promulgation": "2014-12-29",
+      "titre": "Loi de finances pour 2015",
+      "jorf": "JORFTEXT000029988857",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000029988857"
+    },
+    {
+      "numero": "2014-1655",
+      "type": "LFR",
+      "annee_budgetaire": 2014,
+      "date_promulgation": "2014-12-29",
+      "titre": "Loi de finances rectificative pour 2014 (2)",
+      "jorf": "JORFTEXT000029990432",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000029990432"
+    },
+    {
+      "numero": "2015-1785",
+      "type": "LF",
+      "annee_budgetaire": 2016,
+      "date_promulgation": "2015-12-29",
+      "titre": "Loi de finances pour 2016",
+      "jorf": "JORFTEXT000031732865",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000031732865"
+    },
+    {
+      "numero": "2015-1786",
+      "type": "LFR",
+      "annee_budgetaire": 2015,
+      "date_promulgation": "2015-12-29",
+      "titre": "Loi de finances rectificative pour 2015",
+      "jorf": "JORFTEXT000031733082",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000031733082"
+    },
+    {
+      "numero": "2016-1917",
+      "type": "LF",
+      "annee_budgetaire": 2017,
+      "date_promulgation": "2016-12-29",
+      "titre": "Loi de finances pour 2017",
+      "jorf": "JORFTEXT000033734169",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000033734169"
+    },
+    {
+      "numero": "2016-1918",
+      "type": "LFR",
+      "annee_budgetaire": 2016,
+      "date_promulgation": "2016-12-29",
+      "titre": "Loi de finances rectificative pour 2016",
+      "jorf": "JORFTEXT000033734341",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000033734341"
+    },
+    {
+      "numero": "2017-1837",
+      "type": "LF",
+      "annee_budgetaire": 2018,
+      "date_promulgation": "2017-12-30",
+      "titre": "Loi de finances pour 2018",
+      "jorf": "JORFTEXT000036339197",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000036339197"
+    },
+    {
+      "numero": "2018-1317",
+      "type": "LF",
+      "annee_budgetaire": 2019,
+      "date_promulgation": "2018-12-28",
+      "titre": "Loi de finances pour 2019",
+      "jorf": "JORFTEXT000037882341",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000037882341"
+    },
+    {
+      "numero": "2019-1479",
+      "type": "LF",
+      "annee_budgetaire": 2020,
+      "date_promulgation": "2019-12-28",
+      "titre": "Loi de finances pour 2020",
+      "jorf": "JORFTEXT000039683923",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000039683923",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/15/dossiers/loi_finances_2020",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl19-139.html"
+    },
+    {
+      "numero": "2020-1721",
+      "type": "LF",
+      "annee_budgetaire": 2021,
+      "date_promulgation": "2020-12-29",
+      "titre": "Loi de finances pour 2021",
+      "jorf": "JORFTEXT000042753580",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000042753580",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/15/dossiers/loi_de_finances_pour_2021",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl20-137.html"
+    },
+    {
+      "numero": "2021-1900",
+      "type": "LF",
+      "annee_budgetaire": 2022,
+      "date_promulgation": "2021-12-30",
+      "titre": "Loi de finances pour 2022",
+      "jorf": "JORFTEXT000044637640",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000044637640",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/15/dossiers/loi_de_finances_pour_2022",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl21-162.html"
+    },
+    {
+      "numero": "2022-1726",
+      "type": "LF",
+      "annee_budgetaire": 2023,
+      "date_promulgation": "2022-12-30",
+      "titre": "Loi de finances pour 2023",
+      "jorf": "JORFTEXT000046845631",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000046845631",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/16/dossiers/loi_finances_2023",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl22-114.html"
+    },
+    {
+      "numero": "2023-1322",
+      "type": "LF",
+      "annee_budgetaire": 2024,
+      "date_promulgation": "2023-12-29",
+      "titre": "Loi de finances pour 2024",
+      "jorf": "JORFTEXT000048727345",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000048727345",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/16/dossiers/loi_finances_2024",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl23-127.html"
+    },
+    {
+      "numero": "2025-127",
+      "type": "LF",
+      "annee_budgetaire": 2025,
+      "date_promulgation": "2025-02-14",
+      "titre": "Loi de finances pour 2025",
+      "jorf": "JORFTEXT000051168007",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000051168007",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/17/dossiers/loi_finances_2025",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl24-143.html"
+    },
+    {
+      "numero": "2020-289",
+      "type": "LFR",
+      "annee_budgetaire": 2020,
+      "date_promulgation": "2020-03-23",
+      "titre": "Loi de finances rectificative pour 2020 (1)",
+      "jorf": "JORFTEXT000041746298",
+      "url_legifrance": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000041746298",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/15/dossiers/plfr1_2020",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl19-384.html"
+    },
+    {
+      "numero": "2020-473",
+      "type": "LFR",
+      "annee_budgetaire": 2020,
+      "date_promulgation": "2020-04-25",
+      "titre": "Loi de finances rectificative pour 2020 (2)",
+      "jorf": "JORFTEXT000041820860",
+      "url_legifrance": "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000041820860",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/15/dossiers/plfr2_2020",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl19-403.html"
+    },
+    {
+      "numero": "2020-935",
+      "type": "LFR",
+      "annee_budgetaire": 2020,
+      "date_promulgation": "2020-07-30",
+      "titre": "Loi de finances rectificative pour 2020 (3)",
+      "jorf": "JORFTEXT000042176557",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000042176557",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/15/dossiers/plfr3_2020",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl19-624.html"
+    },
+    {
+      "numero": "2020-1473",
+      "type": "LFR",
+      "annee_budgetaire": 2020,
+      "date_promulgation": "2020-11-30",
+      "titre": "Loi de finances rectificative pour 2020 (4)",
+      "jorf": "JORFTEXT000042580124",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000042580124",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/15/dossiers/loi_de_finances_rectificative_2020_4",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl20-122.html"
+    },
+    {
+      "numero": "2021-953",
+      "type": "LFR",
+      "annee_budgetaire": 2021,
+      "date_promulgation": "2021-07-19",
+      "titre": "Loi de finances rectificative pour 2021",
+      "jorf": "JORFTEXT000043805899",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000043805899",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/15/dossiers/loi_de_finances_rectificative_2021",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl20-682.html"
+    },
+    {
+      "numero": "2022-1157",
+      "type": "LFR",
+      "annee_budgetaire": 2022,
+      "date_promulgation": "2022-08-16",
+      "titre": "Loi de finances rectificative pour 2022 (1)",
+      "jorf": "JORFTEXT000046186661",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000046186661",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/16/dossiers/loi_finances_rectificative_2022",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl21-830.html"
+    },
+    {
+      "numero": "2022-1499",
+      "type": "LFR",
+      "annee_budgetaire": 2022,
+      "date_promulgation": "2022-12-01",
+      "titre": "Loi de finances rectificative pour 2022 (2)",
+      "jorf": "JORFTEXT000046672407",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000046672407",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/16/dossiers/loi_finances_rectificative_fin_gestion_2022",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/pjl22-096.html"
+    },
+    {
+      "numero": "2019-1446",
+      "type": "LFSS",
+      "annee_budgetaire": 2020,
+      "date_promulgation": "2019-12-24",
+      "titre": "Loi de financement de la sécurité sociale pour 2020",
+      "jorf": "JORFTEXT000039675317",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000039675317",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/15/dossiers/plfss_2020",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/plfss2020.html"
+    },
+    {
+      "numero": "2020-1576",
+      "type": "LFSS",
+      "annee_budgetaire": 2021,
+      "date_promulgation": "2020-12-14",
+      "titre": "Loi de financement de la sécurité sociale pour 2021",
+      "jorf": "JORFTEXT000042665307",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000042665307",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/15/dossiers/plfss_2021",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/plfss2021.html"
+    },
+    {
+      "numero": "2021-1754",
+      "type": "LFSS",
+      "annee_budgetaire": 2022,
+      "date_promulgation": "2021-12-23",
+      "titre": "Loi de financement de la sécurité sociale pour 2022",
+      "jorf": "JORFTEXT000044553428",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000044553428",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/15/dossiers/plfss_2022",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/plfss2022.html"
+    },
+    {
+      "numero": "2022-1616",
+      "type": "LFSS",
+      "annee_budgetaire": 2023,
+      "date_promulgation": "2022-12-23",
+      "titre": "Loi de financement de la sécurité sociale pour 2023",
+      "jorf": "JORFTEXT000046791754",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000046791754",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/16/dossiers/plfss_2023",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/plfss2023.html"
+    },
+    {
+      "numero": "2023-1250",
+      "type": "LFSS",
+      "annee_budgetaire": 2024,
+      "date_promulgation": "2023-12-26",
+      "titre": "Loi de financement de la sécurité sociale pour 2024",
+      "jorf": "JORFTEXT000048668665",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000048668665",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/16/dossiers/plfss_2024",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/plfss2024.html"
+    },
+    {
+      "numero": "2025-199",
+      "type": "LFSS",
+      "annee_budgetaire": 2025,
+      "date_promulgation": "2025-02-28",
+      "titre": "Loi de financement de la sécurité sociale pour 2025",
+      "jorf": "JORFTEXT000051269481",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000051269481",
+      "dossier_an_url": "https://www.assemblee-nationale.fr/dyn/17/dossiers/plfss_2025",
+      "dossier_senat_url": "https://www.senat.fr/dossier-legislatif/plfss2025.html"
+    },
+    {
+      "numero": "2013-1203",
+      "type": "LFSS",
+      "annee_budgetaire": 2014,
+      "date_promulgation": "2013-12-23",
+      "titre": "Loi de financement de la sécurité sociale pour 2014",
+      "jorf": "JORFTEXT000028372809",
+      "url_legifrance": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000028372809"
+    }
+  ]
+}

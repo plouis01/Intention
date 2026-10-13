@@ -1,0 +1,228 @@
+{
+  "description": "Reference list of important CGI articles frequently modified by finance laws",
+  "last_updated": "2025-01-29",
+  "articles": [
+    {
+      "reference": "150-0 B ter",
+      "titre": "Report d'imposition des plus-values lors de l'apport de titres (apport-cession)",
+      "theme": "Plus-values mobilières",
+      "generate_expansions": true
+    },
+    {
+      "reference": "150-0 B",
+      "titre": "Sursis d'imposition des plus-values d'apport de titres",
+      "theme": "Plus-values mobilières",
+      "generate_expansions": true
+    },
+    {
+      "reference": "150-0 A",
+      "titre": "Imposition des plus-values de cession de valeurs mobilières",
+      "theme": "Plus-values mobilières",
+      "generate_expansions": true
+    },
+    {
+      "reference": "150-0 D",
+      "titre": "Abattement pour durée de détention sur les plus-values",
+      "theme": "Plus-values mobilières",
+      "generate_expansions": true
+    },
+    {
+      "reference": "150-0 D ter",
+      "titre": "Abattement renforcé dirigeants partant à la retraite",
+      "theme": "Plus-values mobilières",
+      "generate_expansions": true
+    },
+    {
+      "reference": "199 terdecies-0 A",
+      "titre": "Réduction d'impôt IR-PME (Madelin)",
+      "theme": "Réductions d'impôt",
+      "generate_expansions": true
+    },
+    {
+      "reference": "200 A",
+      "titre": "Prélèvement forfaitaire unique (PFU/flat tax)",
+      "theme": "Revenus de capitaux mobiliers",
+      "generate_expansions": true
+    },
+    {
+      "reference": "787 B",
+      "titre": "Pacte Dutreil - Exonération transmission d'entreprise",
+      "theme": "Droits de succession",
+      "generate_expansions": true
+    },
+    {
+      "reference": "787 C",
+      "titre": "Pacte Dutreil - Entreprises individuelles",
+      "theme": "Droits de succession",
+      "generate_expansions": true
+    },
+    {
+      "reference": "885 I bis",
+      "titre": "Ancien ISF - Pacte d'actionnaires (abrogé)",
+      "theme": "ISF/IFI",
+      "generate_expansions": true
+    },
+    {
+      "reference": "964",
+      "titre": "Impôt sur la fortune immobilière (IFI) - Champ d'application",
+      "theme": "ISF/IFI",
+      "generate_expansions": true
+    },
+    {
+      "reference": "965",
+      "titre": "IFI - Biens imposables",
+      "theme": "ISF/IFI",
+      "generate_expansions": true
+    },
+    {
+      "reference": "966",
+      "titre": "IFI - Exonération des biens professionnels",
+      "theme": "ISF/IFI",
+      "generate_expansions": true
+    },
+    {
+      "reference": "238 bis",
+      "titre": "Réduction d'impôt mécénat d'entreprise",
+      "theme": "Mécénat",
+      "generate_expansions": true
+    },
+    {
+      "reference": "244 quater B",
+      "titre": "Crédit d'impôt recherche (CIR)",
+      "theme": "Crédits d'impôt entreprises",
+      "generate_expansions": true
+    },
+    {
+      "reference": "244 quater C",
+      "titre": "Crédit d'impôt compétitivité emploi (CICE)",
+      "theme": "Crédits d'impôt entreprises",
+      "generate_expansions": true
+    },
+    {
+      "reference": "39",
+      "titre": "Charges déductibles du bénéfice imposable",
+      "theme": "BIC/IS",
+      "generate_expansions": true
+    },
+    {
+      "reference": "39 duodecies",
+      "titre": "Régime des plus-values professionnelles",
+      "theme": "BIC/IS",
+      "generate_expansions": true
+    },
+    {
+      "reference": "151 septies",
+      "titre": "Exonération plus-values professionnelles (petites entreprises)",
+      "theme": "Plus-values professionnelles",
+      "generate_expansions": true
+    },
+    {
+      "reference": "151 septies A",
+      "titre": "Exonération plus-values départ à la retraite",
+      "theme": "Plus-values professionnelles",
+      "generate_expansions": true
+    },
+    {
+      "reference": "151 septies B",
+      "titre": "Abattement immeubles d'exploitation",
+      "theme": "Plus-values professionnelles",
+      "generate_expansions": true
+    },
+    {
+      "reference": "44 sexies",
+      "titre": "Exonération entreprises nouvelles",
+      "theme": "Exonérations",
+      "generate_expansions": true
+    },
+    {
+      "reference": "44 sexies A",
+      "titre": "Jeunes entreprises innovantes (JEI)",
+      "theme": "Exonérations",
+      "generate_expansions": true
+    },
+    {
+      "reference": "163 bis G",
+      "titre": "Bons de souscription de parts de créateur d'entreprise (BSPCE)",
+      "theme": "Actionnariat salarié",
+      "generate_expansions": true
+    },
+    {
+      "reference": "80 quaterdecies",
+      "titre": "Régime des attributions gratuites d'actions (AGA)",
+      "theme": "Actionnariat salarié",
+      "generate_expansions": true
+    },
+    {
+      "reference": "119 bis",
+      "titre": "Retenue à la source sur dividendes",
+      "theme": "Retenues à la source",
+      "generate_expansions": true
+    },
+    {
+      "reference": "182 B",
+      "titre": "Retenue à la source sur redevances",
+      "theme": "Retenues à la source",
+      "generate_expansions": true
+    },
+    {
+      "reference": "209",
+      "titre": "Détermination du bénéfice imposable à l'IS",
+      "theme": "Impôt sur les sociétés",
+      "generate_expansions": true
+    },
+    {
+      "reference": "209 B",
+      "titre": "Régime des sociétés étrangères contrôlées (CFC)",
+      "theme": "Impôt sur les sociétés",
+      "generate_expansions": true
+    },
+    {
+      "reference": "210 A",
+      "titre": "Régime spécial des fusions",
+      "theme": "Restructurations",
+      "generate_expansions": true
+    },
+    {
+      "reference": "210 B",
+      "titre": "Apport partiel d'actif - régime de faveur",
+      "theme": "Restructurations",
+      "generate_expansions": true
+    },
+    {
+      "reference": "223 A",
+      "titre": "Intégration fiscale - constitution du groupe",
+      "theme": "Groupes de sociétés",
+      "generate_expansions": true
+    },
+    {
+      "reference": "223 B",
+      "titre": "Intégration fiscale - résultat d'ensemble",
+      "theme": "Groupes de sociétés",
+      "generate_expansions": true
+    },
+    {
+      "reference": "145",
+      "titre": "Régime mère-fille",
+      "theme": "Groupes de sociétés",
+      "generate_expansions": true
+    },
+    {
+      "reference": "219",
+      "titre": "Taux de l'impôt sur les sociétés",
+      "theme": "Impôt sur les sociétés",
+      "generate_expansions": true
+    },
+    {
+      "reference": "1649 quater-0 B bis",
+      "titre": "Déclaration des comptes à l'étranger (crypto-actifs)",
+      "theme": "Obligations déclaratives",
+      "generate_expansions": true
+    },
+    {
+      "reference": "150 VH bis",
+      "titre": "Imposition des plus-values sur actifs numériques",
+      "theme": "Crypto-actifs",
+      "generate_expansions": true
+    }
+  ]
+}
